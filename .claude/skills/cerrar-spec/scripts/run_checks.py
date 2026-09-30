@@ -11,6 +11,7 @@ Exit code: 0 if every step passed (and pytest matches N when given), 1 otherwise
 
 import argparse
 import re
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -24,6 +25,8 @@ ANSI = re.compile(r"\x1b\[[0-9;]*m")
 
 
 def _run(command: str, cwd: Path) -> tuple[int, str]:
+    # Child Python processes must emit UTF-8 so their output decodes correctly
+    # even when stdout is a pipe (Windows would otherwise use cp1252).
     result = subprocess.run(
         command,
         cwd=cwd,
@@ -32,6 +35,7 @@ def _run(command: str, cwd: Path) -> tuple[int, str]:
         text=True,
         encoding="utf-8",
         errors="replace",
+        env={**os.environ, "PYTHONIOENCODING": "utf-8"},
     )
     return result.returncode, ANSI.sub("", result.stdout + result.stderr)
 
@@ -59,6 +63,7 @@ def _lint_count(output: str) -> str:
 
 
 def main() -> int:
+    sys.stdout.reconfigure(errors="replace")
     parser = argparse.ArgumentParser()
     parser.add_argument("--expected-pytest", type=int, default=None)
     args = parser.parse_args()

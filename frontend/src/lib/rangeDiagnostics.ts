@@ -4,7 +4,9 @@ import type {
   DeviceRangeRow,
   HourlyTrendPoint,
   PeakHour,
+  RangeDiagnosticsResponse,
 } from '../types/api'
+import { composeCrossNegatives } from './crossDiagnostics'
 import {
   AMD_RATIO,
   BEST_DAY_MIN_CALLS,
@@ -338,4 +340,48 @@ export function rankPositiveDrivers(
   const dropped = replaceable.slice(-missing.length)
   return [...selected.filter((event) => !dropped.includes(event)), ...missing]
     .sort(byPositivePriority)
+}
+
+export function mapRangeDiagnostics(
+  data: RangeDiagnosticsResponse,
+  devices: DeviceRangeRow[],
+  daily: DailyTrendPoint[],
+  hourly: HourlyTrendPoint[],
+): {
+  rootCauses: DiagnosticEvent[]
+  positiveDrivers: DiagnosticEvent[]
+} {
+  const backendCauses: DiagnosticEvent[] = [
+    ...data.congested_gateways.map((gateway) => ({
+      severity: 'WARNING' as const,
+      type: 'NETWORK_CONGESTION',
+      entity: String(gateway.device),
+      message: gateway.message,
+    })),
+    ...data.burn_hours.map((hour) => ({
+      severity: 'WARNING' as const,
+      type: 'BUSY_HOUR',
+      entity: String(hour.hora),
+      message: hour.message,
+    })),
+  ]
+  const worstHour = buildWorstHour(hourly)
+  const worstDevice = buildWorstDevice(devices)
+  const rootCauses = composeCrossNegatives(backendCauses, [
+    worstHour,
+    worstDevice,
+  ])
+  const totalCalls = devices.reduce((sum, row) => sum + row.total_calls, 0)
+  const trunk = buildReliableTrunk(devices, totalCalls)
+  const bestDay = buildBestDay(daily)
+  const bestHour = buildBestHour(hourly)
+  const bestDevice = buildBestDevice(devices)
+  const positiveDrivers = rankPositiveDrivers([
+    ...mergePeakWindows(data.peak_hours),
+    ...(trunk ? [trunk] : []),
+    ...(bestDay ? [bestDay] : []),
+    ...(bestHour ? [bestHour] : []),
+    ...(bestDevice ? [bestDevice] : []),
+  ])
+  return { rootCauses, positiveDrivers }
 }

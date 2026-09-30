@@ -4,6 +4,7 @@ import type {
   DeviceRangeRow,
   HourlyTrendPoint,
   PeakHour,
+  RangeDiagnosticsResponse,
 } from '../../types/api'
 import {
   buildBestDay,
@@ -12,12 +13,14 @@ import {
   buildReliableTrunk,
   buildWorstDevice,
   buildWorstHour,
+  mapRangeDiagnostics,
   mergePeakWindows,
   rankPositiveDrivers,
 } from '../rangeDiagnostics'
 import {
   BEST_DEVICE_MIN_CALLS,
   BEST_HOUR_MIN_CALLS,
+  NEGATIVE_DRIVERS_MAX,
   PEAK_WINDOW_MIN_RATE,
   POSITIVE_DRIVERS_MAX,
   TRUNK_MAX_BUSY,
@@ -507,5 +510,88 @@ describe('buildWorstDevice', () => {
       'Peor dispositivo de la campaña 38: GW37',
     )
     expect(event!.message).toContain('5.99%')
+  })
+})
+
+describe('mapRangeDiagnostics', () => {
+  function diagnostics(
+    overrides: Partial<RangeDiagnosticsResponse>,
+  ): RangeDiagnosticsResponse {
+    return {
+      min_calls_applied: 50,
+      congested_gateways: [],
+      burn_hours: [],
+      peak_hours: [],
+      ...overrides,
+    }
+  }
+
+  function congested(name: string) {
+    return {
+      device: name,
+      total_calls: 1000,
+      congestion_rate: 0.1,
+      health_score: -10,
+      message: `${name} en saturación de red`,
+    }
+  }
+
+  const hourly = [hour(9, 0.07, 1000, 70), hour(16, 0.049, 1000, 49)]
+  const devices = [
+    device('IPLAN', 2000, 140, 100, 0.01, 0.2),
+    device('IPLAN2', 1000, 35, 50, 0.06, 0.2),
+  ]
+  const daily = [day('2026-09-11', 0.085, 1000, 85)]
+
+  it('compone negativas: causas del backend + peor hora y dispositivo, con tope', () => {
+    const { rootCauses } = mapRangeDiagnostics(
+      diagnostics({
+        congested_gateways: [congested('GW37'), congested('IPLAN2'), congested('GW20')],
+        burn_hours: [
+          {
+            hora: 14,
+            total_calls: 1000,
+            busy_rate: 0.4,
+            health_score: -20,
+            message: 'Hora 14 con alta quema de base',
+          },
+        ],
+      }),
+      devices,
+      daily,
+      hourly,
+    )
+
+    expect(rootCauses).toHaveLength(NEGATIVE_DRIVERS_MAX)
+    expect(rootCauses.map((event) => event.type)).toEqual([
+      'NETWORK_CONGESTION',
+      'NETWORK_CONGESTION',
+      'NETWORK_CONGESTION',
+      'WORST_HOUR',
+      'WORST_DEVICE',
+    ])
+    expect(rootCauses[3].entity).toBe('16')
+    expect(rootCauses[4].entity).toBe('IPLAN2')
+  })
+
+  it('prioriza positivas y garantiza mejor hora y mejor dispositivo', () => {
+    const windows = [1, 2, 4, 5, 7, 8, 10, 11, 13, 14].map((hora) => peak(hora, 0.07))
+    const { positiveDrivers } = mapRangeDiagnostics(
+      diagnostics({ peak_hours: windows }),
+      devices,
+      daily,
+      hourly,
+    )
+
+    expect(positiveDrivers).toHaveLength(POSITIVE_DRIVERS_MAX)
+    expect(positiveDrivers.map((event) => event.type)).toEqual([
+      'PEAK_WINDOW',
+      'PEAK_WINDOW',
+      'PEAK_WINDOW',
+      'BEST_HOUR',
+      'BEST_DEVICE',
+    ])
+    expect(positiveDrivers[3].entity).toBe('9')
+    expect(positiveDrivers[4].entity).toBe('IPLAN')
   })
 })
