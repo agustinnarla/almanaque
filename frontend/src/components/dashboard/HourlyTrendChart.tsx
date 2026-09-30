@@ -10,40 +10,7 @@ import {
 } from 'recharts'
 import type { ReactNode } from 'react'
 import type { HourlyTrendPoint } from '../../types/api'
-
-export interface MergedHourPoint {
-  hora: number
-  totalA: number
-  totalB: number
-  rateA: number | null
-  rateB: number | null
-}
-
-export function mergeHourlyPoints(
-  pointsA: HourlyTrendPoint[],
-  pointsB: HourlyTrendPoint[],
-): MergedHourPoint[] {
-  const byHour = new Map<number, MergedHourPoint>()
-  const ensure = (hora: number): MergedHourPoint => {
-    let row = byHour.get(hora)
-    if (!row) {
-      row = { hora, totalA: 0, totalB: 0, rateA: null, rateB: null }
-      byHour.set(hora, row)
-    }
-    return row
-  }
-  for (const p of pointsA) {
-    const row = ensure(p.hora)
-    row.totalA = p.total_calls
-    row.rateA = p.agent_answer_rate != null ? p.agent_answer_rate * 100 : null
-  }
-  for (const p of pointsB) {
-    const row = ensure(p.hora)
-    row.totalB = p.total_calls
-    row.rateB = p.agent_answer_rate != null ? p.agent_answer_rate * 100 : null
-  }
-  return [...byHour.values()].sort((a, b) => a.hora - b.hora)
-}
+import { mergeHourlyPoints } from '../../lib/chartData'
 
 interface TooltipPayloadItem {
   dataKey?: string | number

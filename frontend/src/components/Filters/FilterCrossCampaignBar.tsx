@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { catalogBounds } from '../../lib/catalog'
 import type { CampaignCatalogEntry } from '../../types/api'
 import { CampaignSelect } from './CampaignSelect'
+import { MinCallsSelect } from './MinCallsSelect'
 
 export interface CrossCampaignValues {
   campaignA: string
@@ -17,8 +18,6 @@ interface FilterCrossCampaignBarProps {
   catalog: CampaignCatalogEntry[]
   onCompare: (values: CrossCampaignValues) => void
 }
-
-const MIN_CALLS_OPTIONS = [50, 100, 200]
 
 export function FilterCrossCampaignBar({
   initial,
@@ -83,20 +82,11 @@ export function FilterCrossCampaignBar({
           required
         />
       </label>
-      <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-        Mín. llamadas
-        <select
-          value={minCalls}
-          onChange={(event) => setMinCalls(Number(event.target.value))}
-          className={inputClass}
-        >
-          {MIN_CALLS_OPTIONS.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </label>
+      <MinCallsSelect
+        value={minCalls}
+        onChange={setMinCalls}
+        className={inputClass}
+      />
       <button
         type="submit"
         data-testid="filter-cross-submit"

@@ -3,11 +3,13 @@ import { useState } from 'react'
 import { campaignEntry } from '../../lib/catalog'
 import type { CampaignCatalogEntry } from '../../types/api'
 import { CampaignSelect } from './CampaignSelect'
+import { MinCallsSelect } from './MinCallsSelect'
 
 export interface RangeValues {
   campaign: string
   from: string
   to: string
+  minCalls: number
 }
 
 interface FilterRangeBarProps {
@@ -20,6 +22,7 @@ export function FilterRangeBar({ initial, catalog, onApply }: FilterRangeBarProp
   const [campaign, setCampaign] = useState(initial.campaign)
   const [from, setFrom] = useState(initial.from)
   const [to, setTo] = useState(initial.to)
+  const [minCalls, setMinCalls] = useState(initial.minCalls)
 
   const entry = campaignEntry(catalog, campaign)
 
@@ -32,7 +35,7 @@ export function FilterRangeBar({ initial, catalog, onApply }: FilterRangeBarProp
       className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-end print:hidden"
       onSubmit={(event) => {
         event.preventDefault()
-        onApply({ campaign, from, to })
+        onApply({ campaign, from, to, minCalls })
       }}
     >
       <CampaignSelect
@@ -66,6 +69,11 @@ export function FilterRangeBar({ initial, catalog, onApply }: FilterRangeBarProp
           required
         />
       </label>
+      <MinCallsSelect
+        value={minCalls}
+        onChange={setMinCalls}
+        className={inputClass}
+      />
       <button
         type="submit"
         data-testid="filter-range-submit"

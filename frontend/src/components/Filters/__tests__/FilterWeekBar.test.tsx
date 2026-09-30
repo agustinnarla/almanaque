@@ -13,7 +13,7 @@ describe('FilterWeekBar', () => {
   it('renderiza campaña, las 3 semanas y la info por defecto (S37)', () => {
     render(
       <FilterWeekBar
-        initial={{ campaign: '35', weekStart: '2026-09-07' }}
+        initial={{ campaign: '35', weekStart: '2026-09-07', minCalls: 50 }}
         catalog={TEST_CATALOG}
         onApply={() => {}}
       />,
@@ -30,7 +30,7 @@ describe('FilterWeekBar', () => {
   it('marca las semanas parciales en el select y muestra el badge', async () => {
     render(
       <FilterWeekBar
-        initial={{ campaign: '35', weekStart: '2026-09-07' }}
+        initial={{ campaign: '35', weekStart: '2026-09-07', minCalls: 50 }}
         catalog={TEST_CATALOG}
         onApply={() => {}}
       />,
@@ -54,7 +54,7 @@ describe('FilterWeekBar', () => {
     const onApply = vi.fn()
     render(
       <FilterWeekBar
-        initial={{ campaign: '35', weekStart: '2026-09-07' }}
+        initial={{ campaign: '35', weekStart: '2026-09-07', minCalls: 50 }}
         catalog={TEST_CATALOG}
         onApply={onApply}
       />,
@@ -65,6 +65,7 @@ describe('FilterWeekBar', () => {
       campaign: '35',
       from: '2026-08-31',
       to: '2026-09-06',
+      minCalls: 50,
     })
   })
 
@@ -80,7 +81,7 @@ describe('FilterWeekBar', () => {
     const onApply = vi.fn()
     render(
       <FilterWeekBar
-        initial={{ campaign: '35', weekStart: '2026-09-07' }}
+        initial={{ campaign: '35', weekStart: '2026-09-07', minCalls: 50 }}
         catalog={[...TEST_CATALOG, october]}
         onApply={onApply}
       />,
@@ -94,6 +95,7 @@ describe('FilterWeekBar', () => {
       campaign: '91',
       from: '2026-10-05',
       to: '2026-10-11',
+      minCalls: 50,
     })
   })
 })

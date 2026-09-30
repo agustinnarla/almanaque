@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { FilterRangeBar } from '../FilterRangeBar'
@@ -8,7 +8,7 @@ describe('FilterRangeBar', () => {
   it('renderiza los campos con los valores iniciales', () => {
     render(
       <FilterRangeBar
-        initial={{ campaign: '35', from: '2026-09-01', to: '2026-09-15' }}
+        initial={{ campaign: '35', from: '2026-09-01', to: '2026-09-15', minCalls: 50 }}
         catalog={TEST_CATALOG}
         onApply={() => {}}
       />,
@@ -23,7 +23,7 @@ describe('FilterRangeBar', () => {
     const onApply = vi.fn()
     render(
       <FilterRangeBar
-        initial={{ campaign: '35', from: '2026-09-01', to: '2026-09-15' }}
+        initial={{ campaign: '35', from: '2026-09-01', to: '2026-09-15', minCalls: 50 }}
         catalog={TEST_CATALOG}
         onApply={onApply}
       />,
@@ -35,6 +35,7 @@ describe('FilterRangeBar', () => {
       campaign: '35',
       from: '2026-09-07',
       to: '2026-09-15',
+      minCalls: 50,
     })
   })
 
@@ -42,15 +43,16 @@ describe('FilterRangeBar', () => {
     const onApply = vi.fn()
     render(
       <FilterRangeBar
-        initial={{ campaign: '35', from: '2026-09-01', to: '2026-09-15' }}
+        initial={{ campaign: '35', from: '2026-09-01', to: '2026-09-15', minCalls: 50 }}
         catalog={TEST_CATALOG}
         onApply={onApply}
       />,
     )
-    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
-      '35 · 11 días',
-      '38 · 11 días',
-    ])
+    expect(
+      within(screen.getByLabelText('Campaña'))
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual(['35 · 11 días', '38 · 11 días'])
     expect(screen.getByLabelText('Desde')).toHaveAttribute('min', '2026-09-01')
     expect(screen.getByLabelText('Hasta')).toHaveAttribute('max', '2026-09-15')
 
@@ -60,6 +62,27 @@ describe('FilterRangeBar', () => {
       campaign: '38',
       from: '2026-09-01',
       to: '2026-09-15',
+      minCalls: 50,
+    })
+  })
+
+  it('emite el mínimo de llamadas elegido', async () => {
+    const onApply = vi.fn()
+    render(
+      <FilterRangeBar
+        initial={{ campaign: '35', from: '2026-09-01', to: '2026-09-15', minCalls: 50 }}
+        catalog={TEST_CATALOG}
+        onApply={onApply}
+      />,
+    )
+    expect(screen.getByLabelText('Mín. llamadas')).toHaveValue('50')
+    await userEvent.selectOptions(screen.getByLabelText('Mín. llamadas'), '100')
+    await userEvent.click(screen.getByTestId('filter-range-submit'))
+    expect(onApply).toHaveBeenCalledWith({
+      campaign: '35',
+      from: '2026-09-01',
+      to: '2026-09-15',
+      minCalls: 100,
     })
   })
 })

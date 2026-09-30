@@ -6,20 +6,7 @@ import {
   healthScoreLabel,
 } from '../common/healthStyle'
 import type { CompareDiagnosticsResponse } from '../../types/api'
-
-function formatRate(rate: number | null): string {
-  if (rate == null) return '—'
-  return `${(rate * 100).toFixed(2)}%`
-}
-
-function formatNumber(value: number): string {
-  return value.toLocaleString('es-AR')
-}
-
-function formatScore(score: number | null): string {
-  if (score == null) return '—'
-  return score.toFixed(2)
-}
+import { formatNumber, formatRatePct, formatScore } from '../../lib/format'
 
 interface KpiGridProps {
   data: CompareDiagnosticsResponse | { summary: CompareDiagnosticsResponse['summary'] }
@@ -54,7 +41,7 @@ export function KpiGrid({ data, labelA = 'Día', labelB = 'Día' }: KpiGridProps
       />
       <StatCard
         title="Tasa de contacto"
-        value={`${formatRate(summary.agent_answer_rate_a)} → ${formatRate(summary.agent_answer_rate_b)}`}
+        value={`${formatRatePct(summary.agent_answer_rate_a)} → ${formatRatePct(summary.agent_answer_rate_b)}`}
         delta={summary.delta_rate != null ? summary.delta_rate * 100 : null}
         deltaIsPercent={false}
         deltaSuffix="pp"
@@ -62,7 +49,7 @@ export function KpiGrid({ data, labelA = 'Día', labelB = 'Día' }: KpiGridProps
       />
       <StatCard
         title={`Congestión (${labelB} B)`}
-        value={formatRate(summary.congestion_rate)}
+        value={formatRatePct(summary.congestion_rate)}
         delta={congestionDeltaPp}
         deltaIsPercent={false}
         goodWhenNegative

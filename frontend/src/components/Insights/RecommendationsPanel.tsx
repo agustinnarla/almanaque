@@ -1,6 +1,6 @@
-import { AlertTriangle, FileText } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { AlertTriangle } from 'lucide-react'
 import type { Recommendation, Severity } from '../../types/api'
+import { Badge } from '../common/Badge'
 
 const BORDER_CLASSES: Record<Severity, string> = {
   CRITICAL: 'border-l-rose-500',
@@ -40,12 +40,12 @@ function ExcludedAmdBadge({ devices }: { devices: string[] }) {
   return (
     <div
       data-testid="routing-excluded-amd"
-      className="mt-2 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-950/40 px-3 py-2"
+      className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2"
     >
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" aria-hidden />
-      <div className="text-xs text-amber-100">
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden />
+      <div className="text-xs text-amber-900">
         <p className="font-semibold">Descartado del ruteo por contestadores</p>
-        <p className="mt-0.5 text-amber-200/90">
+        <p className="mt-0.5 text-amber-800">
           {devices.join(', ')} no compite por prioridad de marcado mientras su
           ratio de automáticos ≥ 4× agentes. Plan: corregir AMD/troncal → puede
           volver a ser candidato a ruteo.
@@ -64,16 +64,19 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
       data-testid="recommendation-card"
       data-category={rec.category}
       data-type={rec.type}
-      className={`rounded-xl border-l-4 bg-slate-900 px-4 py-3 shadow-sm ${BORDER_CLASSES[rec.category]}`}
+      className={`rounded-xl border border-l-4 border-slate-200 bg-white p-4 shadow-sm ${BORDER_CLASSES[rec.category]}`}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-bold uppercase tracking-wide text-slate-100">
-          {TYPE_LABELS[rec.type] ?? rec.type}
-        </span>
-        <span className="text-xs text-slate-400">·</span>
-        <span className="text-xs font-semibold text-slate-300">{rec.entity}</span>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-bold uppercase tracking-wide text-slate-900">
+            {TYPE_LABELS[rec.type] ?? rec.type}
+          </span>
+          <span className="text-xs text-slate-400">·</span>
+          <span className="text-xs font-semibold text-slate-600">{rec.entity}</span>
+        </div>
+        <Badge severity={rec.category} />
       </div>
-      <p className="mt-1 text-sm text-slate-100">{rec.text}</p>
+      <p className="mt-2 text-sm text-slate-700">{rec.text}</p>
       {showExcluded && <ExcludedAmdBadge devices={rec.excluded_amd!} />}
     </article>
   )
@@ -81,24 +84,13 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
 
 interface RecommendationsPanelProps {
   recommendations: Recommendation[]
-  headerAction?: ReactNode
 }
 
-export function RecommendationsPanel({
-  recommendations,
-  headerAction,
-}: RecommendationsPanelProps) {
+export function RecommendationsPanel({ recommendations }: RecommendationsPanelProps) {
   const groups = groupRecommendations(recommendations)
 
   return (
-    <section aria-label="Observaciones y recomendaciones">
-      <div className="mb-1 flex items-start justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-          <FileText className="h-4 w-4 text-indigo-600" aria-hidden />
-          Observaciones y recomendaciones
-        </h2>
-        {headerAction}
-      </div>
+    <div>
       <p className="mb-3 text-xs text-slate-500">
         Generadas automáticamente a partir de los datos cargados, con foco en
         mejorar la contactación y el Answer Agent
@@ -132,6 +124,6 @@ export function RecommendationsPanel({
           })}
         </div>
       )}
-    </section>
+    </div>
   )
 }

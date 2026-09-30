@@ -3,6 +3,10 @@ import { AlertTriangle, Trophy } from 'lucide-react'
 import { ExportCsvButton } from '../components/common/ExportCsvButton'
 import { PrintButton } from '../components/common/PrintButton'
 import {
+  SectionNav,
+  type SectionLink,
+} from '../components/common/SectionNav'
+import {
   FilterRangeBar,
   type RangeValues,
 } from '../components/Filters/FilterRangeBar'
@@ -44,6 +48,17 @@ import { buildWeekOptions, findWeekByStart } from '../lib/weeks'
 import type { CampaignCatalogEntry } from '../types/api'
 import { DEFAULT_MIN_CALLS, RANKING_LIMIT } from './defaults'
 
+const RANGE_SECTIONS: SectionLink[] = [
+  { id: 'sec-filtros', label: 'Filtros' },
+  { id: 'sec-kpis', label: 'Indicadores' },
+  { id: 'sec-diagnostico', label: 'Diagnóstico' },
+  { id: 'sec-recomendaciones', label: 'Recomendaciones' },
+  { id: 'sec-rankings', label: 'Rankings' },
+  { id: 'sec-alertas', label: 'Alertas' },
+  { id: 'sec-tendencias', label: 'Tendencia diaria' },
+  { id: 'sec-horaria', label: 'Por hora' },
+]
+
 export type RangeVariant = 'range' | 'week'
 
 interface RangeModeProps {
@@ -54,7 +69,9 @@ interface RangeModeProps {
 export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
   const isWeek = variant === 'week'
   const [range, setRange] = useState<RangeValues>(() =>
-    isWeek ? defaultWeekValues(catalog) : defaultRangeValues(catalog),
+    isWeek
+      ? defaultWeekValues(catalog, DEFAULT_MIN_CALLS)
+      : defaultRangeValues(catalog, DEFAULT_MIN_CALLS),
   )
 
   const params = useMemo(
@@ -63,25 +80,26 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
   )
 
   const overview = useCampaignOverview(params)
-  const diagnostics = useRangeDiagnostics({ ...params, minCalls: DEFAULT_MIN_CALLS })
+  const diagnostics = useRangeDiagnostics({ ...params, minCalls: range.minCalls })
   const recommendations = useRangeRecommendations({
     ...params,
-    minCalls: DEFAULT_MIN_CALLS,
+    minCalls: range.minCalls,
   })
   const rankings = useRangeRankings({
     ...params,
-    minCalls: DEFAULT_MIN_CALLS,
+    minCalls: range.minCalls,
     limit: RANKING_LIMIT,
   })
   const patternAlerts = usePatternAlerts(params)
 
   const defaultRange = isWeek
-    ? defaultWeekValues(catalog)
-    : defaultRangeValues(catalog)
+    ? defaultWeekValues(catalog, DEFAULT_MIN_CALLS)
+    : defaultRangeValues(catalog, DEFAULT_MIN_CALLS)
   const same =
     range.campaign === defaultRange.campaign &&
     range.from === defaultRange.from &&
-    range.to === defaultRange.to
+    range.to === defaultRange.to &&
+    range.minCalls === defaultRange.minCalls
   const filePrefix = isWeek ? 'semana' : 'rango'
   const week = isWeek
     ? findWeekByStart(
@@ -115,37 +133,45 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
 
   return (
     <div className="space-y-6">
-      {isWeek ? (
-        <FilterWeekBar
-          initial={{ campaign: range.campaign, weekStart: range.from }}
-          catalog={catalog}
-          onApply={(values) => {
-            const unchanged =
-              values.campaign === range.campaign &&
-              values.from === range.from &&
-              values.to === range.to
-            setRange(values)
-            if (unchanged) {
-              reloadRange()
-            }
-          }}
-        />
-      ) : (
-        <FilterRangeBar
-          initial={range}
-          catalog={catalog}
-          onApply={(values) => {
-            const unchanged =
-              values.campaign === range.campaign &&
-              values.from === range.from &&
-              values.to === range.to
-            setRange(values)
-            if (unchanged) {
-              reloadRange()
-            }
-          }}
-        />
-      )}
+      <div id="sec-filtros" className="scroll-mt-16">
+        {isWeek ? (
+          <FilterWeekBar
+            initial={{
+              campaign: range.campaign,
+              weekStart: range.from,
+              minCalls: range.minCalls,
+            }}
+            catalog={catalog}
+            onApply={(values) => {
+              const unchanged =
+                values.campaign === range.campaign &&
+                values.from === range.from &&
+                values.to === range.to &&
+                values.minCalls === range.minCalls
+              setRange(values)
+              if (unchanged) {
+                reloadRange()
+              }
+            }}
+          />
+        ) : (
+          <FilterRangeBar
+            initial={range}
+            catalog={catalog}
+            onApply={(values) => {
+              const unchanged =
+                values.campaign === range.campaign &&
+                values.from === range.from &&
+                values.to === range.to &&
+                values.minCalls === range.minCalls
+              setRange(values)
+              if (unchanged) {
+                reloadRange()
+              }
+            }}
+          />
+        )}
+      </div>
 
       {overview.loading && (
         <div className="space-y-4" aria-busy="true" aria-label="Cargando campaña">
@@ -168,7 +194,8 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
         <>
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-slate-400">
-              {overview.summary.campaign} · {range.from} → {range.to}
+              {overview.summary.campaign} · {range.from} → {range.to} · min_calls{' '}
+              {range.minCalls}
               {week && <> · {week.label}</>}
               {week && <> · {week.dataDays} días con datos</>}
               {week?.partial && (
@@ -183,7 +210,9 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             <PrintButton />
           </div>
 
-          <section>
+          <SectionNav links={RANGE_SECTIONS} />
+
+          <section id="sec-kpis" className="scroll-mt-16">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Indicadores acumulados
@@ -196,7 +225,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             <OverviewKpis summary={overview.summary} />
           </section>
 
-          <section aria-label="Diagnóstico del rango">
+          <section id="sec-diagnostico" aria-label="Diagnóstico del rango" className="scroll-mt-16">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Diagnóstico del rango
@@ -226,7 +255,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             )}
           </section>
 
-          <section aria-label="Recomendaciones del rango">
+          <section id="sec-recomendaciones" aria-label="Recomendaciones del rango" className="scroll-mt-16">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Recomendaciones del rango
@@ -253,7 +282,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             )}
           </section>
 
-          <section aria-label="Rankings del rango">
+          <section id="sec-rankings" aria-label="Rankings del rango" className="scroll-mt-16">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -262,7 +291,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 </h2>
                 <p className="text-xs text-slate-500">
                   Mejores y peores segmentos por health score · volumen mínimo{' '}
-                  {rankings.devices?.min_calls_applied ?? DEFAULT_MIN_CALLS} llamadas · top{' '}
+                  {rankings.devices?.min_calls_applied ?? range.minCalls} llamadas · top{' '}
                   {rankings.devices?.limit_applied ?? RANKING_LIMIT}
                 </p>
               </div>
@@ -276,7 +305,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                   label="Dispositivos"
                   filename={`${filePrefix}_${range.campaign}_${range.from}_${range.to}_devices_ranking.csv`}
                   {...segmentRankingRows('Dispositivos', rankings.devices ?? {
-                    min_calls_applied: DEFAULT_MIN_CALLS,
+                    min_calls_applied: range.minCalls,
                     limit_applied: RANKING_LIMIT,
                     best: [],
                     worst: [],
@@ -286,7 +315,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                   label="Horas"
                   filename={`${filePrefix}_${range.campaign}_${range.from}_${range.to}_hours_ranking.csv`}
                   {...segmentRankingRows('Horas', rankings.hours ?? {
-                    min_calls_applied: DEFAULT_MIN_CALLS,
+                    min_calls_applied: range.minCalls,
                     limit_applied: RANKING_LIMIT,
                     best: [],
                     worst: [],
@@ -346,7 +375,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             )}
           </section>
 
-          <section aria-label="Alertas de patrones">
+          <section id="sec-alertas" aria-label="Alertas de patrones" className="scroll-mt-16">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -395,7 +424,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             )}
           </section>
 
-          <section className="grid gap-6 lg:grid-cols-12">
+          <section id="sec-tendencias" className="grid scroll-mt-16 gap-6 lg:grid-cols-12">
             <div className="lg:col-span-7">
               <DailyTrendChart
                 points={overview.daily}
@@ -426,7 +455,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             </div>
           </section>
 
-          <section>
+          <section id="sec-horaria" className="scroll-mt-16">
             <HourlyAggregateChart
               points={overview.hourly}
               headerAction={

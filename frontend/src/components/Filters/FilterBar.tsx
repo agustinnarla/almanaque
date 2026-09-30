@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { campaignEntry } from '../../lib/catalog'
 import type { CampaignCatalogEntry } from '../../types/api'
 import { CampaignSelect } from './CampaignSelect'
+import { MinCallsSelect } from './MinCallsSelect'
 
 export interface FilterValues {
   campaign: string
@@ -16,8 +17,6 @@ interface FilterBarProps {
   catalog: CampaignCatalogEntry[]
   onCompare: (values: FilterValues) => void
 }
-
-const MIN_CALLS_OPTIONS = [50, 100, 200]
 
 export function FilterBar({ initial, catalog, onCompare }: FilterBarProps) {
   const [campaign, setCampaign] = useState(initial.campaign)
@@ -69,20 +68,11 @@ export function FilterBar({ initial, catalog, onCompare }: FilterBarProps) {
           required
         />
       </label>
-      <label className="flex flex-col gap-1 text-xs font-medium text-slate-600">
-        Mín. llamadas
-        <select
-          value={minCalls}
-          onChange={(event) => setMinCalls(Number(event.target.value))}
-          className={inputClass}
-        >
-          {MIN_CALLS_OPTIONS.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </label>
+      <MinCallsSelect
+        value={minCalls}
+        onChange={setMinCalls}
+        className={inputClass}
+      />
       <button
         type="submit"
         className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"

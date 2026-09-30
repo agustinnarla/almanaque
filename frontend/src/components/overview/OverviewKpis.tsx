@@ -1,14 +1,6 @@
 import { StatCard } from '../common/StatCard'
 import type { CampaignSummary } from '../../types/api'
-
-export function formatRatePct(rate: number | null): string {
-  if (rate == null) return '—'
-  return `${(rate * 100).toFixed(2)}%`
-}
-
-function formatNumber(value: number): string {
-  return value.toLocaleString('es-AR')
-}
+import { formatNumber, formatRatePct } from '../../lib/format'
 
 interface OverviewKpisProps {
   summary: CampaignSummary

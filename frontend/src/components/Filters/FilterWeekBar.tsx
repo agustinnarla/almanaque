@@ -5,10 +5,12 @@ import { campaignDates } from '../../lib/catalog'
 import { buildWeekOptions, defaultWeek, findWeekByStart } from '../../lib/weeks'
 import type { CampaignCatalogEntry } from '../../types/api'
 import { CampaignSelect } from './CampaignSelect'
+import { MinCallsSelect } from './MinCallsSelect'
 
 export interface WeekFilterValues {
   campaign: string
   weekStart: string
+  minCalls: number
 }
 
 interface FilterWeekBarProps {
@@ -20,6 +22,7 @@ interface FilterWeekBarProps {
 export function FilterWeekBar({ initial, catalog, onApply }: FilterWeekBarProps) {
   const [campaign, setCampaign] = useState(initial.campaign)
   const [weekStart, setWeekStart] = useState(initial.weekStart)
+  const [minCalls, setMinCalls] = useState(initial.minCalls)
 
   const weeks = buildWeekOptions(campaignDates(catalog, campaign))
   const week = findWeekByStart(weeks, weekStart) ?? defaultWeek(weeks)
@@ -42,7 +45,7 @@ export function FilterWeekBar({ initial, catalog, onApply }: FilterWeekBarProps)
       onSubmit={(event) => {
         event.preventDefault()
         if (week) {
-          onApply({ campaign, from: week.start, to: week.end })
+          onApply({ campaign, from: week.start, to: week.end, minCalls })
         }
       }}
     >
@@ -82,6 +85,11 @@ export function FilterWeekBar({ initial, catalog, onApply }: FilterWeekBarProps)
           )}
         </p>
       )}
+      <MinCallsSelect
+        value={minCalls}
+        onChange={setMinCalls}
+        className={inputClass}
+      />
       <button
         type="submit"
         data-testid="filter-week-submit"

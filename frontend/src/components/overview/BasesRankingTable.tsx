@@ -1,5 +1,5 @@
 import type { BaseRankingRow } from '../../types/api'
-import { formatRatePct } from './OverviewKpis'
+import { formatNumber, formatRatePct } from '../../lib/format'
 
 interface BasesRankingTableProps {
   rows: BaseRankingRow[] | null
@@ -52,7 +52,7 @@ export function BasesRankingTable({ rows }: BasesRankingTableProps) {
                 {row.base}
               </td>
               <td className="px-3 py-2.5 text-right font-mono text-slate-700">
-                {row.total_calls.toLocaleString('es-AR')}
+                {formatNumber(row.total_calls)}
               </td>
               <td className="px-3 py-2.5 text-right font-mono text-slate-700">
                 {formatRatePct(row.agent_answer_rate)}

@@ -2,6 +2,10 @@ import { useMemo, useState } from 'react'
 import { AlertTriangle, Trophy } from 'lucide-react'
 import { ExportCsvButton } from '../components/common/ExportCsvButton'
 import { PrintButton } from '../components/common/PrintButton'
+import {
+  SectionNav,
+  type SectionLink,
+} from '../components/common/SectionNav'
 import { BasesCompareTable } from '../components/dashboard/BasesCompareTable'
 import { GatewaysTable } from '../components/dashboard/GatewaysTable'
 import { HourlyTrendChart } from '../components/dashboard/HourlyTrendChart'
@@ -51,6 +55,18 @@ import { DEFAULT_MIN_CALLS, RANKING_LIMIT } from './defaults'
 interface CampaignsCompareModeProps {
   catalog: CampaignCatalogEntry[]
 }
+
+const CAMPAIGNS_SECTIONS: SectionLink[] = [
+  { id: 'sec-filtros', label: 'Filtros' },
+  { id: 'sec-kpis', label: 'Indicadores' },
+  { id: 'sec-diagnostico', label: 'Diagnóstico' },
+  { id: 'sec-recomendaciones', label: 'Recomendaciones' },
+  { id: 'sec-rankings', label: 'Rankings' },
+  { id: 'sec-alertas', label: 'Alertas' },
+  { id: 'sec-temporal', label: 'Horas y gateways' },
+  { id: 'sec-bases', label: 'Bases' },
+  { id: 'sec-diario', label: 'Tendencia diaria' },
+]
 
 export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
   const [cross, setCross] = useState<CrossCampaignValues>(() =>
@@ -150,22 +166,24 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
 
   return (
     <div className="space-y-6">
-      <FilterCrossCampaignBar
-        initial={cross}
-        catalog={catalog}
-        onCompare={(values) => {
-          const same =
-            values.campaignA === cross.campaignA &&
-            values.campaignB === cross.campaignB &&
-            values.from === cross.from &&
-            values.to === cross.to &&
-            values.minCalls === cross.minCalls
-          setCross(values)
-          if (same) {
-            reloadAll()
-          }
-        }}
-      />
+      <div id="sec-filtros" className="scroll-mt-16">
+        <FilterCrossCampaignBar
+          initial={cross}
+          catalog={catalog}
+          onCompare={(values) => {
+            const same =
+              values.campaignA === cross.campaignA &&
+              values.campaignB === cross.campaignB &&
+              values.from === cross.from &&
+              values.to === cross.to &&
+              values.minCalls === cross.minCalls
+            setCross(values)
+            if (same) {
+              reloadAll()
+            }
+          }}
+        />
+      </div>
 
       {loading && (
         <div className="space-y-4" aria-busy="true" aria-label="Cargando campañas">
@@ -194,7 +212,9 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             <PrintButton />
           </div>
 
-          <section>
+          <SectionNav links={CAMPAIGNS_SECTIONS} />
+
+          <section id="sec-kpis" className="scroll-mt-16">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Indicadores clave
@@ -209,7 +229,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             <KpiGrid data={data} labelA="Campaña" labelB="Campaña" />
           </section>
 
-          <section aria-label="Diagnóstico entre campañas">
+          <section id="sec-diagnostico" aria-label="Diagnóstico entre campañas" className="scroll-mt-16">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Diagnóstico
@@ -244,7 +264,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             )}
           </section>
 
-          <section aria-label="Recomendaciones entre campañas">
+          <section id="sec-recomendaciones" aria-label="Recomendaciones entre campañas" className="scroll-mt-16">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Recomendaciones
@@ -278,7 +298,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             )}
           </section>
 
-          <section aria-label="Rankings comparados">
+          <section id="sec-rankings" aria-label="Rankings comparados" className="scroll-mt-16">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -365,7 +385,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             )}
           </section>
 
-          <section aria-label="Alertas de patrones comparadas">
+          <section id="sec-alertas" aria-label="Alertas de patrones comparadas" className="scroll-mt-16">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -415,8 +435,9 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
           </section>
 
           <section
+            id="sec-temporal"
             aria-label="Análisis temporal e infraestructura"
-            className="grid gap-6 lg:grid-cols-12"
+            className="grid scroll-mt-16 gap-6 lg:grid-cols-12"
           >
             <div className="lg:col-span-7">
               <HourlyTrendChart
@@ -452,7 +473,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             </div>
           </section>
 
-          <section aria-label="Bases comparadas">
+          <section id="sec-bases" aria-label="Bases comparadas" className="scroll-mt-16">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <h2 className="mb-1 text-base font-semibold text-slate-900">
@@ -470,7 +491,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             <BasesCompareTable rows={data.bases_comparison} />
           </section>
 
-          <section>
+          <section id="sec-diario" className="scroll-mt-16">
             <DailyCompareChart
               pointsA={data.daily_a}
               pointsB={data.daily_b}

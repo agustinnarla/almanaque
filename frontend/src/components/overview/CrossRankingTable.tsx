@@ -1,20 +1,6 @@
 import type { CrossRankingRow } from '../../types/api'
 import type { CrossRankingKind } from '../../lib/rankings'
-
-function formatRate(rate: number | null): string {
-  if (rate == null) return '—'
-  return `${(rate * 100).toFixed(2)}%`
-}
-
-function formatAttempts(value: number | null): string {
-  if (value == null) return '—'
-  return value.toLocaleString('es-AR')
-}
-
-function formatHealth(value: number | null): string {
-  if (value == null) return '—'
-  return value.toFixed(2)
-}
+import { formatNumber, formatRatePct, formatScore } from '../../lib/format'
 
 function healthTone(value: number | null): { className: string; attribute: string } | null {
   if (value == null) return null
@@ -146,31 +132,31 @@ export function CrossRankingTable({ kind, rows }: CrossRankingTableProps) {
                   {row.key}
                 </td>
                 <td className={`${cellPadding} text-right font-mono text-slate-700`}>
-                  {formatAttempts(row.attemptsA)}
+                  {formatNumber(row.attemptsA)}
                 </td>
                 <td className={`${cellPadding} text-right font-mono text-slate-700`}>
-                  {formatRate(row.rateA)}
+                  {formatRatePct(row.rateA)}
                 </td>
                 {meta.withHealth && (
                   <td
                     {...(toneA ? { [toneA.attribute]: 'true' } : {})}
                     className={`${cellPadding} text-right font-mono font-semibold ${toneA?.className ?? 'text-slate-500'}`}
                   >
-                    {formatHealth(row.healthA)}
+                    {formatScore(row.healthA)}
                   </td>
                 )}
                 <td className={`${cellPadding} text-right font-mono text-slate-700`}>
-                  {formatAttempts(row.attemptsB)}
+                  {formatNumber(row.attemptsB)}
                 </td>
                 <td className={`${cellPadding} text-right font-mono text-slate-700`}>
-                  {formatRate(row.rateB)}
+                  {formatRatePct(row.rateB)}
                 </td>
                 {meta.withHealth && (
                   <td
                     {...(toneB ? { [toneB.attribute]: 'true' } : {})}
                     className={`${cellPadding} text-right font-mono font-semibold ${toneB?.className ?? 'text-slate-500'}`}
                   >
-                    {formatHealth(row.healthB)}
+                    {formatScore(row.healthB)}
                   </td>
                 )}
                 <td

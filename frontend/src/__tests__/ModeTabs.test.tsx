@@ -350,7 +350,11 @@ describe('ModeTabs', () => {
     expect(
       screen.getByLabelText('Recomendaciones entre campañas'),
     ).toBeInTheDocument()
-    expect(screen.getByText('Observaciones y recomendaciones')).toBeInTheDocument()
+    expect(
+      within(
+        screen.getByLabelText('Recomendaciones entre campañas'),
+      ).getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent),
+    ).toEqual(['Recomendaciones'])
     expect(screen.getByTestId('recommendation-card')).toBeInTheDocument()
   })
 
@@ -406,6 +410,18 @@ describe('ModeTabs', () => {
     expect(screen.getByTestId('filter-week-bar')).toBeInTheDocument()
     await userEvent.click(screen.getByTestId('tab-campaigns'))
     expect(screen.getByTestId('filter-cross-campaign')).toBeInTheDocument()
+  })
+
+  it('el índice del tab de campañas apunta a secciones existentes', async () => {
+    render(<App />)
+    await userEvent.click(screen.getByTestId('tab-campaigns'))
+    const nav = screen.getByRole('navigation', { name: 'Secciones' })
+    const links = within(nav).getAllByRole('link')
+    expect(links).toHaveLength(9)
+    for (const link of links) {
+      const id = link.getAttribute('href')!.slice(1)
+      expect(document.getElementById(id), id).not.toBeNull()
+    }
   })
 
   it('ofrece 12 exportaciones CSV y una impresión en el tab de campañas', async () => {

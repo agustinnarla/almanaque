@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { HourlyTrendPoint } from '../../../types/api'
-import { HourlyTrendChart, mergeHourlyPoints } from '../HourlyTrendChart'
+import { mergeHourlyPoints } from '../../../lib/chartData'
+import { HourlyTrendChart } from '../HourlyTrendChart'
 
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (

@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { DailyTrendPoint } from '../../../types/api'
-import { DailyCompareChart, mergeDailyPoints } from '../DailyCompareChart'
+import { mergeDailyPoints } from '../../../lib/chartData'
+import { DailyCompareChart } from '../DailyCompareChart'
 
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (

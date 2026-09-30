@@ -39,4 +39,17 @@ describe('DiagnosticsFeed', () => {
     ).toBeInTheDocument()
     expect(screen.queryByText('Factores de mejora')).not.toBeInTheDocument()
   })
+
+  it('usa h3 en las columnas para no competir con el título de la sección', () => {
+    render(
+      <DiagnosticsFeed rootCauses={[]} positiveDrivers={positive} />,
+    )
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Causas negativas' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Factores de mejora' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 2 })).not.toBeInTheDocument()
+  })
 })

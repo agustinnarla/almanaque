@@ -1,36 +1,6 @@
 import type { GatewayComparison } from '../../types/api'
-
-export type GatewayStatus = 'Saturado' | 'Aliviado' | 'Normal'
-
-export const SATURATED_RATE_B = 0.05
-export const RELIEVED_DELTA = -0.02
-
-export function gatewayStatus(row: GatewayComparison): GatewayStatus {
-  const rateB = row.congestion_rate_b
-  const delta = row.delta_congestion
-  if (rateB != null && rateB >= SATURATED_RATE_B) return 'Saturado'
-  if (
-    rateB != null &&
-    rateB < SATURATED_RATE_B &&
-    delta != null &&
-    delta <= RELIEVED_DELTA
-  ) {
-    return 'Aliviado'
-  }
-  return 'Normal'
-}
-
-export function formatRatePct(rate: number | null): string {
-  if (rate == null) return '—'
-  return `${(rate * 100).toFixed(2)}%`
-}
-
-export function formatDeltaPp(delta: number | null): string {
-  if (delta == null) return '—'
-  const pp = delta * 100
-  const sign = pp > 0 ? '+' : pp < 0 ? '−' : ''
-  return `${sign}${Math.abs(pp).toFixed(2)} pp`
-}
+import { formatDeltaPp, formatRatePct } from '../../lib/format'
+import { gatewayStatus, type GatewayStatus } from '../../lib/gateways'
 
 const STATUS_STYLES: Record<GatewayStatus, string> = {
   Saturado: 'bg-red-100 text-red-800 border-red-200',

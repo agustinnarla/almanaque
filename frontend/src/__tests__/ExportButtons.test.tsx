@@ -432,6 +432,34 @@ describe('Exportación por modo', () => {
     return () => vi.unstubAllGlobals()
   })
 
+  it('RangeMode muestra el índice de secciones y cada ancla existe', () => {
+    render(<App />)
+    const nav = screen.getByRole('navigation', { name: 'Secciones' })
+    const links = within(nav).getAllByRole('link')
+    expect(links.map((link) => link.textContent)).toEqual([
+      'Filtros',
+      'Indicadores',
+      'Diagnóstico',
+      'Recomendaciones',
+      'Rankings',
+      'Alertas',
+      'Tendencia diaria',
+      'Por hora',
+    ])
+    for (const link of links) {
+      const id = link.getAttribute('href')!.slice(1)
+      expect(document.getElementById(id), id).not.toBeNull()
+    }
+  })
+
+  it('RangeMode aplica el mínimo de llamadas elegido', async () => {
+    render(<App />)
+    expect(screen.getByText(/min_calls 50/)).toBeInTheDocument()
+    await userEvent.selectOptions(screen.getByLabelText('Mín. llamadas'), '100')
+    await userEvent.click(screen.getByTestId('filter-range-submit'))
+    expect(screen.getByText(/min_calls 100/)).toBeInTheDocument()
+  })
+
   it('RangeMode ofrece 11 CSV + imprimir', () => {
     render(<App />)
     expect(screen.getAllByTestId('export-csv')).toHaveLength(11)

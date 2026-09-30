@@ -2,7 +2,7 @@ import { AlertTriangle } from 'lucide-react'
 import type { PatternAlert } from '../../types/api'
 import { comparePatternSummaries } from '../../lib/patterns'
 import { formatDayLabel } from '../../lib/dates'
-import { formatRatePct } from '../overview/OverviewKpis'
+import { formatRatePct } from '../../lib/format'
 
 interface PatternsComparePanelProps {
   alerts: PatternAlert[] | null

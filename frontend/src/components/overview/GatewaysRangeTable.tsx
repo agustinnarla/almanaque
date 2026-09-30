@@ -1,5 +1,5 @@
 import type { DeviceRangeRow } from '../../types/api'
-import { formatRatePct } from './OverviewKpis'
+import { formatNumber, formatRatePct } from '../../lib/format'
 
 interface GatewaysRangeTableProps {
   rows: DeviceRangeRow[] | null
@@ -39,7 +39,7 @@ export function GatewaysRangeTable({ rows }: GatewaysRangeTableProps) {
                 {row.device}
               </td>
               <td className="px-2 py-2 text-right font-mono text-slate-700">
-                {row.total_calls.toLocaleString('es-AR')}
+                {formatNumber(row.total_calls)}
               </td>
               <td className="px-2 py-2 text-right font-mono text-slate-700">
                 {formatRatePct(row.agent_answer_rate)}

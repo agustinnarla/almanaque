@@ -22,10 +22,11 @@ function single(campaign: string, dates: string[]): CampaignCatalogEntry {
 
 describe('defaults desde el catálogo', () => {
   it('deriva los valores iniciales de los 4 modos con el catálogo real', () => {
-    expect(defaultRangeValues(TEST_CATALOG)).toEqual({
+    expect(defaultRangeValues(TEST_CATALOG, 50)).toEqual({
       campaign: '35',
       from: '2026-09-01',
       to: '2026-09-15',
+      minCalls: 50,
     })
     expect(defaultCompareValues(TEST_CATALOG, 50)).toEqual({
       campaign: '35',
@@ -40,10 +41,11 @@ describe('defaults desde el catálogo', () => {
       from: '2026-09-01',
       to: '2026-09-15',
     })
-    expect(defaultWeekValues(TEST_CATALOG)).toEqual({
+    expect(defaultWeekValues(TEST_CATALOG, 100)).toEqual({
       campaign: '35',
       from: '2026-09-07',
       to: '2026-09-13',
+      minCalls: 100,
     })
   })
 

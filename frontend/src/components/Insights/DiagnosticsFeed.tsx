@@ -27,10 +27,10 @@ function Section({
 }) {
   return (
     <section className="flex-1">
-      <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+      <h3 className="flex items-center gap-2 text-sm font-bold text-slate-800">
         <Icon className={`h-4 w-4 ${iconClassName}`} aria-hidden />
         {title}
-      </h2>
+      </h3>
       <p className="mb-3 text-xs text-slate-500">{description}</p>
       {events.length === 0 ? (
         <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">

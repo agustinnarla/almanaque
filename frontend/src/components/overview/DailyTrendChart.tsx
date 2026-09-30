@@ -10,22 +10,7 @@ import {
 } from 'recharts'
 import type { ReactNode } from 'react'
 import type { DailyTrendPoint } from '../../types/api'
-
-export interface DailyChartPoint {
-  label: string
-  fecha: string
-  total: number
-  rate: number | null
-}
-
-export function mapDailyPoints(points: DailyTrendPoint[]): DailyChartPoint[] {
-  return points.map((p) => ({
-    label: `${p.fecha.slice(8, 10)}/${p.fecha.slice(5, 7)}`,
-    fecha: p.fecha,
-    total: p.total_calls,
-    rate: p.agent_answer_rate != null ? p.agent_answer_rate * 100 : null,
-  }))
-}
+import { mapDailyPoints } from '../../lib/chartData'
 
 interface TooltipPayloadItem {
   dataKey?: string | number

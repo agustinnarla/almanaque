@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import type { CampaignSummary } from '../../../types/api'
-import { formatRatePct, OverviewKpis } from '../OverviewKpis'
+import { formatRatePct } from '../../../lib/format'
+import { OverviewKpis } from '../OverviewKpis'
 
 const summary: CampaignSummary = {
   campaign: '35',

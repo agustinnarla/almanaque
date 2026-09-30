@@ -10,46 +10,7 @@ import {
 } from 'recharts'
 import type { ReactNode } from 'react'
 import type { DailyTrendPoint } from '../../types/api'
-
-export interface DailyComparePoint {
-  label: string
-  totalA: number
-  totalB: number
-  rateA: number | null
-  rateB: number | null
-}
-
-export function mergeDailyPoints(
-  pointsA: DailyTrendPoint[],
-  pointsB: DailyTrendPoint[],
-): DailyComparePoint[] {
-  const byFecha = new Map<string, DailyComparePoint>()
-  const ensure = (fecha: string): DailyComparePoint => {
-    let row = byFecha.get(fecha)
-    if (!row) {
-      row = {
-        label: `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}`,
-        totalA: 0,
-        totalB: 0,
-        rateA: null,
-        rateB: null,
-      }
-      byFecha.set(fecha, row)
-    }
-    return row
-  }
-  for (const p of pointsA) {
-    const row = ensure(p.fecha)
-    row.totalA = p.total_calls
-    row.rateA = p.agent_answer_rate != null ? p.agent_answer_rate * 100 : null
-  }
-  for (const p of pointsB) {
-    const row = ensure(p.fecha)
-    row.totalB = p.total_calls
-    row.rateB = p.agent_answer_rate != null ? p.agent_answer_rate * 100 : null
-  }
-  return [...byFecha.values()]
-}
+import { mergeDailyPoints } from '../../lib/chartData'
 
 interface TooltipPayloadItem {
   dataKey?: string | number

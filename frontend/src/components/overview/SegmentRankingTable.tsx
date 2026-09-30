@@ -1,10 +1,5 @@
 import type { SegmentRankingItem, SegmentRankingResponse } from '../../types/api'
-import { formatRatePct } from './OverviewKpis'
-
-function formatHealth(value: number | null): string {
-  if (value == null) return '—'
-  return value.toFixed(2)
-}
+import { formatNumber, formatRatePct, formatScore } from '../../lib/format'
 
 function healthTone(value: number | null): { className: string; attribute: string } | null {
   if (value == null) return null
@@ -89,7 +84,7 @@ function RankingBlock({ title, items, kind }: RankingBlockProps) {
                     {segmentLabel(item, kind)}
                   </td>
                   <td className="px-3 py-2.5 text-right font-mono text-slate-700">
-                    {item.total_calls.toLocaleString('es-AR')}
+                    {formatNumber(item.total_calls)}
                   </td>
                   <td className="px-3 py-2.5 text-right font-mono text-slate-700">
                     {formatRatePct(item.agent_answer_rate)}
@@ -101,7 +96,7 @@ function RankingBlock({ title, items, kind }: RankingBlockProps) {
                     {...(tone ? { [tone.attribute]: 'true' } : {})}
                     className={`px-3 py-2.5 text-right font-mono font-semibold ${tone?.className ?? 'text-slate-700'}`}
                   >
-                    {formatHealth(item.health_score)}
+                    {formatScore(item.health_score)}
                   </td>
                 </tr>
               )

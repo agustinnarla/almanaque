@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import type { Recommendation } from '../../../types/api'
 import { RecommendationsPanel } from '../RecommendationsPanel'
@@ -36,8 +36,21 @@ describe('RecommendationsPanel', () => {
     expect(cards[0]).toHaveAttribute('data-category', 'WARNING')
     expect(cards[1].className).toContain('border-l-emerald-500')
     expect(cards[1]).toHaveAttribute('data-category', 'SUCCESS')
-    expect(screen.getByText('Observaciones y recomendaciones')).toBeInTheDocument()
+    expect(
+      screen.getByText(/Generadas automáticamente a partir de los datos cargados/),
+    ).toBeInTheDocument()
     expect(screen.getByText(warningRec.text)).toBeInTheDocument()
+  })
+
+  it('usa tarjetas claras con badge de severidad y sin título propio', () => {
+    render(<RecommendationsPanel recommendations={[warningRec, successRec]} />)
+    const cards = screen.getAllByTestId('recommendation-card')
+    expect(cards[0].className).toContain('bg-white')
+    expect(cards[0].className).not.toContain('bg-slate-900')
+    expect(within(cards[0]).getByTestId('severity-badge')).toHaveTextContent('Advertencia')
+    expect(within(cards[1]).getByTestId('severity-badge')).toHaveTextContent('Éxito')
+    expect(screen.queryByRole('heading', { level: 2 })).not.toBeInTheDocument()
+    expect(screen.queryByText('Observaciones y recomendaciones')).not.toBeInTheDocument()
   })
 
   it('agrupa en Estrategia de campaña y Alertas del período', () => {

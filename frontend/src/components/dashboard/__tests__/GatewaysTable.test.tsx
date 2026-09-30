@@ -1,11 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import type { GatewayComparison } from '../../../types/api'
-import {
-  formatDeltaPp,
-  gatewayStatus,
-  GatewaysTable,
-} from '../GatewaysTable'
+import { formatDeltaPp } from '../../../lib/format'
+import { gatewayStatus } from '../../../lib/gateways'
+import { GatewaysTable } from '../GatewaysTable'
 
 const saturatedImproved: GatewayComparison = {
   device: 'GW37',

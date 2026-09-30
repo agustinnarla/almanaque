@@ -1,21 +1,5 @@
 import type { BaseComparison } from '../../types/api'
-
-function formatRate(rate: number | null): string {
-  if (rate == null) return '—'
-  return `${(rate * 100).toFixed(2)}%`
-}
-
-function formatDeltaPp(delta: number | null): string {
-  if (delta == null) return '—'
-  const pp = delta * 100
-  const sign = pp > 0 ? '+' : pp < 0 ? '−' : ''
-  return `${sign}${Math.abs(pp).toFixed(2)} pp`
-}
-
-function formatShare(share: number | null): string {
-  if (share == null) return '—'
-  return `${(share * 100).toFixed(1)}%`
-}
+import { formatDeltaPp, formatRatePct } from '../../lib/format'
 
 interface BasesCompareTableProps {
   rows: BaseComparison[] | null
@@ -56,19 +40,19 @@ export function BasesCompareTable({ rows }: BasesCompareTableProps) {
                 {row.base}
               </td>
               <td className="px-2 py-2 text-right font-mono text-slate-700">
-                {formatRate(row.agent_answer_rate_a)}
+                {formatRatePct(row.agent_answer_rate_a)}
               </td>
               <td className="px-2 py-2 text-right font-mono text-slate-700">
-                {formatRate(row.agent_answer_rate_b)}
+                {formatRatePct(row.agent_answer_rate_b)}
               </td>
               <td className="px-2 py-2 text-right font-mono text-slate-700">
                 {formatDeltaPp(row.delta_rate)}
               </td>
               <td className="px-2 py-2 text-right font-mono text-slate-500">
-                {formatShare(row.share_a)}
+                {formatRatePct(row.share_a, 1)}
               </td>
               <td className="px-2 py-2 text-right font-mono text-slate-500">
-                {formatShare(row.share_b)}
+                {formatRatePct(row.share_b, 1)}
               </td>
             </tr>
           ))}

@@ -30,9 +30,17 @@ export function catalogBounds(catalog: CampaignCatalogEntry[]): {
   return { from: firstDays[0] ?? '', to: lastDays.at(-1) ?? '' }
 }
 
-export function defaultRangeValues(catalog: CampaignCatalogEntry[]): RangeValues {
+export function defaultRangeValues(
+  catalog: CampaignCatalogEntry[],
+  minCalls: number,
+): RangeValues {
   const first = catalog[0]
-  return { campaign: first.campaign, from: first.first_day, to: first.last_day }
+  return {
+    campaign: first.campaign,
+    from: first.first_day,
+    to: first.last_day,
+    minCalls,
+  }
 }
 
 export function defaultCompareValues(
@@ -55,12 +63,16 @@ export function defaultCrossValues(
   return { campaignA, campaignB, minCalls, from, to }
 }
 
-export function defaultWeekValues(catalog: CampaignCatalogEntry[]): RangeValues {
+export function defaultWeekValues(
+  catalog: CampaignCatalogEntry[],
+  minCalls: number,
+): RangeValues {
   const first = catalog[0]
   const week = defaultWeek(buildWeekOptions(first.dates))
   return {
     campaign: first.campaign,
     from: week?.start ?? first.first_day,
     to: week?.end ?? first.last_day,
+    minCalls,
   }
 }

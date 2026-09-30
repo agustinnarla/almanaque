@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react'
 import { ExportCsvButton } from '../components/common/ExportCsvButton'
 import { PrintButton } from '../components/common/PrintButton'
+import {
+  SectionNav,
+  type SectionLink,
+} from '../components/common/SectionNav'
 import { GatewaysTable } from '../components/dashboard/GatewaysTable'
 import { HourlyTrendChart } from '../components/dashboard/HourlyTrendChart'
 import { KpiGrid } from '../components/dashboard/KpiGrid'
@@ -24,6 +28,14 @@ import { DEFAULT_MIN_CALLS } from './defaults'
 interface CompareModeProps {
   catalog: CampaignCatalogEntry[]
 }
+
+const COMPARE_SECTIONS: SectionLink[] = [
+  { id: 'sec-filtros', label: 'Filtros' },
+  { id: 'sec-kpis', label: 'Indicadores' },
+  { id: 'sec-diagnostico', label: 'Diagnóstico' },
+  { id: 'sec-recomendaciones', label: 'Recomendaciones' },
+  { id: 'sec-temporal', label: 'Horas y gateways' },
+]
 
 export function CompareMode({ catalog }: CompareModeProps) {
   const [filters, setFilters] = useState<FilterValues>(() =>
@@ -51,21 +63,23 @@ export function CompareMode({ catalog }: CompareModeProps) {
 
   return (
     <div className="space-y-6">
-      <FilterBar
-        initial={filters}
-        catalog={catalog}
-        onCompare={(values) => {
-          const same =
-            values.campaign === filters.campaign &&
-            values.dateA === filters.dateA &&
-            values.dateB === filters.dateB &&
-            values.minCalls === filters.minCalls
-          setFilters(values)
-          if (same) {
-            reload()
-          }
-        }}
-      />
+      <div id="sec-filtros" className="scroll-mt-16">
+        <FilterBar
+          initial={filters}
+          catalog={catalog}
+          onCompare={(values) => {
+            const same =
+              values.campaign === filters.campaign &&
+              values.dateA === filters.dateA &&
+              values.dateB === filters.dateB &&
+              values.minCalls === filters.minCalls
+            setFilters(values)
+            if (same) {
+              reload()
+            }
+          }}
+        />
+      </div>
 
       {loading && (
         <div className="space-y-4" aria-busy="true" aria-label="Cargando">
@@ -94,7 +108,9 @@ export function CompareMode({ catalog }: CompareModeProps) {
             <PrintButton />
           </div>
 
-          <section>
+          <SectionNav links={COMPARE_SECTIONS} />
+
+          <section id="sec-kpis" className="scroll-mt-16">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Indicadores clave
@@ -109,7 +125,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
             <KpiGrid data={data} labelA="Día" labelB="Día" />
           </section>
 
-          <section aria-label="Diagnóstico">
+          <section id="sec-diagnostico" aria-label="Diagnóstico" className="scroll-mt-16">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Diagnóstico
@@ -125,7 +141,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
             />
           </section>
 
-          <section aria-label="Recomendaciones">
+          <section id="sec-recomendaciones" aria-label="Recomendaciones" className="scroll-mt-16">
             <div className="mb-3 flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Recomendaciones
@@ -161,8 +177,9 @@ export function CompareMode({ catalog }: CompareModeProps) {
           </section>
 
           <section
+            id="sec-temporal"
             aria-label="Análisis temporal e infraestructura"
-            className="grid gap-6 lg:grid-cols-12"
+            className="grid scroll-mt-16 gap-6 lg:grid-cols-12"
           >
             <div className="lg:col-span-7">
               {hourly.loading && !hourly.error && (
