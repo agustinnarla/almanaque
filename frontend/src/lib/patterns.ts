@@ -1,4 +1,5 @@
 import type { PatternAlert } from '../types/api'
+import { formatRatePct } from './format'
 
 export interface PatternDayCount {
   fecha: string
@@ -142,4 +143,37 @@ export function comparePatternSummaries(
     .slice(0, TOP_COMBOS)
 
   return { byDay, combos }
+}
+
+export interface CampaignThreshold {
+  threshold: number
+  average: number
+}
+
+// The backend decides the threshold (a factor of the campaign average); the
+// UI only reads it back from the alerts, so the factor lives in one place.
+export function campaignThreshold(
+  alerts: PatternAlert[],
+  campaign: string,
+): CampaignThreshold | null {
+  for (const alert of alerts) {
+    if (
+      alert.campaign === campaign &&
+      alert.threshold_rate != null &&
+      alert.campaign_rate != null
+    ) {
+      return { threshold: alert.threshold_rate, average: alert.campaign_rate }
+    }
+  }
+  return null
+}
+
+export function thresholdLabel(
+  campaign: string,
+  { threshold, average }: CampaignThreshold,
+): string {
+  const base = `Umbral de la campaña ${campaign}: AA menor a ${formatRatePct(threshold)}`
+  if (average <= 0) return base
+  const share = Math.round((threshold / average) * 100)
+  return `${base} (${share}% del promedio de ${formatRatePct(average)})`
 }

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { comparePatternSummaries, summarizePatterns } from '../patterns'
+import {
+  campaignThreshold,
+  comparePatternSummaries,
+  summarizePatterns,
+  thresholdLabel,
+} from '../patterns'
 import type { PatternAlert } from '../../types/api'
 
 function alert(
@@ -167,5 +172,21 @@ describe('comparePatternSummaries', () => {
     )
     expect(result.byDay).toEqual([])
     expect(result.combos).toEqual([])
+  })
+})
+
+describe('campaignThreshold', () => {
+  it('lee el umbral y el promedio de las alertas de la campaña pedida', () => {
+    const alerts: PatternAlert[] = [
+      { ...alert('2026-09-01', '80', 'GW20', 0.02, '38'), threshold_rate: 0.0293, campaign_rate: 0.0489 },
+      { ...alert('2026-09-01', '80', 'GW20', 0.01), threshold_rate: 0.0356, campaign_rate: 0.0594 },
+    ]
+    const threshold = campaignThreshold(alerts, '35')
+    expect(threshold).toEqual({ threshold: 0.0356, average: 0.0594 })
+    expect(thresholdLabel('35', threshold!)).toBe(
+      'Umbral de la campaña 35: AA menor a 3.56% (60% del promedio de 5.94%)',
+    )
+    expect(campaignThreshold(alerts, '91')).toBeNull()
+    expect(campaignThreshold([alert('2026-09-01', '80', 'GW20', 0)], '35')).toBeNull()
   })
 })

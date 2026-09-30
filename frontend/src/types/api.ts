@@ -239,5 +239,8 @@ export interface PatternAlert {
   base: string
   device: string
   agent_answer_rate: number | null
+  total_calls?: number
+  campaign_rate?: number
+  threshold_rate?: number
   pattern_alert: boolean
 }

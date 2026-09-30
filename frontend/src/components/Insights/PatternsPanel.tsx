@@ -1,6 +1,10 @@
 import { AlertTriangle } from 'lucide-react'
 import type { PatternAlert } from '../../types/api'
-import { summarizePatterns } from '../../lib/patterns'
+import {
+  campaignThreshold,
+  summarizePatterns,
+  thresholdLabel,
+} from '../../lib/patterns'
 import { formatDayLabel } from '../../lib/dates'
 import { formatRatePct } from '../../lib/format'
 
@@ -21,16 +25,22 @@ export function PatternsPanel({ alerts, campaign }: PatternsPanelProps) {
         className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500"
       >
         Sin alertas de patrones para la campaña en este rango: ninguna
-        combinación cayó bajo el umbral de Agent Answer.
+        combinación quedó muy por debajo del promedio de la campaña.
       </p>
     )
   }
 
+  const threshold = campaignThreshold(alerts, campaign)
   const total = summary.byDay.reduce((sum, day) => sum + day.alerts, 0)
   const maxAlerts = Math.max(...summary.byDay.map((day) => day.alerts))
 
   return (
     <div className="grid gap-6 lg:grid-cols-12" data-testid="patterns-panel">
+      {threshold && (
+        <p data-testid="patterns-threshold" className="lg:col-span-12 text-xs text-slate-500">
+          {thresholdLabel(campaign, threshold)}
+        </p>
+      )}
       <div className="lg:col-span-5">
         <div className="mb-2 flex items-center justify-between gap-2">
           <h3 className="text-sm font-bold text-slate-800">Alertas por día</h3>

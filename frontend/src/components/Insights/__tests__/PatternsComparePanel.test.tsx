@@ -80,4 +80,18 @@ describe('PatternsComparePanel', () => {
     expect(screen.queryByTestId('patterns-compare-panel')).not.toBeInTheDocument()
     expect(screen.queryByTestId('patterns-compare-empty')).not.toBeInTheDocument()
   })
+
+  it('muestra el umbral de cada campaña', () => {
+    const alerts = [
+      { ...alert('2026-09-01', '80', 'GW20', 0.02, '35'), threshold_rate: 0.0356, campaign_rate: 0.0594 },
+      { ...alert('2026-09-02', '34', 'IPLAN', 0.01, '38'), threshold_rate: 0.0293, campaign_rate: 0.0489 },
+    ]
+    render(<PatternsComparePanel alerts={alerts} campaignA="35" campaignB="38" />)
+    expect(screen.getByTestId('patterns-threshold-a')).toHaveTextContent(
+      'Umbral de la campaña 35: AA menor a 3.56%',
+    )
+    expect(screen.getByTestId('patterns-threshold-b')).toHaveTextContent(
+      'Umbral de la campaña 38: AA menor a 2.93% (60% del promedio de 4.89%)',
+    )
+  })
 })

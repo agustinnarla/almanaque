@@ -43,6 +43,20 @@ describe('PatternsPanel', () => {
     expect(combos[0].className).toContain('bg-amber-50')
   })
 
+  it('muestra el umbral de la campaña calculado por el backend', () => {
+    render(
+      <PatternsPanel
+        alerts={[
+          { ...alert('2026-09-01', '80', 'GW20', 0.02), threshold_rate: 0.0356, campaign_rate: 0.0594 },
+        ]}
+        campaign="35"
+      />,
+    )
+    expect(screen.getByTestId('patterns-threshold')).toHaveTextContent(
+      'Umbral de la campaña 35: AA menor a 3.56% (60% del promedio de 5.94%)',
+    )
+  })
+
   it('filtra alertas de otras campañas', () => {
     render(
       <PatternsPanel

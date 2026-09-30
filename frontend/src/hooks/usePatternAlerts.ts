@@ -5,6 +5,7 @@ import { useApiResource } from './useApiResource'
 export interface PatternAlertsParams {
   from: string
   to: string
+  minCalls: number
 }
 
 interface State {
@@ -16,11 +17,11 @@ interface State {
 export function usePatternAlerts(params: PatternAlertsParams): State & {
   reload: () => void
 } {
-  const { from, to } = params
+  const { from, to, minCalls } = params
 
   const { data, loading, error, reload } = useApiResource(
-    (signal) => fetchPatterns(from, to, signal),
-    [from, to],
+    (signal) => fetchPatterns(from, to, minCalls, signal),
+    [from, to, minCalls],
     { errorMessage: 'No se pudieron cargar las alertas de patrones' },
   )
 

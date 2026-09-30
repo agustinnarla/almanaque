@@ -104,6 +104,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
   const patternAlerts = usePatternAlerts({
     from: cross.from,
     to: cross.to,
+    minCalls: cross.minCalls,
   })
 
   const baseRows = mergeBaseRankings(
@@ -393,8 +394,8 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                   Alertas de patrones
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Combinaciones que cayeron bajo el umbral de Agent Answer (5%) en
-                  cada campaña
+                  Combinaciones con Agent Answer muy por debajo del promedio de
+                  cada campaña · volumen mínimo {cross.minCalls} llamadas
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">

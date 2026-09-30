@@ -90,7 +90,11 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
     minCalls: range.minCalls,
     limit: RANKING_LIMIT,
   })
-  const patternAlerts = usePatternAlerts(params)
+  const patternAlerts = usePatternAlerts({
+    from: range.from,
+    to: range.to,
+    minCalls: range.minCalls,
+  })
 
   const defaultRange = isWeek
     ? defaultWeekValues(catalog, DEFAULT_MIN_CALLS)
@@ -383,7 +387,8 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                   Alertas de patrones
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Combinaciones que cayeron bajo el umbral de Agent Answer (5%)
+                  Combinaciones con Agent Answer muy por debajo del promedio de
+                  la campaña · volumen mínimo {range.minCalls} llamadas
                 </p>
               </div>
               {patternSummary && (

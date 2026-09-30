@@ -71,8 +71,10 @@ export function fetchHoursRanking(
 export function fetchPatterns(
   from: string,
   to: string,
+  minCalls: number,
   signal?: AbortSignal,
 ): Promise<PatternAlert[]> {
   const query = rangeQuery(from, to)
+  query.set('min_calls', String(minCalls))
   return fetchJson(`/api/patterns?${query}`, signal)
 }

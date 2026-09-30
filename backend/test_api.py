@@ -96,34 +96,70 @@ def test_metrics_invalid_date_returns_422(client):
     assert response.status_code == 422
 
 
-def test_pattern_detector_alerts_below_threshold():
+def pattern_row(campaign: str, base: str, total: int, agents: int, hora: int = 9) -> dict:
+    return {
+        "fecha": "2026-09-01",
+        "hora": hora,
+        "campaign": campaign,
+        "base": base,
+        "device": "GW37",
+        "total_calls": total,
+        "agent_answers": agents,
+        "machine_answers": 0,
+    }
+
+
+def test_pattern_detector_alerts_relative_to_campaign_average():
     alerts = evaluate_campaigns(
         [
-            {
-                "fecha": "2026-09-01",
-                "hora": 9,
-                "campaign": "35",
-                "base": "A",
-                "device": "GW37",
-                "total_calls": 100,
-                "agent_answers": 4,
-                "machine_answers": 0,
-            }
+            pattern_row("35", "A", 100, 10),
+            pattern_row("35", "B", 100, 10),
+            pattern_row("35", "C", 100, 1, hora=11),
         ]
     )
     assert len(alerts) == 1
-    assert alerts[0]["pattern_alert"] is True
-    assert alerts[0]["campaign"] == "35"
-    assert alerts[0]["hora"] == 9
-    assert alerts[0]["device"] == "GW37"
-    assert alerts[0]["agent_answer_rate"] == pytest.approx(0.04)
+    alert = alerts[0]
+    assert alert["pattern_alert"] is True
+    assert alert["campaign"] == "35"
+    assert alert["base"] == "C"
+    assert alert["hora"] == 11
+    assert alert["device"] == "GW37"
+    assert alert["total_calls"] == 100
+    assert alert["agent_answer_rate"] == pytest.approx(0.01)
+    assert alert["campaign_rate"] == pytest.approx(0.07)
+    assert alert["threshold_rate"] == pytest.approx(0.042)
 
 
-def test_pattern_detector_ignores_above_threshold():
+def test_pattern_detector_ignores_rows_at_campaign_average():
     alerts = evaluate_campaigns(
-        [{"fecha": "2026-09-01", "base": "B", "total_calls": 100, "agent_answers": 20, "machine_answers": 0}]
+        [pattern_row("35", "A", 100, 5), pattern_row("35", "B", 200, 10)]
     )
     assert alerts == []
+
+
+def test_pattern_detector_uses_each_campaign_average():
+    alerts = evaluate_campaigns(
+        [
+            pattern_row("35", "X", 100, 10),
+            pattern_row("35", "Y", 100, 2),
+            pattern_row("91", "X", 100, 2),
+            pattern_row("91", "Y", 100, 2),
+            pattern_row("91", "Z", 100, 1),
+        ]
+    )
+    assert [(a["campaign"], a["base"]) for a in alerts] == [("35", "Y")]
+    assert alerts[0]["threshold_rate"] == pytest.approx(0.036)
+
+
+def test_pattern_detector_skips_rows_below_min_calls():
+    rows = [
+        pattern_row("35", "A", 100, 10),
+        pattern_row("35", "B", 100, 10),
+        pattern_row("35", "C", 40, 0),
+    ]
+    assert evaluate_campaigns(rows) == []
+    alerts = evaluate_campaigns(rows, min_calls=20)
+    assert [a["base"] for a in alerts] == ["C"]
 
 
 def test_pattern_detector_excludes_zero_denominator():
@@ -150,6 +186,30 @@ def test_patterns_endpoint_returns_hourly_alerts(client, memory_conn):
     assert alert["pattern_alert"] is True
     assert isinstance(alert["agent_answer_rate"], float)
     assert alert["agent_answer_rate"] == pytest.approx(0.0)
+
+
+def test_patterns_endpoint_includes_threshold_fields(client, memory_conn):
+    seed_metrics(memory_conn)
+    data = client.get(
+        "/api/patterns",
+        params={"start_date": "2026-09-01", "end_date": "2026-09-01"},
+    ).json()
+    average = 38 / 290
+    assert {(a["base"], a["device"]) for a in data} == {("34", "GW37"), ("99", "GW20")}
+    for alert in data:
+        assert alert["campaign"] == "35"
+        assert alert["total_calls"] >= 50
+        assert alert["campaign_rate"] == pytest.approx(average)
+        assert alert["threshold_rate"] == pytest.approx(average * 0.6)
+        assert alert["agent_answer_rate"] < alert["threshold_rate"]
+
+
+def test_patterns_endpoint_min_calls_validation(client):
+    response = client.get(
+        "/api/patterns",
+        params={"start_date": "2026-09-01", "end_date": "2026-09-01", "min_calls": 0},
+    )
+    assert response.status_code == 422
 
 
 def test_patterns_endpoint_empty_range(client):

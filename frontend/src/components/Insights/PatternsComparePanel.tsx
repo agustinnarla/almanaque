@@ -1,6 +1,10 @@
 import { AlertTriangle } from 'lucide-react'
 import type { PatternAlert } from '../../types/api'
-import { comparePatternSummaries } from '../../lib/patterns'
+import {
+  campaignThreshold,
+  comparePatternSummaries,
+  thresholdLabel,
+} from '../../lib/patterns'
 import { formatDayLabel } from '../../lib/dates'
 import { formatRatePct } from '../../lib/format'
 
@@ -26,11 +30,13 @@ export function PatternsComparePanel({
         className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500"
       >
         Sin alertas de patrones para ninguna de las dos campañas en este rango:
-        ninguna combinación cayó bajo el umbral de Agent Answer.
+        ninguna combinación quedó muy por debajo del promedio de su campaña.
       </p>
     )
   }
 
+  const thresholdA = campaignThreshold(alerts, campaignA)
+  const thresholdB = campaignThreshold(alerts, campaignB)
   const totalA = summary.byDay.reduce((sum, day) => sum + day.alertsA, 0)
   const totalB = summary.byDay.reduce((sum, day) => sum + day.alertsB, 0)
   const maxAlerts = Math.max(
@@ -39,6 +45,20 @@ export function PatternsComparePanel({
 
   return (
     <div className="grid gap-6 lg:grid-cols-12" data-testid="patterns-compare-panel">
+      {(thresholdA || thresholdB) && (
+        <div className="lg:col-span-12 text-xs text-slate-500 space-y-0.5">
+          {thresholdA && (
+            <p data-testid="patterns-threshold-a">
+              {thresholdLabel(campaignA, thresholdA)}
+            </p>
+          )}
+          {thresholdB && (
+            <p data-testid="patterns-threshold-b">
+              {thresholdLabel(campaignB, thresholdB)}
+            </p>
+          )}
+        </div>
+      )}
       <div className="lg:col-span-5">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-bold text-slate-800">Alertas por día</h3>
