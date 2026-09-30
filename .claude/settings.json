@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/aarla/Desktop/Analisis-SDD/.venv/Scripts/python.exe",
+            "args": ["C:/Users/aarla/Desktop/Analisis-SDD/.claude/hooks/protect_data.py"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

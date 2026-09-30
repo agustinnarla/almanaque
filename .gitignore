@@ -1,0 +1,23 @@
+# Entornos y dependencias
+.venv/
+node_modules/
+
+# Build y cachés
+frontend/dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.tsbuildinfo
+
+# Datos locales: crudos de solo lectura (~831 MB) y DB regenerable con el pipeline
+/data/
+/callcenter_metrics.db
+
+# Estado local de Claude Code
+.claude/baseline.json
+.claude/settings.local.json
+
+# Logs y archivos del sistema operativo
+*.log
+.DS_Store
+Thumbs.db
