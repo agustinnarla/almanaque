@@ -1205,3 +1205,60 @@ def test_cross_recommendations_min_calls_validation(client):
         params={**CROSS_PARAMS, "min_calls": 0},
     )
     assert response.status_code == 422
+
+
+def insert_day(conn: sqlite3.Connection, fecha: str, campaign: str, total: int) -> None:
+    conn.execute(
+        """
+        INSERT INTO daily_campaign_metrics
+            (fecha, hora, campaign, base, device, total_calls, agent_answers,
+             machine_answers, busy_calls, congestion_calls,
+             avg_wait_time_sec, avg_abandon_time_sec)
+        VALUES (?, 9, ?, '34', 'GW37', ?, 1, 0, 0, 0, NULL, NULL)
+        """,
+        (fecha, campaign, total),
+    )
+    conn.commit()
+
+
+def test_campaigns_catalog_lists_campaigns_sorted_with_dates(client, memory_conn):
+    seed_metrics(memory_conn)
+    insert_day(memory_conn, "2026-09-03", "100", 10)
+    insert_day(memory_conn, "2026-09-04", "ABC", 7)
+
+    response = client.get("/api/campaigns")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert [item["campaign"] for item in data] == ["35", "40", "100", "ABC"]
+    assert data[0] == {
+        "campaign": "35",
+        "first_day": "2026-09-01",
+        "last_day": "2026-09-02",
+        "days": 2,
+        "total_calls": 390,
+        "dates": ["2026-09-01", "2026-09-02"],
+    }
+    assert data[1]["dates"] == ["2026-09-02"]
+    assert data[1]["total_calls"] == 80
+    for item in data:
+        assert item["days"] == len(item["dates"])
+        assert item["dates"] == sorted(item["dates"])
+
+
+def test_campaigns_catalog_excludes_sentinel_date(client, memory_conn):
+    seed_metrics(memory_conn)
+    insert_day(memory_conn, "1970-01-01", "35", 999)
+    insert_day(memory_conn, "1970-01-01", "77", 5)
+
+    data = client.get("/api/campaigns").json()
+
+    assert [item["campaign"] for item in data] == ["35", "40"]
+    assert data[0]["first_day"] == "2026-09-01"
+    assert data[0]["total_calls"] == 390
+
+
+def test_campaigns_catalog_empty_db_returns_empty_list(client):
+    response = client.get("/api/campaigns")
+    assert response.status_code == 200
+    assert response.json() == []

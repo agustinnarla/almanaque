@@ -1,7 +1,10 @@
 import { Search } from 'lucide-react'
 import { useState } from 'react'
 import type { RangeValues } from './FilterRangeBar'
-import { WEEK_OPTIONS } from '../../lib/weeks'
+import { campaignDates } from '../../lib/catalog'
+import { buildWeekOptions, defaultWeek, findWeekByStart } from '../../lib/weeks'
+import type { CampaignCatalogEntry } from '../../types/api'
+import { CampaignSelect } from './CampaignSelect'
 
 export interface WeekFilterValues {
   campaign: string
@@ -10,16 +13,24 @@ export interface WeekFilterValues {
 
 interface FilterWeekBarProps {
   initial: WeekFilterValues
+  catalog: CampaignCatalogEntry[]
   onApply: (values: RangeValues) => void
 }
 
-export function FilterWeekBar({ initial, onApply }: FilterWeekBarProps) {
+export function FilterWeekBar({ initial, catalog, onApply }: FilterWeekBarProps) {
   const [campaign, setCampaign] = useState(initial.campaign)
   const [weekStart, setWeekStart] = useState(initial.weekStart)
 
-  const week =
-    WEEK_OPTIONS.find((option) => option.start === weekStart) ??
-    WEEK_OPTIONS[0]
+  const weeks = buildWeekOptions(campaignDates(catalog, campaign))
+  const week = findWeekByStart(weeks, weekStart) ?? defaultWeek(weeks)
+
+  const changeCampaign = (next: string) => {
+    setCampaign(next)
+    const nextWeeks = buildWeekOptions(campaignDates(catalog, next))
+    if (!findWeekByStart(nextWeeks, weekStart)) {
+      setWeekStart(defaultWeek(nextWeeks)?.start ?? '')
+    }
+  }
 
   const inputClass =
     'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200'
@@ -30,28 +41,27 @@ export function FilterWeekBar({ initial, onApply }: FilterWeekBarProps) {
       className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-end print:hidden"
       onSubmit={(event) => {
         event.preventDefault()
-        onApply({ campaign, from: week.start, to: week.end })
+        if (week) {
+          onApply({ campaign, from: week.start, to: week.end })
+        }
       }}
     >
-      <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
-        Campaña
-        <input
-          type="text"
-          value={campaign}
-          onChange={(event) => setCampaign(event.target.value)}
-          className={inputClass}
-          required
-        />
-      </label>
+      <CampaignSelect
+        label="Campaña"
+        value={campaign}
+        catalog={catalog}
+        onChange={changeCampaign}
+        className={inputClass}
+      />
       <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
         Semana
         <select
-          value={weekStart}
+          value={week?.start ?? ''}
           onChange={(event) => setWeekStart(event.target.value)}
           className={inputClass}
           required
         >
-          {WEEK_OPTIONS.map((option) => (
+          {weeks.map((option) => (
             <option key={option.start} value={option.start}>
               {option.label}
               {option.partial ? ' · parcial' : ''}
@@ -59,17 +69,19 @@ export function FilterWeekBar({ initial, onApply }: FilterWeekBarProps) {
           ))}
         </select>
       </label>
-      <p className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
-        {week.start} → {week.end} · {week.dataDays} días con datos
-        {week.partial && (
-          <span
-            data-testid="filter-week-partial"
-            className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700"
-          >
-            Parcial
-          </span>
-        )}
-      </p>
+      {week && (
+        <p className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          {week.start} → {week.end} · {week.dataDays} días con datos
+          {week.partial && (
+            <span
+              data-testid="filter-week-partial"
+              className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700"
+            >
+              Parcial
+            </span>
+          )}
+        </p>
+      )}
       <button
         type="submit"
         data-testid="filter-week-submit"

@@ -1,5 +1,8 @@
 import { Search } from 'lucide-react'
 import { useState } from 'react'
+import { campaignEntry } from '../../lib/catalog'
+import type { CampaignCatalogEntry } from '../../types/api'
+import { CampaignSelect } from './CampaignSelect'
 
 export interface FilterValues {
   campaign: string
@@ -10,16 +13,19 @@ export interface FilterValues {
 
 interface FilterBarProps {
   initial: FilterValues
+  catalog: CampaignCatalogEntry[]
   onCompare: (values: FilterValues) => void
 }
 
 const MIN_CALLS_OPTIONS = [50, 100, 200]
 
-export function FilterBar({ initial, onCompare }: FilterBarProps) {
+export function FilterBar({ initial, catalog, onCompare }: FilterBarProps) {
   const [campaign, setCampaign] = useState(initial.campaign)
   const [dateA, setDateA] = useState(initial.dateA)
   const [dateB, setDateB] = useState(initial.dateB)
   const [minCalls, setMinCalls] = useState(initial.minCalls)
+
+  const entry = campaignEntry(catalog, campaign)
 
   const inputClass =
     'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200'
@@ -32,21 +38,20 @@ export function FilterBar({ initial, onCompare }: FilterBarProps) {
         onCompare({ campaign, dateA, dateB, minCalls })
       }}
     >
-      <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
-        Campaña
-        <input
-          type="text"
-          value={campaign}
-          onChange={(event) => setCampaign(event.target.value)}
-          className={inputClass}
-          required
-        />
-      </label>
+      <CampaignSelect
+        label="Campaña"
+        value={campaign}
+        catalog={catalog}
+        onChange={setCampaign}
+        className={inputClass}
+      />
       <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
         Fecha A
         <input
           type="date"
           value={dateA}
+          min={entry?.first_day}
+          max={entry?.last_day}
           onChange={(event) => setDateA(event.target.value)}
           className={inputClass}
           required
@@ -57,6 +62,8 @@ export function FilterBar({ initial, onCompare }: FilterBarProps) {
         <input
           type="date"
           value={dateB}
+          min={entry?.first_day}
+          max={entry?.last_day}
           onChange={(event) => setDateB(event.target.value)}
           className={inputClass}
           required

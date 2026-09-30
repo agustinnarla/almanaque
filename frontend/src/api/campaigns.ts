@@ -1,4 +1,5 @@
 import type {
+  CampaignCatalogEntry,
   CompareDiagnosticsResponse,
   CrossCampaignCompareResponse,
   CrossCampaignDiagnosticsResponse,
@@ -30,6 +31,16 @@ function crossQuery(params: CrossCampaignParams): URLSearchParams {
     end_date: params.endDate,
     min_calls: String(params.minCalls),
   })
+}
+
+export async function fetchCampaigns(
+  signal?: AbortSignal,
+): Promise<CampaignCatalogEntry[]> {
+  const response = await fetch('/api/campaigns', { signal })
+  if (!response.ok) {
+    throw new Error(`Error de API: ${response.status}`)
+  }
+  return (await response.json()) as CampaignCatalogEntry[]
 }
 
 export async function fetchCompareDiagnostics(

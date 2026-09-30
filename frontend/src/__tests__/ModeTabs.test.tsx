@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -291,13 +291,27 @@ vi.mock('../lib/csv', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../lib/csv')>()
   return { ...actual, downloadCsv: vi.fn() }
 })
+vi.mock('../hooks/useCampaigns', () => ({ useCampaigns: vi.fn() }))
 
 import { downloadCsv } from '../lib/csv'
+import { useCampaigns } from '../hooks/useCampaigns'
+import { TEST_CATALOG } from '../test/catalog'
 import App from '../App'
+
+function mockCatalog(overrides: Partial<ReturnType<typeof useCampaigns>> = {}) {
+  vi.mocked(useCampaigns).mockReturnValue({
+    campaigns: TEST_CATALOG,
+    loading: false,
+    error: null,
+    reload: vi.fn(),
+    ...overrides,
+  })
+}
 
 describe('ModeTabs', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockCatalog()
   })
 
   it('muestra cuatro tabs', () => {
@@ -315,7 +329,9 @@ describe('ModeTabs', () => {
     expect(screen.getByTestId('filter-week-bar')).toBeInTheDocument()
     expect(screen.getByLabelText('Campaña')).toHaveValue('35')
     expect(screen.getByLabelText('Semana')).toHaveValue('2026-09-07')
-    expect(screen.getAllByRole('option')).toHaveLength(3)
+    expect(
+      within(screen.getByLabelText('Semana')).getAllByRole('option'),
+    ).toHaveLength(3)
   })
 
   it('activa el tab de comparar campañas y muestra su filtro', async () => {
@@ -414,5 +430,22 @@ describe('ModeTabs', () => {
     render(<App />)
     expect(screen.queryByTestId('export-csv')).not.toBeInTheDocument()
     expect(screen.queryByTestId('print-report')).not.toBeInTheDocument()
+  })
+
+  it('muestra un error si no se puede cargar la lista de campañas', () => {
+    mockCatalog({ campaigns: null, error: 'Error de API: 500' })
+    render(<App />)
+    expect(screen.getByTestId('tab-range')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'No se pudo cargar la lista de campañas: Error de API: 500',
+    )
+    expect(screen.queryByTestId('filter-range-bar')).not.toBeInTheDocument()
+  })
+
+  it('avisa cuando no hay campañas cargadas', () => {
+    mockCatalog({ campaigns: [] })
+    render(<App />)
+    expect(screen.getByText(/No hay campañas cargadas/)).toBeInTheDocument()
+    expect(screen.queryByTestId('filter-range-bar')).not.toBeInTheDocument()
   })
 })

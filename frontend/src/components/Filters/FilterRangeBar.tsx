@@ -1,5 +1,8 @@
 import { Search } from 'lucide-react'
 import { useState } from 'react'
+import { campaignEntry } from '../../lib/catalog'
+import type { CampaignCatalogEntry } from '../../types/api'
+import { CampaignSelect } from './CampaignSelect'
 
 export interface RangeValues {
   campaign: string
@@ -9,13 +12,16 @@ export interface RangeValues {
 
 interface FilterRangeBarProps {
   initial: RangeValues
+  catalog: CampaignCatalogEntry[]
   onApply: (values: RangeValues) => void
 }
 
-export function FilterRangeBar({ initial, onApply }: FilterRangeBarProps) {
+export function FilterRangeBar({ initial, catalog, onApply }: FilterRangeBarProps) {
   const [campaign, setCampaign] = useState(initial.campaign)
   const [from, setFrom] = useState(initial.from)
   const [to, setTo] = useState(initial.to)
+
+  const entry = campaignEntry(catalog, campaign)
 
   const inputClass =
     'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200'
@@ -29,21 +35,20 @@ export function FilterRangeBar({ initial, onApply }: FilterRangeBarProps) {
         onApply({ campaign, from, to })
       }}
     >
-      <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
-        Campaña
-        <input
-          type="text"
-          value={campaign}
-          onChange={(event) => setCampaign(event.target.value)}
-          className={inputClass}
-          required
-        />
-      </label>
+      <CampaignSelect
+        label="Campaña"
+        value={campaign}
+        catalog={catalog}
+        onChange={setCampaign}
+        className={inputClass}
+      />
       <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
         Desde
         <input
           type="date"
           value={from}
+          min={entry?.first_day}
+          max={entry?.last_day}
           onChange={(event) => setFrom(event.target.value)}
           className={inputClass}
           required
@@ -55,6 +60,7 @@ export function FilterRangeBar({ initial, onApply }: FilterRangeBarProps) {
           type="date"
           value={to}
           min={from}
+          max={entry?.last_day}
           onChange={(event) => setTo(event.target.value)}
           className={inputClass}
           required

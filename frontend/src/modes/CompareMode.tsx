@@ -17,10 +17,18 @@ import {
   kpiCompareRows,
   recommendationRows,
 } from '../lib/exporters'
-import { DEFAULT_FILTERS } from './defaults'
+import { defaultCompareValues } from '../lib/catalog'
+import type { CampaignCatalogEntry } from '../types/api'
+import { DEFAULT_MIN_CALLS } from './defaults'
 
-export function CompareMode() {
-  const [filters, setFilters] = useState<FilterValues>(DEFAULT_FILTERS)
+interface CompareModeProps {
+  catalog: CampaignCatalogEntry[]
+}
+
+export function CompareMode({ catalog }: CompareModeProps) {
+  const [filters, setFilters] = useState<FilterValues>(() =>
+    defaultCompareValues(catalog, DEFAULT_MIN_CALLS),
+  )
 
   const params = useMemo(
     () => ({
@@ -45,6 +53,7 @@ export function CompareMode() {
     <div className="space-y-6">
       <FilterBar
         initial={filters}
+        catalog={catalog}
         onCompare={(values) => {
           const same =
             values.campaign === filters.campaign &&

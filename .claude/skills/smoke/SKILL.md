@@ -50,3 +50,6 @@ Limitaciones: el script valida la API, no el render. Lo que depende solo del fro
 ## 5. Limpieza
 
 Detener **solo** los procesos que levantó esta skill (uvicorn / vite). No tocar la DB ni `/data`.
+
+- `npm run dev` lanzado en background deja un proceso `node … vite.js` hijo que **sobrevive** a `TaskStop` (se corta solo el envoltorio de npm). Después de detener la tarea, buscar el proceso por su línea de comandos (`vite.js … --port 5173`) y cerrarlo por PID.
+- Confirmar al final que los puertos 8000 y 5173 quedaron libres (`Get-NetTCPConnection -LocalPort <puerto> -State Listen`). Si un puerto está ocupado por un proceso que **no** levantó esta sesión, no tocarlo: usarlo tal cual o avisar al usuario.

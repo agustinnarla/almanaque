@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useCampaigns } from './hooks/useCampaigns'
 import { CampaignsCompareMode } from './modes/CampaignsCompareMode'
 import { CompareMode } from './modes/CompareMode'
 import { RangeMode } from './modes/RangeMode'
@@ -71,6 +72,8 @@ function ModeTabs({ mode, onChange }: ModeTabsProps) {
 
 function App() {
   const [mode, setMode] = useState<ViewMode>('range')
+  const campaigns = useCampaigns()
+  const catalog = campaigns.loading ? null : campaigns.campaigns
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -89,10 +92,37 @@ function App() {
 
       <ModeTabs mode={mode} onChange={setMode} />
 
-      {mode === 'range' && <RangeMode />}
-      {mode === 'compare' && <CompareMode />}
-      {mode === 'campaigns' && <CampaignsCompareMode />}
-      {mode === 'week' && <RangeMode variant="week" />}
+      {campaigns.loading && (
+        <div className="space-y-4" aria-busy="true" aria-label="Cargando lista de campañas">
+          <div className="h-20 animate-pulse rounded-xl bg-slate-200" />
+          <div className="h-28 animate-pulse rounded-xl bg-slate-200" />
+        </div>
+      )}
+
+      {campaigns.error && (
+        <p
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+        >
+          No se pudo cargar la lista de campañas: {campaigns.error}. ¿Está
+          corriendo el backend en el puerto 8000?
+        </p>
+      )}
+
+      {catalog && catalog.length === 0 && (
+        <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+          No hay campañas cargadas. Ejecutá la ingesta de /data para empezar.
+        </p>
+      )}
+
+      {catalog && catalog.length > 0 && (
+        <>
+          {mode === 'range' && <RangeMode catalog={catalog} />}
+          {mode === 'compare' && <CompareMode catalog={catalog} />}
+          {mode === 'campaigns' && <CampaignsCompareMode catalog={catalog} />}
+          {mode === 'week' && <RangeMode catalog={catalog} variant="week" />}
+        </>
+      )}
     </div>
   )
 }

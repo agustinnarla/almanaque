@@ -21,9 +21,17 @@ from repositories.campaigns_repo import (
     get_hourly_trend,
     get_ranking,
     get_summary,
+    list_campaigns,
 )
 
 router = APIRouter(prefix="/api/campaigns", tags=["campaigns"])
+
+
+@router.get("")
+def campaigns_catalog(
+    conn: sqlite3.Connection = Depends(get_db_connection),
+):
+    return list_campaigns(conn)
 
 
 @router.get("/compare-campaigns")

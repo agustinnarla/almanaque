@@ -35,20 +35,26 @@ import {
 } from '../lib/exporters'
 import { summarizePatterns } from '../lib/patterns'
 import { mapRangeDiagnostics } from '../lib/rangeDiagnostics'
-import { findWeekByStart } from '../lib/weeks'
 import {
-  DEFAULT_MIN_CALLS,
-  DEFAULT_RANGE,
-  DEFAULT_WEEK_RANGE,
-  RANKING_LIMIT,
-} from './defaults'
+  campaignDates,
+  defaultRangeValues,
+  defaultWeekValues,
+} from '../lib/catalog'
+import { buildWeekOptions, findWeekByStart } from '../lib/weeks'
+import type { CampaignCatalogEntry } from '../types/api'
+import { DEFAULT_MIN_CALLS, RANKING_LIMIT } from './defaults'
 
 export type RangeVariant = 'range' | 'week'
 
-export function RangeMode({ variant = 'range' }: { variant?: RangeVariant }) {
+interface RangeModeProps {
+  catalog: CampaignCatalogEntry[]
+  variant?: RangeVariant
+}
+
+export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
   const isWeek = variant === 'week'
-  const [range, setRange] = useState<RangeValues>(
-    isWeek ? DEFAULT_WEEK_RANGE : DEFAULT_RANGE,
+  const [range, setRange] = useState<RangeValues>(() =>
+    isWeek ? defaultWeekValues(catalog) : defaultRangeValues(catalog),
   )
 
   const params = useMemo(
@@ -69,13 +75,20 @@ export function RangeMode({ variant = 'range' }: { variant?: RangeVariant }) {
   })
   const patternAlerts = usePatternAlerts(params)
 
-  const defaultRange = isWeek ? DEFAULT_WEEK_RANGE : DEFAULT_RANGE
+  const defaultRange = isWeek
+    ? defaultWeekValues(catalog)
+    : defaultRangeValues(catalog)
   const same =
     range.campaign === defaultRange.campaign &&
     range.from === defaultRange.from &&
     range.to === defaultRange.to
   const filePrefix = isWeek ? 'semana' : 'rango'
-  const week = isWeek ? findWeekByStart(range.from) : null
+  const week = isWeek
+    ? findWeekByStart(
+        buildWeekOptions(campaignDates(catalog, range.campaign)),
+        range.from,
+      )
+    : null
 
   const rangeDiag =
     diagnostics.data != null
@@ -105,6 +118,7 @@ export function RangeMode({ variant = 'range' }: { variant?: RangeVariant }) {
       {isWeek ? (
         <FilterWeekBar
           initial={{ campaign: range.campaign, weekStart: range.from }}
+          catalog={catalog}
           onApply={(values) => {
             const unchanged =
               values.campaign === range.campaign &&
@@ -119,6 +133,7 @@ export function RangeMode({ variant = 'range' }: { variant?: RangeVariant }) {
       ) : (
         <FilterRangeBar
           initial={range}
+          catalog={catalog}
           onApply={(values) => {
             const unchanged =
               values.campaign === range.campaign &&

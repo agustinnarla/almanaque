@@ -410,8 +410,11 @@ vi.mock('../lib/csv', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../lib/csv')>()
   return { ...actual, downloadCsv: vi.fn() }
 })
+vi.mock('../hooks/useCampaigns', () => ({ useCampaigns: vi.fn() }))
 
 import { downloadCsv } from '../lib/csv'
+import { useCampaigns } from '../hooks/useCampaigns'
+import { TEST_CATALOG } from '../test/catalog'
 import App from '../App'
 
 const downloadMock = vi.mocked(downloadCsv)
@@ -419,6 +422,12 @@ const downloadMock = vi.mocked(downloadCsv)
 describe('Exportación por modo', () => {
   beforeEach(() => {
     downloadMock.mockClear()
+    vi.mocked(useCampaigns).mockReturnValue({
+      campaigns: TEST_CATALOG,
+      loading: false,
+      error: null,
+      reload: vi.fn(),
+    })
     vi.stubGlobal('print', vi.fn())
     return () => vi.unstubAllGlobals()
   })
@@ -567,7 +576,7 @@ describe('Exportación por modo', () => {
     await userEvent.click(screen.getByTestId('tab-compare'))
     await userEvent.click(screen.getAllByTestId('export-csv')[1])
     expect(downloadMock).toHaveBeenCalledWith(
-      'comparar_35_2026-09-01_2026-09-02_diagnosticos.csv',
+      'comparar_35_2026-09-14_2026-09-15_diagnosticos.csv',
       expect.any(Array),
       expect.any(Array),
     )

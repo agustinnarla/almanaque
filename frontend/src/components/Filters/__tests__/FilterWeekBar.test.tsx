@@ -1,21 +1,27 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { FilterWeekBar } from '../FilterWeekBar'
-import { WEEK_OPTIONS } from '../../../lib/weeks'
+import { TEST_CATALOG } from '../../../test/catalog'
+import type { CampaignCatalogEntry } from '../../../types/api'
+
+function weekOptions() {
+  return within(screen.getByLabelText('Semana')).getAllByRole('option')
+}
 
 describe('FilterWeekBar', () => {
   it('renderiza campaña, las 3 semanas y la info por defecto (S37)', () => {
     render(
       <FilterWeekBar
         initial={{ campaign: '35', weekStart: '2026-09-07' }}
+        catalog={TEST_CATALOG}
         onApply={() => {}}
       />,
     )
     expect(screen.getByTestId('filter-week-bar')).toBeInTheDocument()
     expect(screen.getByLabelText('Campaña')).toHaveValue('35')
     expect(screen.getByLabelText('Semana')).toHaveValue('2026-09-07')
-    expect(screen.getAllByRole('option')).toHaveLength(WEEK_OPTIONS.length)
+    expect(weekOptions()).toHaveLength(3)
     expect(screen.getByText(/2026-09-07 → 2026-09-13/)).toBeInTheDocument()
     expect(screen.getByText(/5 días con datos/)).toBeInTheDocument()
     expect(screen.queryByTestId('filter-week-partial')).not.toBeInTheDocument()
@@ -25,6 +31,7 @@ describe('FilterWeekBar', () => {
     render(
       <FilterWeekBar
         initial={{ campaign: '35', weekStart: '2026-09-07' }}
+        catalog={TEST_CATALOG}
         onApply={() => {}}
       />,
     )
@@ -48,6 +55,7 @@ describe('FilterWeekBar', () => {
     render(
       <FilterWeekBar
         initial={{ campaign: '35', weekStart: '2026-09-07' }}
+        catalog={TEST_CATALOG}
         onApply={onApply}
       />,
     )
@@ -57,6 +65,35 @@ describe('FilterWeekBar', () => {
       campaign: '35',
       from: '2026-08-31',
       to: '2026-09-06',
+    })
+  })
+
+  it('recalcula las semanas al cambiar de campaña y vuelve a su semana por defecto', async () => {
+    const october: CampaignCatalogEntry = {
+      campaign: '91',
+      first_day: '2026-10-05',
+      last_day: '2026-10-09',
+      days: 5,
+      total_calls: 1000,
+      dates: ['2026-10-05', '2026-10-06', '2026-10-07', '2026-10-08', '2026-10-09'],
+    }
+    const onApply = vi.fn()
+    render(
+      <FilterWeekBar
+        initial={{ campaign: '35', weekStart: '2026-09-07' }}
+        catalog={[...TEST_CATALOG, october]}
+        onApply={onApply}
+      />,
+    )
+    await userEvent.selectOptions(screen.getByLabelText('Campaña'), '91')
+
+    expect(weekOptions()).toHaveLength(1)
+    expect(screen.getByLabelText('Semana')).toHaveValue('2026-10-05')
+    await userEvent.click(screen.getByTestId('filter-week-submit'))
+    expect(onApply).toHaveBeenCalledWith({
+      campaign: '91',
+      from: '2026-10-05',
+      to: '2026-10-11',
     })
   })
 })

@@ -223,6 +223,15 @@ export interface CrossRankingRow {
   attemptsB: number | null
 }
 
+export interface CampaignCatalogEntry {
+  campaign: string
+  first_day: string
+  last_day: string
+  days: number
+  total_calls: number
+  dates: string[]
+}
+
 export interface PatternAlert {
   fecha: string
   hora: number

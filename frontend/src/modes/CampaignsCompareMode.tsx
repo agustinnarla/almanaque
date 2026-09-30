@@ -44,25 +44,28 @@ import {
   buildWorstHour,
 } from '../lib/rangeDiagnostics'
 import { mergeBaseRankings, mergeSegmentRankings } from '../lib/rankings'
-import {
-  CROSS_END_DATE,
-  CROSS_START_DATE,
-  DEFAULT_CROSS,
-  RANKING_LIMIT,
-} from './defaults'
+import { defaultCrossValues } from '../lib/catalog'
+import type { CampaignCatalogEntry } from '../types/api'
+import { DEFAULT_MIN_CALLS, RANKING_LIMIT } from './defaults'
 
-export function CampaignsCompareMode() {
-  const [cross, setCross] = useState<CrossCampaignValues>(DEFAULT_CROSS)
+interface CampaignsCompareModeProps {
+  catalog: CampaignCatalogEntry[]
+}
+
+export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
+  const [cross, setCross] = useState<CrossCampaignValues>(() =>
+    defaultCrossValues(catalog, DEFAULT_MIN_CALLS),
+  )
 
   const params = useMemo(
     () => ({
       campaignA: cross.campaignA,
       campaignB: cross.campaignB,
-      startDate: CROSS_START_DATE,
-      endDate: CROSS_END_DATE,
+      startDate: cross.from,
+      endDate: cross.to,
       minCalls: cross.minCalls,
     }),
-    [cross.campaignA, cross.campaignB, cross.minCalls],
+    [cross.campaignA, cross.campaignB, cross.from, cross.to, cross.minCalls],
   )
 
   const { data, loading, error, reload } = useCrossCampaignCompare(params)
@@ -70,21 +73,21 @@ export function CampaignsCompareMode() {
   const recommendations = useCrossCampaignRecommendations(params)
   const rankingsA = useRangeRankings({
     campaign: cross.campaignA,
-    from: CROSS_START_DATE,
-    to: CROSS_END_DATE,
+    from: cross.from,
+    to: cross.to,
     minCalls: cross.minCalls,
     limit: RANKING_LIMIT,
   })
   const rankingsB = useRangeRankings({
     campaign: cross.campaignB,
-    from: CROSS_START_DATE,
-    to: CROSS_END_DATE,
+    from: cross.from,
+    to: cross.to,
     minCalls: cross.minCalls,
     limit: RANKING_LIMIT,
   })
   const patternAlerts = usePatternAlerts({
-    from: CROSS_START_DATE,
-    to: CROSS_END_DATE,
+    from: cross.from,
+    to: cross.to,
   })
 
   const baseRows = mergeBaseRankings(
@@ -149,12 +152,13 @@ export function CampaignsCompareMode() {
     <div className="space-y-6">
       <FilterCrossCampaignBar
         initial={cross}
-        startDate={CROSS_START_DATE}
-        endDate={CROSS_END_DATE}
+        catalog={catalog}
         onCompare={(values) => {
           const same =
             values.campaignA === cross.campaignA &&
             values.campaignB === cross.campaignB &&
+            values.from === cross.from &&
+            values.to === cross.to &&
             values.minCalls === cross.minCalls
           setCross(values)
           if (same) {

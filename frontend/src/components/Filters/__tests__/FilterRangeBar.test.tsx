@@ -2,12 +2,14 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { FilterRangeBar } from '../FilterRangeBar'
+import { TEST_CATALOG } from '../../../test/catalog'
 
 describe('FilterRangeBar', () => {
   it('renderiza los campos con los valores iniciales', () => {
     render(
       <FilterRangeBar
         initial={{ campaign: '35', from: '2026-09-01', to: '2026-09-15' }}
+        catalog={TEST_CATALOG}
         onApply={() => {}}
       />,
     )
@@ -22,6 +24,7 @@ describe('FilterRangeBar', () => {
     render(
       <FilterRangeBar
         initial={{ campaign: '35', from: '2026-09-01', to: '2026-09-15' }}
+        catalog={TEST_CATALOG}
         onApply={onApply}
       />,
     )
@@ -31,6 +34,31 @@ describe('FilterRangeBar', () => {
     expect(onApply).toHaveBeenCalledWith({
       campaign: '35',
       from: '2026-09-07',
+      to: '2026-09-15',
+    })
+  })
+
+  it('ofrece las campañas del catálogo y limita las fechas a su rango', async () => {
+    const onApply = vi.fn()
+    render(
+      <FilterRangeBar
+        initial={{ campaign: '35', from: '2026-09-01', to: '2026-09-15' }}
+        catalog={TEST_CATALOG}
+        onApply={onApply}
+      />,
+    )
+    expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
+      '35 · 11 días',
+      '38 · 11 días',
+    ])
+    expect(screen.getByLabelText('Desde')).toHaveAttribute('min', '2026-09-01')
+    expect(screen.getByLabelText('Hasta')).toHaveAttribute('max', '2026-09-15')
+
+    await userEvent.selectOptions(screen.getByLabelText('Campaña'), '38')
+    await userEvent.click(screen.getByTestId('filter-range-submit'))
+    expect(onApply).toHaveBeenCalledWith({
+      campaign: '38',
+      from: '2026-09-01',
       to: '2026-09-15',
     })
   })

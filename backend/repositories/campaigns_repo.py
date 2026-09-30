@@ -26,6 +26,46 @@ DAY_COLUMNS = """
     machine_answers
 """
 
+SENTINEL_DAY = "1970-01-01"
+
+
+def _campaign_sort_key(name: str) -> tuple:
+    return (0, int(name), "") if name.isdigit() else (1, 0, name)
+
+
+def list_campaigns(conn: sqlite3.Connection) -> list[dict]:
+    cursor = conn.execute(
+        """
+        SELECT campaign, fecha, SUM(total_calls) AS total_calls
+        FROM daily_campaign_metrics
+        WHERE fecha != ?
+        GROUP BY campaign, fecha
+        ORDER BY campaign, fecha
+        """,
+        (SENTINEL_DAY,),
+    )
+    grouped: dict[str, dict] = {}
+    for row in cursor.fetchall():
+        name = str(row["campaign"])
+        entry = grouped.setdefault(name, {"dates": [], "total_calls": 0})
+        entry["dates"].append(str(row["fecha"]))
+        entry["total_calls"] += int(row["total_calls"])
+
+    catalog = []
+    for name in sorted(grouped, key=_campaign_sort_key):
+        dates = grouped[name]["dates"]
+        catalog.append(
+            {
+                "campaign": name,
+                "first_day": dates[0],
+                "last_day": dates[-1],
+                "days": len(dates),
+                "total_calls": grouped[name]["total_calls"],
+                "dates": dates,
+            }
+        )
+    return catalog
+
 
 def _rate(agent_answers: int, total_calls: int, machine_answers: int) -> float | None:
     denominator = total_calls
