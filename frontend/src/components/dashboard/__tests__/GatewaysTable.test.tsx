@@ -57,6 +57,8 @@ describe('GatewaysTable', () => {
       .getAllByTestId('gateway-status')
       .map((el) => el.getAttribute('data-status'))
     expect(statuses).toEqual(['Saturado', 'Aliviado', 'Normal'])
+    expect(table.className).toContain('min-w-[480px]')
+    expect(table.parentElement?.className).toContain('overflow-x-auto')
   })
 
   it('muestra empty-state cuando rows es null o vacío', () => {

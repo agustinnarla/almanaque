@@ -44,7 +44,7 @@ export function PatternsComparePanel({
   )
 
   return (
-    <div className="grid gap-6 lg:grid-cols-12" data-testid="patterns-compare-panel">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-12" data-testid="patterns-compare-panel">
       {(thresholdA || thresholdB) && (
         <div className="lg:col-span-12 text-xs text-slate-500 space-y-0.5">
           {thresholdA && (
@@ -120,8 +120,8 @@ export function PatternsComparePanel({
           <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden />
           Combinaciones más problemáticas
         </h3>
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full table-fixed text-left text-sm">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full min-w-[480px] table-fixed text-left text-sm">
             <caption className="sr-only">
               Combinaciones de base y dispositivo comparadas entre campañas
             </caption>

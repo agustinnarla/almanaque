@@ -24,7 +24,7 @@ export function CampaignSelect({
   className,
 }: CampaignSelectProps) {
   return (
-    <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
+    <label className="flex min-w-[9rem] flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
       {label}
       <select
         value={value}

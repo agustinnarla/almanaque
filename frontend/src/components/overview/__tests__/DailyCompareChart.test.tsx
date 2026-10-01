@@ -13,6 +13,7 @@ vi.mock('recharts', () => ({
   ),
   Bar: () => <div data-testid="chart-bar" />,
   Line: () => <div data-testid="chart-line" />,
+  CartesianGrid: () => null,
   XAxis: () => null,
   YAxis: () => null,
   Tooltip: () => null,
@@ -61,7 +62,7 @@ describe('DailyCompareChart', () => {
     )
     expect(screen.getByTestId('daily-compare-chart')).toBeInTheDocument()
     expect(screen.getByText('Serie diaria comparada')).toBeInTheDocument()
-    expect(screen.getByText(/Campaña 35 atenuado/)).toBeInTheDocument()
+    expect(screen.getByText(/Campaña 35 vs Campaña 38/)).toBeInTheDocument()
   })
 
   it('muestra empty-state sin datos', () => {

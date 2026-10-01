@@ -12,6 +12,7 @@ vi.mock('recharts', () => ({
   ),
   Bar: () => <div data-testid="chart-bar" />,
   Line: () => <div data-testid="chart-line" />,
+  CartesianGrid: () => null,
   XAxis: () => null,
   YAxis: () => null,
   Tooltip: () => null,

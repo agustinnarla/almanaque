@@ -18,10 +18,10 @@ export function BasesCompareTable({ rows }: BasesCompareTableProps) {
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
       <table
         data-testid="bases-compare-table"
-        className="w-full table-fixed text-left text-sm"
+        className="w-full min-w-[720px] table-fixed text-left text-sm"
       >
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">

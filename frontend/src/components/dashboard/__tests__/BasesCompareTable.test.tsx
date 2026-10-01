@@ -50,4 +50,11 @@ describe('BasesCompareTable', () => {
     expect(screen.getByTestId('bases-compare-empty')).toBeInTheDocument()
     expect(screen.queryByTestId('bases-compare-table')).not.toBeInTheDocument()
   })
+
+  it('en pantallas angostas la tabla scrollea dentro de su tarjeta', () => {
+    render(<BasesCompareTable rows={rows} />)
+    const table = screen.getByTestId('bases-compare-table')
+    expect(table.className).toContain('min-w-[720px]')
+    expect(table.parentElement?.className).toContain('overflow-x-auto')
+  })
 })

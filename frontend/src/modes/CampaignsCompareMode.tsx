@@ -231,7 +231,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
           <SectionNav links={CAMPAIGNS_SECTIONS} />
 
           <section id="sec-kpis" className="scroll-mt-16">
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Indicadores clave
               </h2>
@@ -246,7 +246,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
           </section>
 
           <section id="sec-diagnostico" aria-label="Diagnóstico entre campañas" className="scroll-mt-16">
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Diagnóstico
               </h2>
@@ -281,7 +281,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
           </section>
 
           <section id="sec-recomendaciones" aria-label="Recomendaciones entre campañas" className="scroll-mt-16">
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Recomendaciones
               </h2>
@@ -315,7 +315,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
           </section>
 
           <section id="sec-rankings" aria-label="Rankings comparados" className="scroll-mt-16">
-            <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
                   <Trophy className="h-4 w-4 text-indigo-600" aria-hidden />
@@ -360,7 +360,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
               </p>
             )}
             {!rankingsLoading && !rankingsError && (
-              <div className="grid items-start gap-8">
+              <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8">
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="mb-4">
                     <h3 className="text-sm font-bold text-slate-800">
@@ -402,7 +402,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
           </section>
 
           <section id="sec-alertas" aria-label="Alertas de patrones comparadas" className="scroll-mt-16">
-            <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
                   <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden />
@@ -453,9 +453,9 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
           <section
             id="sec-temporal"
             aria-label="Análisis temporal e infraestructura"
-            className="grid scroll-mt-16 gap-6 lg:grid-cols-12"
+            className="grid scroll-mt-16 grid-cols-[minmax(0,1fr)] gap-6"
           >
-            <div className="lg:col-span-7">
+            <div>
               <HourlyTrendChart
                 pointsA={data.hourly_a}
                 pointsB={data.hourly_b}
@@ -469,8 +469,8 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                 }
               />
             </div>
-            <div className="lg:col-span-5">
-              <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="mb-1 text-base font-semibold text-slate-900">
                     Comparativa de gateways
@@ -490,7 +490,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
           </section>
 
           <section id="sec-bases" aria-label="Bases comparadas" className="scroll-mt-16">
-            <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="mb-1 text-base font-semibold text-slate-900">
                   Comparativa de bases

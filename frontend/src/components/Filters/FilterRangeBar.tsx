@@ -32,7 +32,7 @@ export function FilterRangeBar({ initial, catalog, onApply }: FilterRangeBarProp
   return (
     <form
       data-testid="filter-range-bar"
-      className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-end print:hidden"
+      className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:flex-wrap md:items-end print:hidden"
       onSubmit={(event) => {
         event.preventDefault()
         onApply({ campaign, from, to, minCalls })
@@ -45,7 +45,7 @@ export function FilterRangeBar({ initial, catalog, onApply }: FilterRangeBarProp
         onChange={setCampaign}
         className={inputClass}
       />
-      <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
+      <label className="flex min-w-[9rem] flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
         Desde
         <input
           type="date"
@@ -57,7 +57,7 @@ export function FilterRangeBar({ initial, catalog, onApply }: FilterRangeBarProp
           required
         />
       </label>
-      <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
+      <label className="flex min-w-[9rem] flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
         Hasta
         <input
           type="date"

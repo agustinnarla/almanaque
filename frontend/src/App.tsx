@@ -22,7 +22,7 @@ function ModeTabs({ mode, onChange }: ModeTabsProps) {
   return (
     <div
       data-testid="mode-tabs"
-      className="mb-6 inline-flex gap-2 rounded-xl border border-slate-200 bg-slate-100 p-1 print:hidden"
+      className="mb-6 inline-flex flex-wrap gap-2 rounded-xl border border-slate-200 bg-slate-100 p-1 print:hidden"
       role="tablist"
       aria-label="Modo de análisis"
     >

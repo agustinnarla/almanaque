@@ -125,7 +125,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
           <SectionNav links={COMPARE_SECTIONS} />
 
           <section id="sec-kpis" className="scroll-mt-16">
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Indicadores clave
               </h2>
@@ -140,7 +140,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
           </section>
 
           <section id="sec-diagnostico" aria-label="Diagnóstico" className="scroll-mt-16">
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Diagnóstico
               </h2>
@@ -156,7 +156,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
           </section>
 
           <section id="sec-recomendaciones" aria-label="Recomendaciones" className="scroll-mt-16">
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Recomendaciones
               </h2>
@@ -193,9 +193,9 @@ export function CompareMode({ catalog }: CompareModeProps) {
           <section
             id="sec-temporal"
             aria-label="Análisis temporal e infraestructura"
-            className="grid scroll-mt-16 gap-6 lg:grid-cols-12"
+            className="grid scroll-mt-16 grid-cols-[minmax(0,1fr)] gap-6"
           >
-            <div className="lg:col-span-7">
+            <div>
               {hourly.loading && !hourly.error && (
                 <div
                   className="h-80 animate-pulse rounded-xl bg-slate-200"
@@ -226,8 +226,8 @@ export function CompareMode({ catalog }: CompareModeProps) {
                 />
               )}
             </div>
-            <div className="lg:col-span-5">
-              <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="mb-1 text-base font-semibold text-slate-900">
                     Comparativa de gateways

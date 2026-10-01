@@ -35,7 +35,7 @@ export function PatternsPanel({ alerts, campaign }: PatternsPanelProps) {
   const maxAlerts = Math.max(...summary.byDay.map((day) => day.alerts))
 
   return (
-    <div className="grid gap-6 lg:grid-cols-12" data-testid="patterns-panel">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-12" data-testid="patterns-panel">
       {threshold && (
         <p data-testid="patterns-threshold" className="lg:col-span-12 text-xs text-slate-500">
           {thresholdLabel(campaign, threshold)}
@@ -81,8 +81,8 @@ export function PatternsPanel({ alerts, campaign }: PatternsPanelProps) {
           <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden />
           Combinaciones más problemáticas
         </h3>
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full table-fixed text-left text-sm">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+          <table className="w-full min-w-[420px] table-fixed text-left text-sm">
             <caption className="sr-only">
               Combinaciones de base y dispositivo con más alertas
             </caption>

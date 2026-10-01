@@ -20,9 +20,9 @@ export function GatewaysRangeTable({ rows }: GatewaysRangeTableProps) {
   return (
     <div
       data-testid="gateways-range-table"
-      className="rounded-xl border border-slate-200 bg-white shadow-sm"
+      className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm"
     >
-      <table className="w-full table-fixed text-left text-sm">
+      <table className="w-full min-w-[560px] table-fixed text-left text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <th className="w-[30%] px-2 py-2 font-semibold">Troncal</th>

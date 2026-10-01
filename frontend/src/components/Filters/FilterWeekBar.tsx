@@ -41,7 +41,7 @@ export function FilterWeekBar({ initial, catalog, onApply }: FilterWeekBarProps)
   return (
     <form
       data-testid="filter-week-bar"
-      className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:items-end print:hidden"
+      className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:flex-row md:flex-wrap md:items-end print:hidden"
       onSubmit={(event) => {
         event.preventDefault()
         if (week) {
@@ -56,7 +56,7 @@ export function FilterWeekBar({ initial, catalog, onApply }: FilterWeekBarProps)
         onChange={changeCampaign}
         className={inputClass}
       />
-      <label className="flex flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
+      <label className="flex min-w-[9rem] flex-1 flex-col gap-1 text-xs font-medium text-slate-600">
         Semana
         <select
           value={week?.start ?? ''}
