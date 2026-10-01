@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { ExportCsvButton } from '../components/common/ExportCsvButton'
 import { PrintButton } from '../components/common/PrintButton'
+import { ExecutiveSummary } from '../components/Insights/ExecutiveSummary'
+import { compareSummaryItems } from '../lib/executiveSummary'
 import {
   SectionNav,
   type SectionLink,
@@ -31,6 +33,7 @@ interface CompareModeProps {
 
 const COMPARE_SECTIONS: SectionLink[] = [
   { id: 'sec-filtros', label: 'Filtros' },
+  { id: 'sec-resumen', label: 'Resumen' },
   { id: 'sec-kpis', label: 'Indicadores' },
   { id: 'sec-diagnostico', label: 'Diagnóstico' },
   { id: 'sec-recomendaciones', label: 'Recomendaciones' },
@@ -107,6 +110,17 @@ export function CompareMode({ catalog }: CompareModeProps) {
             </p>
             <PrintButton />
           </div>
+
+          <ExecutiveSummary
+            items={compareSummaryItems({
+              summary: data.summary,
+              dateA: data.date_a,
+              dateB: data.date_b,
+              rootCauses: data.root_causes,
+              positiveDrivers: data.positive_drivers,
+              recommendations: recommendations.data?.recommendations ?? [],
+            })}
+          />
 
           <SectionNav links={COMPARE_SECTIONS} />
 

@@ -14,6 +14,36 @@ export function campaignEntry(
   return catalog.find((entry) => entry.campaign === campaign) ?? null
 }
 
+export function segmentOf(
+  catalog: CampaignCatalogEntry[],
+  campaign: string,
+): string | null {
+  return campaignEntry(catalog, campaign)?.segment ?? null
+}
+
+// Campaigns of the same business segment (including `campaign` itself).
+export function sameSegment(
+  catalog: CampaignCatalogEntry[],
+  campaign: string,
+): CampaignCatalogEntry[] {
+  const segment = segmentOf(catalog, campaign)
+  return catalog.filter((entry) => entry.segment === segment)
+}
+
+// Segments are never compared with each other: B is another campaign of A's
+// segment, or A itself when the segment has a single campaign.
+export function crossPartner(
+  catalog: CampaignCatalogEntry[],
+  campaignA: string,
+  current?: string,
+): string {
+  const peers = sameSegment(catalog, campaignA)
+  if (current && current !== campaignA && peers.some((entry) => entry.campaign === current)) {
+    return current
+  }
+  return peers.find((entry) => entry.campaign !== campaignA)?.campaign ?? campaignA
+}
+
 export function campaignDates(
   catalog: CampaignCatalogEntry[],
   campaign: string,
@@ -58,7 +88,7 @@ export function defaultCrossValues(
   minCalls: number,
 ): CrossCampaignValues {
   const campaignA = catalog[0].campaign
-  const campaignB = (catalog[1] ?? catalog[0]).campaign
+  const campaignB = crossPartner(catalog, campaignA)
   const { from, to } = catalogBounds(catalog)
   return { campaignA, campaignB, minCalls, from, to }
 }

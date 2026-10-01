@@ -1,6 +1,6 @@
 import { Search } from 'lucide-react'
 import { useState } from 'react'
-import { catalogBounds } from '../../lib/catalog'
+import { catalogBounds, crossPartner, sameSegment } from '../../lib/catalog'
 import type { CampaignCatalogEntry } from '../../types/api'
 import { CampaignSelect } from './CampaignSelect'
 import { MinCallsSelect } from './MinCallsSelect'
@@ -32,6 +32,11 @@ export function FilterCrossCampaignBar({
 
   const bounds = catalogBounds(catalog)
 
+  const changeCampaignA = (next: string) => {
+    setCampaignA(next)
+    setCampaignB((current) => crossPartner(catalog, next, current))
+  }
+
   const inputClass =
     'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200'
 
@@ -48,13 +53,13 @@ export function FilterCrossCampaignBar({
         label="Campaña A"
         value={campaignA}
         catalog={catalog}
-        onChange={setCampaignA}
+        onChange={changeCampaignA}
         className={inputClass}
       />
       <CampaignSelect
         label="Campaña B"
         value={campaignB}
-        catalog={catalog}
+        catalog={sameSegment(catalog, campaignA)}
         onChange={setCampaignB}
         className={inputClass}
       />

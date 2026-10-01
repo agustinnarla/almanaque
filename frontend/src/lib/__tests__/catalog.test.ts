@@ -1,17 +1,23 @@
 import { describe, expect, it } from 'vitest'
-import { TEST_CATALOG } from '../../test/catalog'
+import { FULL_CATALOG, TEST_CATALOG } from '../../test/catalog'
 import type { CampaignCatalogEntry } from '../../types/api'
 import {
   catalogBounds,
+  crossPartner,
   defaultCompareValues,
   defaultCrossValues,
   defaultRangeValues,
   defaultWeekValues,
 } from '../catalog'
 
-function single(campaign: string, dates: string[]): CampaignCatalogEntry {
+function single(
+  campaign: string,
+  dates: string[],
+  segment = 'Galicia Empresas',
+): CampaignCatalogEntry {
   return {
     campaign,
+    segment,
     first_day: dates[0],
     last_day: dates[dates.length - 1],
     days: dates.length,
@@ -74,5 +80,17 @@ describe('defaults desde el catálogo', () => {
     ]
     expect(catalogBounds(catalog)).toEqual({ from: '2026-09-01', to: '2026-10-02' })
     expect(catalogBounds([])).toEqual({ from: '', to: '' })
+  })
+
+  it('el par de comparación siempre queda dentro del segmento', () => {
+    expect(crossPartner(FULL_CATALOG, '91')).toBe('92')
+    expect(crossPartner(FULL_CATALOG, '35', '91')).toBe('38')
+    expect(crossPartner(FULL_CATALOG, '92', '91')).toBe('91')
+    const lonely = [...FULL_CATALOG, single('77', ['2026-09-01'], 'Sin segmento')]
+    expect(crossPartner(lonely, '77')).toBe('77')
+    expect(defaultCrossValues(FULL_CATALOG, 50)).toMatchObject({
+      campaignA: '35',
+      campaignB: '38',
+    })
   })
 })

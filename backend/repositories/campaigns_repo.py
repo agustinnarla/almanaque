@@ -2,6 +2,8 @@ import sqlite3
 from datetime import date
 
 from config import (
+    CAMPAIGN_SEGMENTS,
+    DEFAULT_SEGMENT,
     DIAG_BUSY_THRESHOLD,
     DIAG_CONGESTION_THRESHOLD,
     DIAG_PEAK_THRESHOLD,
@@ -57,6 +59,7 @@ def list_campaigns(conn: sqlite3.Connection) -> list[dict]:
         catalog.append(
             {
                 "campaign": name,
+                "segment": CAMPAIGN_SEGMENTS.get(name, DEFAULT_SEGMENT),
                 "first_day": dates[0],
                 "last_day": dates[-1],
                 "days": len(dates),

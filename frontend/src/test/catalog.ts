@@ -15,9 +15,17 @@ export const SEPTEMBER_DATES = [
   '2026-09-15',
 ]
 
-function entry(campaign: string, totalCalls: number): CampaignCatalogEntry {
+export const EMPRESAS = 'Galicia Empresas'
+export const INDIVIDUOS = 'Galicia Individuos'
+
+function entry(
+  campaign: string,
+  totalCalls: number,
+  segment = EMPRESAS,
+): CampaignCatalogEntry {
   return {
     campaign,
+    segment,
     first_day: SEPTEMBER_DATES[0],
     last_day: SEPTEMBER_DATES[SEPTEMBER_DATES.length - 1],
     days: SEPTEMBER_DATES.length,
@@ -29,4 +37,11 @@ function entry(campaign: string, totalCalls: number): CampaignCatalogEntry {
 export const TEST_CATALOG: CampaignCatalogEntry[] = [
   entry('35', 35413),
   entry('38', 263198),
+]
+
+// Both business segments, as in the real database.
+export const FULL_CATALOG: CampaignCatalogEntry[] = [
+  ...TEST_CATALOG,
+  entry('91', 734207, INDIVIDUOS),
+  entry('92', 1000709, INDIVIDUOS),
 ]

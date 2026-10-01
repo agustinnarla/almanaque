@@ -1,3 +1,10 @@
+CAMPAIGN_SEGMENTS = {
+    "35": "Galicia Empresas",
+    "38": "Galicia Empresas",
+    "91": "Galicia Individuos",
+    "92": "Galicia Individuos",
+}
+DEFAULT_SEGMENT = "Sin segmento"
 PATTERN_RELATIVE_FACTOR = 0.6
 PATTERN_MIN_CALLS = 50
 HEALTH_WEIGHT_BUSY = 0.5

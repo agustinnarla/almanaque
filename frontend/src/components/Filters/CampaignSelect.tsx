@@ -8,6 +8,14 @@ interface CampaignSelectProps {
   className: string
 }
 
+function groupBySegment(catalog: CampaignCatalogEntry[]) {
+  const groups = new Map<string, CampaignCatalogEntry[]>()
+  for (const entry of catalog) {
+    groups.set(entry.segment, [...(groups.get(entry.segment) ?? []), entry])
+  }
+  return [...groups.entries()]
+}
+
 export function CampaignSelect({
   label,
   value,
@@ -24,10 +32,14 @@ export function CampaignSelect({
         className={className}
         required
       >
-        {catalog.map((entry) => (
-          <option key={entry.campaign} value={entry.campaign}>
-            {entry.campaign} · {entry.days} días
-          </option>
+        {groupBySegment(catalog).map(([segment, entries]) => (
+          <optgroup key={segment} label={segment}>
+            {entries.map((entry) => (
+              <option key={entry.campaign} value={entry.campaign}>
+                {entry.campaign} · {entry.days} días
+              </option>
+            ))}
+          </optgroup>
         ))}
       </select>
     </label>

@@ -2,6 +2,9 @@ import { useMemo, useState } from 'react'
 import { AlertTriangle, Trophy } from 'lucide-react'
 import { ExportCsvButton } from '../components/common/ExportCsvButton'
 import { PrintButton } from '../components/common/PrintButton'
+import { ExecutiveSummary } from '../components/Insights/ExecutiveSummary'
+import { useSegmentPeers } from '../hooks/useSegmentPeers'
+import { rangeSummaryItems } from '../lib/executiveSummary'
 import {
   SectionNav,
   type SectionLink,
@@ -41,6 +44,7 @@ import { summarizePatterns } from '../lib/patterns'
 import { mapRangeDiagnostics } from '../lib/rangeDiagnostics'
 import {
   campaignDates,
+  segmentOf,
   defaultRangeValues,
   defaultWeekValues,
 } from '../lib/catalog'
@@ -50,6 +54,7 @@ import { DEFAULT_MIN_CALLS, RANKING_LIMIT } from './defaults'
 
 const RANGE_SECTIONS: SectionLink[] = [
   { id: 'sec-filtros', label: 'Filtros' },
+  { id: 'sec-resumen', label: 'Resumen' },
   { id: 'sec-kpis', label: 'Indicadores' },
   { id: 'sec-diagnostico', label: 'Diagnóstico' },
   { id: 'sec-recomendaciones', label: 'Recomendaciones' },
@@ -90,6 +95,8 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
     minCalls: range.minCalls,
     limit: RANKING_LIMIT,
   })
+  const segmentPeers = useSegmentPeers({ catalog, ...params })
+  const segment = segmentOf(catalog, range.campaign)
   const patternAlerts = usePatternAlerts({
     from: range.from,
     to: range.to,
@@ -198,7 +205,8 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
         <>
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-slate-400">
-              {overview.summary.campaign} · {range.from} → {range.to} · min_calls{' '}
+              {overview.summary.campaign}
+              {segment && <> · {segment}</>} · {range.from} → {range.to} · min_calls{' '}
               {range.minCalls}
               {week && <> · {week.label}</>}
               {week && <> · {week.dataDays} días con datos</>}
@@ -213,6 +221,17 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             </p>
             <PrintButton />
           </div>
+
+          <ExecutiveSummary
+            items={rangeSummaryItems({
+              summary: overview.summary,
+              segment,
+              peers: segmentPeers.peers,
+              rootCauses: rangeDiag?.rootCauses ?? [],
+              positiveDrivers: rangeDiag?.positiveDrivers ?? [],
+              recommendations: recommendations.data?.recommendations ?? [],
+            })}
+          />
 
           <SectionNav links={RANGE_SECTIONS} />
 

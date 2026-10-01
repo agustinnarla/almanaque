@@ -72,6 +72,7 @@ describe('FilterWeekBar', () => {
   it('recalcula las semanas al cambiar de campaña y vuelve a su semana por defecto', async () => {
     const october: CampaignCatalogEntry = {
       campaign: '91',
+      segment: 'Galicia Individuos',
       first_day: '2026-10-05',
       last_day: '2026-10-09',
       days: 5,

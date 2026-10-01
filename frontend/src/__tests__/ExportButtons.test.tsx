@@ -411,6 +411,13 @@ vi.mock('../lib/csv', async (importOriginal) => {
   return { ...actual, downloadCsv: vi.fn() }
 })
 vi.mock('../hooks/useCampaigns', () => ({ useCampaigns: vi.fn() }))
+vi.mock('../hooks/useSegmentPeers', () => ({
+  useSegmentPeers: () => ({
+    peers: [{ campaign: '38', total_calls: 1000, agent_answers: 40 }],
+    loading: false,
+    error: null,
+  }),
+}))
 
 import { downloadCsv } from '../lib/csv'
 import { useCampaigns } from '../hooks/useCampaigns'
@@ -432,12 +439,25 @@ describe('Exportación por modo', () => {
     return () => vi.unstubAllGlobals()
   })
 
+  it('RangeMode muestra el resumen ejecutivo con el resto del segmento', () => {
+    render(<App />)
+    const summary = screen.getByTestId('executive-summary')
+    expect(within(summary).getByTestId('summary-context')).toHaveTextContent(
+      /vs el resto de Galicia Empresas \(4\.00%\)/,
+    )
+    expect(within(summary).getByTestId('summary-problem')).toHaveTextContent(
+      'Congestión sostenida en GW20.',
+    )
+    expect(within(summary).getByTestId('summary-action')).toBeInTheDocument()
+  })
+
   it('RangeMode muestra el índice de secciones y cada ancla existe', () => {
     render(<App />)
     const nav = screen.getByRole('navigation', { name: 'Secciones' })
     const links = within(nav).getAllByRole('link')
     expect(links.map((link) => link.textContent)).toEqual([
       'Filtros',
+      'Resumen',
       'Indicadores',
       'Diagnóstico',
       'Recomendaciones',
@@ -516,7 +536,11 @@ describe('Exportación por modo', () => {
     expect(
       screen.getByText(/Peor dispositivo del período: GW20 con 6\.00%/),
     ).toBeInTheDocument()
-    expect(screen.getByText('Congestión sostenida en GW20.')).toBeInTheDocument()
+    expect(
+      within(screen.getByLabelText('Diagnóstico del rango')).getByText(
+        'Congestión sostenida en GW20.',
+      ),
+    ).toBeInTheDocument()
     expect(screen.getByText('Hora quemada a las 10.')).toBeInTheDocument()
     expect(
       screen.getAllByTestId('insight-card').length,

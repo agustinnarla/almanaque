@@ -225,6 +225,7 @@ export interface CrossRankingRow {
 
 export interface CampaignCatalogEntry {
   campaign: string
+  segment: string
   first_day: string
   last_day: string
   days: number

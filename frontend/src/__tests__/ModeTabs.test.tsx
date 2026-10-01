@@ -292,6 +292,9 @@ vi.mock('../lib/csv', async (importOriginal) => {
   return { ...actual, downloadCsv: vi.fn() }
 })
 vi.mock('../hooks/useCampaigns', () => ({ useCampaigns: vi.fn() }))
+vi.mock('../hooks/useSegmentPeers', () => ({
+  useSegmentPeers: () => ({ peers: [], loading: false, error: null }),
+}))
 
 import { downloadCsv } from '../lib/csv'
 import { useCampaigns } from '../hooks/useCampaigns'
@@ -375,7 +378,9 @@ describe('ModeTabs', () => {
       screen.getByText(/Mejor dispositivo de la campaña 38: IPLAN/),
     ).toBeInTheDocument()
     expect(
-      screen.getByText('La Base 34 mejoró su tasa de contacto.'),
+      within(screen.getByLabelText('Diagnóstico entre campañas')).getByText(
+        'La Base 34 mejoró su tasa de contacto.',
+      ),
     ).toBeInTheDocument()
     expect(screen.getAllByTestId('insight-card')).toHaveLength(10)
   })
@@ -396,7 +401,11 @@ describe('ModeTabs', () => {
     expect(
       screen.getByText(/Peor dispositivo de la campaña 38: IPLAN/),
     ).toBeInTheDocument()
-    expect(screen.getByText('La Base 34 redujo su tasa de contacto.')).toBeInTheDocument()
+    expect(
+      within(screen.getByLabelText('Diagnóstico entre campañas')).getByText(
+        'La Base 34 redujo su tasa de contacto.',
+      ),
+    ).toBeInTheDocument()
     expect(screen.getAllByTestId('insight-card')).toHaveLength(10)
   })
 
@@ -417,7 +426,7 @@ describe('ModeTabs', () => {
     await userEvent.click(screen.getByTestId('tab-campaigns'))
     const nav = screen.getByRole('navigation', { name: 'Secciones' })
     const links = within(nav).getAllByRole('link')
-    expect(links).toHaveLength(9)
+    expect(links).toHaveLength(10)
     for (const link of links) {
       const id = link.getAttribute('href')!.slice(1)
       expect(document.getElementById(id), id).not.toBeNull()

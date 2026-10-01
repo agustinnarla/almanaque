@@ -1293,6 +1293,7 @@ def test_campaigns_catalog_lists_campaigns_sorted_with_dates(client, memory_conn
     assert [item["campaign"] for item in data] == ["35", "40", "100", "ABC"]
     assert data[0] == {
         "campaign": "35",
+        "segment": "Galicia Empresas",
         "first_day": "2026-09-01",
         "last_day": "2026-09-02",
         "days": 2,
@@ -1304,6 +1305,22 @@ def test_campaigns_catalog_lists_campaigns_sorted_with_dates(client, memory_conn
     for item in data:
         assert item["days"] == len(item["dates"])
         assert item["dates"] == sorted(item["dates"])
+
+
+def test_campaigns_catalog_assigns_business_segment(client, memory_conn):
+    seed_metrics(memory_conn)
+    for fecha, campaign in (("2026-09-01", "38"), ("2026-09-01", "91"), ("2026-09-01", "92")):
+        insert_day(memory_conn, fecha, campaign, 10)
+
+    segments = {item["campaign"]: item["segment"] for item in client.get("/api/campaigns").json()}
+
+    assert segments == {
+        "35": "Galicia Empresas",
+        "38": "Galicia Empresas",
+        "40": "Sin segmento",
+        "91": "Galicia Individuos",
+        "92": "Galicia Individuos",
+    }
 
 
 def test_campaigns_catalog_excludes_sentinel_date(client, memory_conn):

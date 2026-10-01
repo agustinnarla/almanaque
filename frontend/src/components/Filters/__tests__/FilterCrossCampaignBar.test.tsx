@@ -1,8 +1,8 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { FilterCrossCampaignBar } from '../FilterCrossCampaignBar'
-import { TEST_CATALOG } from '../../../test/catalog'
+import { FULL_CATALOG, TEST_CATALOG } from '../../../test/catalog'
 
 const INITIAL = {
   campaignA: '35',
@@ -54,5 +54,30 @@ describe('FilterCrossCampaignBar', () => {
       from: '2026-09-07',
       to: '2026-09-11',
     })
+  })
+
+  it('solo permite comparar campañas del mismo segmento', async () => {
+    const onCompare = vi.fn()
+    render(
+      <FilterCrossCampaignBar
+        initial={INITIAL}
+        catalog={FULL_CATALOG}
+        onCompare={onCompare}
+      />,
+    )
+    const optionsB = () =>
+      within(screen.getByLabelText('Campaña B'))
+        .getAllByRole('option')
+        .map((option) => option.getAttribute('value'))
+    expect(optionsB()).toEqual(['35', '38'])
+
+    await userEvent.selectOptions(screen.getByLabelText('Campaña A'), '91')
+
+    expect(optionsB()).toEqual(['91', '92'])
+    expect(screen.getByLabelText('Campaña B')).toHaveValue('92')
+    await userEvent.click(screen.getByTestId('filter-cross-submit'))
+    expect(onCompare).toHaveBeenCalledWith(
+      expect.objectContaining({ campaignA: '91', campaignB: '92' }),
+    )
   })
 })

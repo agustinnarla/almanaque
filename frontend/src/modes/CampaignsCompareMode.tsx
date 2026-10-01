@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { AlertTriangle, Trophy } from 'lucide-react'
 import { ExportCsvButton } from '../components/common/ExportCsvButton'
 import { PrintButton } from '../components/common/PrintButton'
+import { ExecutiveSummary } from '../components/Insights/ExecutiveSummary'
+import { crossSummaryItems } from '../lib/executiveSummary'
 import {
   SectionNav,
   type SectionLink,
@@ -48,7 +50,7 @@ import {
   buildWorstHour,
 } from '../lib/rangeDiagnostics'
 import { mergeBaseRankings, mergeSegmentRankings } from '../lib/rankings'
-import { defaultCrossValues } from '../lib/catalog'
+import { defaultCrossValues, segmentOf } from '../lib/catalog'
 import type { CampaignCatalogEntry } from '../types/api'
 import { DEFAULT_MIN_CALLS, RANKING_LIMIT } from './defaults'
 
@@ -58,6 +60,7 @@ interface CampaignsCompareModeProps {
 
 const CAMPAIGNS_SECTIONS: SectionLink[] = [
   { id: 'sec-filtros', label: 'Filtros' },
+  { id: 'sec-resumen', label: 'Resumen' },
   { id: 'sec-kpis', label: 'Indicadores' },
   { id: 'sec-diagnostico', label: 'Diagnóstico' },
   { id: 'sec-recomendaciones', label: 'Recomendaciones' },
@@ -212,6 +215,18 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             </p>
             <PrintButton />
           </div>
+
+          <ExecutiveSummary
+            items={crossSummaryItems({
+              summary: data.summary,
+              campaignA: data.campaign_a,
+              campaignB: data.campaign_b,
+              segment: segmentOf(catalog, data.campaign_a),
+              rootCauses: crossNegatives,
+              positiveDrivers: crossPositives,
+              recommendations: recommendations.data?.recommendations ?? [],
+            })}
+          />
 
           <SectionNav links={CAMPAIGNS_SECTIONS} />
 
