@@ -124,6 +124,33 @@ def get_summary(
     return {"campaign": campaign_name, **day}
 
 
+def get_daily_device_rows(
+    conn: sqlite3.Connection,
+    campaign_name: str,
+    start_date: date,
+    end_date: date,
+) -> list[dict]:
+    cursor = conn.execute(
+        """
+        SELECT fecha, device, SUM(total_calls) AS total_calls,
+               SUM(machine_answers) AS machine_answers
+        FROM daily_campaign_metrics
+        WHERE campaign = ? AND fecha BETWEEN ? AND ?
+        GROUP BY fecha, device
+        """,
+        (campaign_name, start_date.isoformat(), end_date.isoformat()),
+    )
+    return [
+        {
+            "fecha": str(row["fecha"]),
+            "device": str(row["device"]),
+            "total_calls": int(row["total_calls"]),
+            "machine_answers": int(row["machine_answers"]),
+        }
+        for row in cursor.fetchall()
+    ]
+
+
 def get_day_metrics(
     conn: sqlite3.Connection,
     campaign_name: str,

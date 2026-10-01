@@ -1,9 +1,10 @@
-import { AlertTriangle, CheckCircle2, Gauge, Lightbulb } from 'lucide-react'
+import { AlertTriangle, CheckCircle2, Gauge, Lightbulb, Route } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { SummaryItem, SummaryKind } from '../../lib/executiveSummary'
 
 const ICONS: Record<SummaryKind, { icon: LucideIcon; className: string }> = {
   context: { icon: Gauge, className: 'text-indigo-600' },
+  change: { icon: Route, className: 'text-violet-600' },
   problem: { icon: AlertTriangle, className: 'text-amber-600' },
   strength: { icon: CheckCircle2, className: 'text-emerald-600' },
   action: { icon: Lightbulb, className: 'text-sky-600' },

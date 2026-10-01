@@ -5,6 +5,7 @@ import type {
   HourlyTrendPoint,
   RangeDiagnosticsResponse,
   RangeRecommendationsResponse,
+  RoutingResponse,
 } from '../types/api'
 
 async function fetchJson<T>(
@@ -73,6 +74,15 @@ export function fetchRangeRecommendations(
     { start_date: from, end_date: to, min_calls: String(minCalls) },
     signal,
   )
+}
+
+export function fetchRouting(
+  campaign: string,
+  from: string,
+  to: string,
+  signal?: AbortSignal,
+): Promise<RoutingResponse> {
+  return fetchJson(campaign, 'routing', { start_date: from, end_date: to }, signal)
 }
 
 export function fetchRangeDiagnostics(

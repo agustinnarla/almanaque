@@ -3,6 +3,7 @@ import { AlertTriangle, Trophy } from 'lucide-react'
 import { ExportCsvButton } from '../components/common/ExportCsvButton'
 import { PrintButton } from '../components/common/PrintButton'
 import { ExecutiveSummary } from '../components/Insights/ExecutiveSummary'
+import { useRoutingChanges } from '../hooks/useRoutingChanges'
 import { useSegmentPeers } from '../hooks/useSegmentPeers'
 import { rangeSummaryItems } from '../lib/executiveSummary'
 import {
@@ -96,6 +97,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
     limit: RANKING_LIMIT,
   })
   const segmentPeers = useSegmentPeers({ catalog, ...params })
+  const routing = useRoutingChanges(params)
   const segment = segmentOf(catalog, range.campaign)
   const patternAlerts = usePatternAlerts({
     from: range.from,
@@ -227,6 +229,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
               summary: overview.summary,
               segment,
               peers: segmentPeers.peers,
+              routingChange: routing.changes.at(-1)?.message ?? null,
               rootCauses: rangeDiag?.rootCauses ?? [],
               positiveDrivers: rangeDiag?.positiveDrivers ?? [],
               recommendations: recommendations.data?.recommendations ?? [],

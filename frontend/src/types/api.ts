@@ -236,6 +236,26 @@ export interface CampaignCatalogEntry {
   dates: string[]
 }
 
+export interface RoutingChange {
+  type: string
+  severity: Severity
+  date: string
+  entity: string
+  message: string
+}
+
+export interface RoutingResponse {
+  days: Array<{
+    fecha: string
+    total_calls: number
+    top_device: string
+    top_share: number
+    active_trunks: number
+    concentrated: boolean
+  }>
+  changes: RoutingChange[]
+}
+
 export interface PatternAlert {
   fecha: string
   hora: number

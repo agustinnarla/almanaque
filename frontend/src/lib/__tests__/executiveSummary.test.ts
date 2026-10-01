@@ -87,6 +87,14 @@ describe('rangeSummaryItems', () => {
     )
   })
 
+  it('suma la línea «Cambio detectado» solo cuando hay un cambio de ruteo', () => {
+    const base = { summary: summary91, segment: null, peers: [], rootCauses: [], positiveDrivers: [], recommendations: [] }
+    const withChange = rangeSummaryItems({ ...base, routingChange: 'Desde el 2026-09-09 el 100% sale por IPLAN.' })
+    expect(withChange.map((i) => i.kind)).toEqual(['context', 'change'])
+    expect(withChange[1].label).toBe('Cambio detectado')
+    expect(rangeSummaryItems(base).map((i) => i.kind)).toEqual(['context'])
+  })
+
   it('omite la comparación sin otras campañas y las líneas sin datos', () => {
     const items = rangeSummaryItems({
       summary: summary91,

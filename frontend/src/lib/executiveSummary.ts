@@ -6,7 +6,7 @@ import type {
 } from '../types/api'
 import { formatDeltaPp, formatNumber, formatRatePct } from './format'
 
-export type SummaryKind = 'context' | 'problem' | 'strength' | 'action'
+export type SummaryKind = 'context' | 'change' | 'problem' | 'strength' | 'action'
 
 export interface SummaryItem {
   kind: SummaryKind
@@ -28,6 +28,7 @@ interface Insights {
 
 const LABELS: Record<SummaryKind, string> = {
   context: 'Contexto',
+  change: 'Cambio detectado',
   problem: 'Principal problema',
   strength: 'Punto fuerte',
   action: 'Qué hacer',
@@ -63,6 +64,7 @@ export function rangeSummaryItems(
     summary: CampaignSummary
     segment: string | null
     peers: PeerSummary[] | null
+    routingChange?: string | null
   },
 ): SummaryItem[] {
   const { summary, segment, peers } = input
@@ -72,7 +74,8 @@ export function rangeSummaryItems(
     const delta = formatDeltaPp(summary.agent_answer_rate - peerRate)
     context += ` · ${delta} vs el resto de ${segment} (${formatRatePct(peerRate)})`
   }
-  return [item('context', context), ...insightItems(input)]
+  const change = input.routingChange ? [item('change', input.routingChange)] : []
+  return [item('context', context), ...change, ...insightItems(input)]
 }
 
 export function compareSummaryItems(

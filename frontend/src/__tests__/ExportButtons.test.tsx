@@ -411,6 +411,11 @@ vi.mock('../lib/csv', async (importOriginal) => {
   return { ...actual, downloadCsv: vi.fn() }
 })
 vi.mock('../hooks/useCampaigns', () => ({ useCampaigns: vi.fn() }))
+vi.mock('../hooks/useRoutingChanges', () => ({
+  useRoutingChanges: () => ({
+    changes: [{ type: 'ROUTING_CHANGE', severity: 'INFO', date: '2026-09-09', entity: 'IPLAN', message: 'Desde el 2026-09-09 el 100% del volumen sale por IPLAN.' }],
+  }),
+}))
 vi.mock('../hooks/useSegmentPeers', () => ({
   useSegmentPeers: () => ({
     peers: [{ campaign: '38', total_calls: 1000, agent_answers: 40 }],
@@ -447,6 +452,9 @@ describe('Exportación por modo', () => {
     )
     expect(within(summary).getByTestId('summary-problem')).toHaveTextContent(
       'Congestión sostenida en GW20.',
+    )
+    expect(within(summary).getByTestId('summary-change')).toHaveTextContent(
+      'Cambio detectadoDesde el 2026-09-09 el 100% del volumen sale por IPLAN.',
     )
     expect(within(summary).getByTestId('summary-action')).toBeInTheDocument()
   })

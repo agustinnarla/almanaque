@@ -292,6 +292,9 @@ vi.mock('../lib/csv', async (importOriginal) => {
   return { ...actual, downloadCsv: vi.fn() }
 })
 vi.mock('../hooks/useCampaigns', () => ({ useCampaigns: vi.fn() }))
+vi.mock('../hooks/useRoutingChanges', () => ({
+  useRoutingChanges: () => ({ changes: [] }),
+}))
 vi.mock('../hooks/useSegmentPeers', () => ({
   useSegmentPeers: () => ({ peers: [], loading: false, error: null }),
 }))

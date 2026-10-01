@@ -4,6 +4,7 @@ import sqlite3
 from fastapi import APIRouter, Depends, Query
 
 from db_manager import get_db_connection
+from services.routing_detector import detect_routing
 from repositories.campaigns_repo import (
     build_compare_diagnostics,
     build_compare_recommendations,
@@ -13,6 +14,7 @@ from repositories.campaigns_repo import (
     build_range_recommendations,
     compute_deltas,
     get_campaign_diagnostics,
+    get_daily_device_rows,
     get_daily_trend,
     get_day_metrics,
     get_device_metrics,
@@ -112,6 +114,17 @@ def campaign_bases_ranking(
     conn: sqlite3.Connection = Depends(get_db_connection),
 ):
     return get_ranking(conn, campaign_name, start_date, end_date, min_calls)
+
+
+@router.get("/{campaign_name}/routing")
+def campaign_routing(
+    campaign_name: str,
+    start_date: date = Query(...),
+    end_date: date = Query(...),
+    conn: sqlite3.Connection = Depends(get_db_connection),
+):
+    rows = get_daily_device_rows(conn, campaign_name, start_date, end_date)
+    return detect_routing(rows)
 
 
 @router.get("/{campaign_name}/hourly-trend")
