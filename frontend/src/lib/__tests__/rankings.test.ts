@@ -36,7 +36,8 @@ describe('mergeBaseRankings', () => {
         { base: '0', agent_answer_rate: 0.7, total_calls: 50 },
       ],
     )
-    expect(rows.map((row) => row.key)).toEqual(['0', '34', '76'])
+    // biggest combined volume first: 34 (198 + 240), 0 (50), 76 (17)
+    expect(rows.map((row) => row.key)).toEqual(['34', '0', '76'])
 
     const base34 = rows.find((row) => row.key === '34')
     expect(base34?.delta).toBeCloseTo(6.63, 2)
@@ -53,6 +54,21 @@ describe('mergeBaseRankings', () => {
     expect(base76?.rateB).toBeNull()
     expect(base76?.attemptsB).toBeNull()
     expect(base76?.delta).toBeNull()
+  })
+
+  it('ordena primero las rankeadas y, dentro de cada grupo, por intentos', () => {
+    const rows = mergeBaseRankings(
+      [
+        { base: '76', agent_answer_rate: 0.0467, total_calls: 261943, ranked: true },
+        { base: '0', agent_answer_rate: 0.7, total_calls: 20, ranked: false },
+      ],
+      [{ base: '80', agent_answer_rate: 0.5714, total_calls: 35, ranked: false }],
+    )
+    expect(rows.map((row) => [row.key, row.ranked])).toEqual([
+      ['76', true],
+      ['80', false],
+      ['0', false],
+    ])
   })
 
   it('devuelve vacío cuando ninguna campaña tiene bases', () => {

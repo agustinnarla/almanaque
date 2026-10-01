@@ -108,9 +108,10 @@ def campaign_bases_ranking(
     campaign_name: str,
     start_date: date = Query(...),
     end_date: date = Query(...),
+    min_calls: int = Query(50, ge=1),
     conn: sqlite3.Connection = Depends(get_db_connection),
 ):
-    return get_ranking(conn, campaign_name, start_date, end_date)
+    return get_ranking(conn, campaign_name, start_date, end_date, min_calls)
 
 
 @router.get("/{campaign_name}/hourly-trend")

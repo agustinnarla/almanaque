@@ -162,6 +162,7 @@ def get_ranking(
     campaign_name: str,
     start_date: date,
     end_date: date,
+    min_calls: int = 1,
 ) -> list[dict]:
     cursor = conn.execute(
         f"""
@@ -182,9 +183,19 @@ def get_ranking(
                 "base": str(row["base"]),
                 "agent_answer_rate": float(rate),
                 "total_calls": int(row["total_calls"]),
+                "ranked": int(row["total_calls"]) >= min_calls,
             }
         )
-    ranking.sort(key=lambda item: (-item["agent_answer_rate"], item["base"]))
+    # Representative bases first, biggest volume on top (AA breaks ties);
+    # bases below the minimum volume go last.
+    ranking.sort(
+        key=lambda item: (
+            not item["ranked"],
+            -item["total_calls"],
+            -item["agent_answer_rate"],
+            item["base"],
+        )
+    )
     return ranking
 
 

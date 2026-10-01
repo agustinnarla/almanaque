@@ -364,11 +364,12 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="mb-4">
                     <h3 className="text-sm font-bold text-slate-800">
-                      Bases por AA %
+                      Bases por intentos
                     </h3>
                     <p className="mt-1 text-xs text-slate-500">
                       Unión de bases de ambas campañas con intentos y tasa
-                      (faltantes → —)
+                      (faltantes → —) · las de menos de {cross.minCalls} llamadas
+                      van al final, atenuadas
                     </p>
                   </div>
                   <CrossRankingTable kind="base" rows={baseRows} />

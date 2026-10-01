@@ -30,12 +30,36 @@ describe('BasesRankingTable', () => {
       'AA %',
     ])
     expect(screen.getAllByTestId('bases-ranking-row')[2]).toHaveTextContent('#3')
+    // the best AA among ranked bases is highlighted, not the first row
     expect(screen.getAllByTestId('bases-ranking-row')[0].className).toContain(
+      'bg-emerald-50',
+    )
+    expect(screen.getAllByTestId('bases-ranking-row')[2].className).not.toContain(
       'bg-emerald-50',
     )
     const wrapper = screen.getByTestId('bases-ranking-table')
     expect(wrapper.className).toContain('overflow-x-auto')
     expect(screen.getByRole('table').className).toContain('min-w-[480px]')
+  })
+
+  it('deja las bases con pocos intentos abajo, en gris y sin rank', () => {
+    render(
+      <BasesRankingTable
+        minCalls={50}
+        rows={[
+          { base: '14', agent_answer_rate: 0.719, total_calls: 121, ranked: true },
+          { base: '5', agent_answer_rate: 0.0655, total_calls: 17135, ranked: true },
+          { base: '27', agent_answer_rate: 1, total_calls: 1, ranked: false },
+        ]}
+      />,
+    )
+    const rows = screen.getAllByTestId('bases-ranking-row')
+    expect(rows.map((row) => row.firstElementChild?.textContent)).toEqual(['#1', '#2', '—'])
+    expect(rows[2]).toHaveAttribute('data-ranked', 'false')
+    expect(rows[2].className).toContain('text-slate-400')
+    expect(screen.getByTestId('bases-ranking-divider')).toHaveTextContent(
+      'Pocos intentos (menos de 50 llamadas) · no compiten en el ranking',
+    )
   })
 
   it('muestra estado vacío cuando no hay filas', () => {

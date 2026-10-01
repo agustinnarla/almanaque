@@ -286,6 +286,14 @@ describe('basesRankingRows', () => {
       ['#2', '80', 35198, 5.7],
     ])
   })
+
+  it('marca como «Pocos intentos» las bases que no compiten', () => {
+    const table = basesRankingRows([
+      { base: '5', agent_answer_rate: 0.0655, total_calls: 17135, ranked: true },
+      { base: '27', agent_answer_rate: 1, total_calls: 1, ranked: false },
+    ])
+    expect(table.rows.map((row) => row[0])).toEqual(['#1', 'Pocos intentos'])
+  })
 })
 
 describe('segmentRankingRows', () => {

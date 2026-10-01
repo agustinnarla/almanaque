@@ -193,6 +193,8 @@ export interface BaseRankingRow {
   base: string
   agent_answer_rate: number | null
   total_calls: number
+  // false when the base is below the minimum volume (missing = ranked)
+  ranked?: boolean
 }
 
 export interface SegmentRankingItem {
@@ -221,6 +223,7 @@ export interface CrossRankingRow {
   healthB: number | null
   attemptsA: number | null
   attemptsB: number | null
+  ranked?: boolean
 }
 
 export interface CampaignCatalogEntry {

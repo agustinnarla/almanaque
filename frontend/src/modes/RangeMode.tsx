@@ -366,13 +366,14 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="mb-4">
                     <h3 className="text-sm font-bold text-slate-800">
-                      Bases por AA %
+                      Bases por intentos
                     </h3>
                     <p className="mt-1 text-xs text-slate-500">
-                      Todas las bases ordenadas por Agent Answer
+                      Las de más intentos primero, entre las bases con al menos{' '}
+                      {range.minCalls} llamadas · en verde, la de mejor AA
                     </p>
                   </div>
-                  <BasesRankingTable rows={rankings.bases} />
+                  <BasesRankingTable rows={rankings.bases} minCalls={range.minCalls} />
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="mb-4">

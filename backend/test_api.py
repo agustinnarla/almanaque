@@ -284,10 +284,39 @@ def test_campaign_ranking_excludes_zero_denominator_and_sorts(client, memory_con
     assert response.status_code == 200
     data = response.json()
     bases = [row["base"] for row in data]
-    rates = [row["agent_answer_rate"] for row in data]
-    assert rates == sorted(rates, reverse=True)
-    assert "99" in bases
-    assert rates[-1] == pytest.approx(0.0)
+    calls = [row["total_calls"] for row in data]
+    assert calls == sorted(calls, reverse=True)
+    assert bases == ["34", "80", "99"]
+    assert data[-1]["agent_answer_rate"] == pytest.approx(0.0)
+
+
+def test_campaign_ranking_keeps_low_volume_bases_apart(client, memory_conn):
+    seed_metrics(memory_conn)
+    memory_conn.execute(
+        "INSERT INTO daily_campaign_metrics VALUES ('2026-09-02', 11, '35', '77', 'GW37', 4, 4, 0, 0, 0, NULL, NULL)"
+    )
+    memory_conn.commit()
+
+    data = client.get(
+        "/api/campaigns/35/bases-ranking",
+        params={"start_date": "2026-09-01", "end_date": "2026-09-02", "min_calls": 60},
+    ).json()
+
+    assert [(row["base"], row["ranked"]) for row in data] == [
+        ("34", True),
+        ("80", True),
+        ("99", False),
+        ("77", False),
+    ]
+    assert data[3]["agent_answer_rate"] == pytest.approx(1.0)
+
+
+def test_campaign_ranking_min_calls_validation(client):
+    response = client.get(
+        "/api/campaigns/35/bases-ranking",
+        params={"start_date": "2026-09-01", "end_date": "2026-09-02", "min_calls": 0},
+    )
+    assert response.status_code == 422
 
 
 def test_campaign_ranking_empty_campaign(client):
@@ -310,7 +339,7 @@ def test_campaign_ranking_includes_total_calls(client, memory_conn):
     by_base = {row["base"]: row for row in data}
     assert set(by_base) == {"34", "80", "99"}
     for row in data:
-        assert set(row) == {"base", "agent_answer_rate", "total_calls"}
+        assert set(row) == {"base", "agent_answer_rate", "total_calls", "ranked"}
         assert isinstance(row["total_calls"], int)
     assert by_base["34"]["total_calls"] == 240
     assert by_base["80"]["total_calls"] == 100

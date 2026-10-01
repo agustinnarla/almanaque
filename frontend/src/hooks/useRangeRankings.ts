@@ -30,7 +30,7 @@ export function useRangeRankings(params: RangeRankingsParams): State & {
   const { data, loading, error, reload } = useApiResource(
     async (signal) => {
       const [bases, devices, hours] = await Promise.all([
-        fetchBasesRanking(campaign, from, to, signal),
+        fetchBasesRanking(campaign, from, to, minCalls, signal),
         fetchDevicesRanking(campaign, from, to, minCalls, limit, signal),
         fetchHoursRanking(campaign, from, to, minCalls, limit, signal),
       ])

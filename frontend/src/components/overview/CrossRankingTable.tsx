@@ -126,7 +126,8 @@ export function CrossRankingTable({ kind, rows }: CrossRankingTableProps) {
               <tr
                 key={row.key}
                 data-testid="cross-ranking-row"
-                className={`transition-colors hover:bg-slate-50 ${index === 0 ? 'bg-emerald-50' : ''}`}
+                data-ranked={row.ranked === false ? 'false' : undefined}
+                className={`transition-colors hover:bg-slate-50 ${index === 0 && row.ranked !== false ? 'bg-emerald-50' : ''} ${row.ranked === false ? 'opacity-50' : ''}`}
               >
                 <td className={`${cellPadding} truncate font-semibold text-slate-900`}>
                   {row.key}

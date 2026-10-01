@@ -271,7 +271,7 @@ export function basesRankingRows(rows: BaseRankingRow[]): CsvTable {
   return {
     headers: ['Rank', 'Base', 'Intentos', 'Agent Answer %'],
     rows: rows.map((row, index) => [
-      `#${index + 1}`,
+      row.ranked === false ? 'Pocos intentos' : `#${index + 1}`,
       row.base,
       row.total_calls,
       pct(row.agent_answer_rate),

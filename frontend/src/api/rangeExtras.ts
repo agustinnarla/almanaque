@@ -19,9 +19,11 @@ export function fetchBasesRanking(
   campaign: string,
   from: string,
   to: string,
+  minCalls: number,
   signal?: AbortSignal,
 ): Promise<BaseRankingRow[]> {
   const query = rangeQuery(from, to)
+  query.set('min_calls', String(minCalls))
   return fetchJson(
     `/api/campaigns/${encodeURIComponent(campaign)}/bases-ranking?${query}`,
     signal,
