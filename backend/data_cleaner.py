@@ -83,6 +83,13 @@ def clean_dataframe(df: pd.DataFrame, campaign: str | None = None) -> pd.DataFra
     return cleaned.reset_index(drop=True)
 
 
+def read_all_sheets(file_path: Path | str, **kwargs) -> pd.DataFrame:
+    sheets = [sheet for sheet in pd.read_excel(file_path, sheet_name=None, **kwargs).values() if not sheet.empty]
+    if not sheets:
+        return pd.DataFrame()
+    return pd.concat(sheets, ignore_index=True)
+
+
 def load_and_clean(file_path: Path | str) -> pd.DataFrame:
-    df = pd.read_excel(file_path)
+    df = read_all_sheets(file_path)
     return clean_dataframe(df, campaign=extract_campaign(file_path))

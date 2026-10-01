@@ -9,15 +9,30 @@ from data_cleaner import (
     _parse_fecha,
     extract_campaign,
     load_and_clean,
+    read_all_sheets,
 )
 from db_manager import DEFAULT_DB_PATH, get_connection, init_db, replace_day
 from file_scanner import DATA_DIR, scan_data_dir
 from metrics_engine import compute_metrics
 
+CALL_ID_COLUMN = "Id. llamada"
+
+
+def _drop_repeated_calls(day: pd.DataFrame, campaign: str, fecha: str) -> pd.DataFrame:
+    if CALL_ID_COLUMN not in day.columns:
+        return day
+    repeated = day[CALL_ID_COLUMN].notna() & day.duplicated(subset=[CALL_ID_COLUMN])
+    if repeated.any():
+        print(
+            f"Aviso: campaña {campaign} {fecha}: {int(repeated.sum())} llamadas repetidas "
+            "entre archivos; se cuentan una sola vez."
+        )
+    return day[~repeated]
+
 
 def _read_dates(file_path: Path | str) -> list[str]:
     try:
-        frame = pd.read_excel(file_path, usecols=lambda column: str(column).upper() == "FECHA")
+        frame = read_all_sheets(file_path, usecols=lambda column: str(column).upper() == "FECHA")
     except Exception:
         return []
     if frame.empty or "FECHA" not in frame.columns:
@@ -66,7 +81,8 @@ def run_pipeline(data_dir: Path | str = DATA_DIR, db_path: Path | str = DEFAULT_
                 print(f"Leído: {file_path.name} ({len(cleaned)} filas).")
         if not frames:
             continue
-        metrics = compute_metrics(pd.concat(frames, ignore_index=True))
+        day = _drop_repeated_calls(pd.concat(frames, ignore_index=True), campaign, fecha)
+        metrics = compute_metrics(day)
         day_rows = metrics[metrics["fecha"] == fecha]
         replace_day(conn, fecha, day_rows)
         print(f"Cargado: campaña {campaign} {fecha} ({len(day_rows)} grupos).")
