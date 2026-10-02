@@ -70,11 +70,11 @@ def list_campaigns(conn: sqlite3.Connection) -> list[dict]:
     return catalog
 
 
-def _rate(agent_answers: int, total_calls: int, machine_answers: int) -> float | None:
-    denominator = total_calls
-    if denominator <= 0:
+def _rate(agent_answers: int, total_calls: int) -> float | None:
+    """AA = agentes / total de intentos (Spec 012)."""
+    if total_calls <= 0:
         return None
-    return agent_answers / denominator
+    return agent_answers / total_calls
 
 
 def _attendable_rate(agent_answers: int, total_calls: int, machine_answers: int) -> float | None:
@@ -100,7 +100,7 @@ def _row_to_day(row: sqlite3.Row | dict, fecha: str | None = None) -> dict:
         "agent_answers": agents,
         "machine_answers": machines,
         "rejected_calls": max(total - agents - machines, 0),
-        "agent_answer_rate": _rate(agents, total, machines),
+        "agent_answer_rate": _rate(agents, total),
     }
 
 
@@ -249,7 +249,7 @@ def get_ranking(
     )
     ranking = []
     for row in cursor.fetchall():
-        rate = _rate(int(row["agent_answers"]), int(row["total_calls"]), int(row["machine_answers"]))
+        rate = _rate(int(row["agent_answers"]), int(row["total_calls"]))
         if rate is None:
             continue
         ranking.append(
@@ -297,11 +297,7 @@ def get_hourly_trend(
                 "total_calls": int(row["total_calls"]),
                 "agent_answers": int(row["agent_answers"]),
                 "machine_answers": int(row["machine_answers"]),
-                "agent_answer_rate": _rate(
-                    int(row["agent_answers"]),
-                    int(row["total_calls"]),
-                    int(row["machine_answers"]),
-                ),
+                "agent_answer_rate": _rate(int(row["agent_answers"]), int(row["total_calls"])),
             }
         )
     return trend
@@ -331,11 +327,7 @@ def get_daily_trend(
                 "total_calls": int(row["total_calls"]),
                 "agent_answers": int(row["agent_answers"]),
                 "machine_answers": int(row["machine_answers"]),
-                "agent_answer_rate": _rate(
-                    int(row["agent_answers"]),
-                    int(row["total_calls"]),
-                    int(row["machine_answers"]),
-                ),
+                "agent_answer_rate": _rate(int(row["agent_answers"]), int(row["total_calls"])),
             }
         )
     return trend
@@ -378,7 +370,7 @@ def get_device_metrics(
                 "machine_answers": machines,
                 "busy_calls": busy,
                 "congestion_calls": congestion,
-                "agent_answer_rate": _rate(agents, total, machines),
+                "agent_answer_rate": _rate(agents, total),
                 "attendable_answer_rate": _attendable_rate(agents, total, machines),
                 "busy_rate": _fraction(busy, total),
                 "congestion_rate": _fraction(congestion, total),
@@ -390,10 +382,9 @@ def get_device_metrics(
 def _segment_rates(row: sqlite3.Row) -> dict:
     total = int(row["total_calls"])
     agents = int(row["agent_answers"])
-    machines = int(row["machine_answers"])
     busy = int(row["busy_calls"])
     congestion = int(row["congestion_calls"])
-    agent_rate = _rate(agents, total, machines)
+    agent_rate = _rate(agents, total)
     busy_rate = _fraction(busy, total)
     congestion_rate = _fraction(congestion, total)
     return {
@@ -586,34 +577,6 @@ def get_campaign_diagnostics(
     }
 
 
-def get_day_totals(
-    conn: sqlite3.Connection,
-    campaign_name: str,
-    day: date,
-) -> dict | None:
-    cursor = conn.execute(
-        f"""
-        SELECT {FULL_AGG_COLUMNS}
-        FROM daily_campaign_metrics
-        WHERE campaign = ? AND fecha = ?
-        """,
-        (campaign_name, day.isoformat()),
-    )
-    row = cursor.fetchone()
-    if row is None or row["total_calls"] is None:
-        return None
-    total = int(row["total_calls"])
-    agents = int(row["agent_answers"])
-    machines = int(row["machine_answers"])
-    congestion = int(row["congestion_calls"])
-    return {
-        "total_calls": total,
-        "agent_answer_rate": _rate(agents, total, machines),
-        "congestion_rate": _fraction(congestion, total),
-        "busy_rate": _fraction(int(row["busy_calls"]), total),
-    }
-
-
 def get_range_totals(
     conn: sqlite3.Connection,
     campaign_name: str,
@@ -633,43 +596,13 @@ def get_range_totals(
         return None
     total = int(row["total_calls"])
     agents = int(row["agent_answers"])
-    machines = int(row["machine_answers"])
     congestion = int(row["congestion_calls"])
     return {
         "total_calls": total,
-        "agent_answer_rate": _rate(agents, total, machines),
+        "agent_answer_rate": _rate(agents, total),
         "congestion_rate": _fraction(congestion, total),
         "busy_rate": _fraction(int(row["busy_calls"]), total),
     }
-
-
-def get_breakdown_by_base(
-    conn: sqlite3.Connection,
-    campaign_name: str,
-    day: date,
-    min_calls: int,
-) -> dict[str, dict]:
-    cursor = conn.execute(
-        f"""
-        SELECT base, {FULL_AGG_COLUMNS}
-        FROM daily_campaign_metrics
-        WHERE campaign = ? AND fecha = ?
-        GROUP BY base
-        HAVING SUM(total_calls) >= ?
-        """,
-        (campaign_name, day.isoformat(), min_calls),
-    )
-    result: dict[str, dict] = {}
-    for row in cursor.fetchall():
-        total = int(row["total_calls"])
-        result[str(row["base"])] = {
-            "base": str(row["base"]),
-            "total_calls": total,
-            "agent_answer_rate": _rate(
-                int(row["agent_answers"]), total, int(row["machine_answers"])
-            ),
-        }
-    return result
 
 
 def get_breakdown_by_base_range(
@@ -695,36 +628,7 @@ def get_breakdown_by_base_range(
         result[str(row["base"])] = {
             "base": str(row["base"]),
             "total_calls": total,
-            "agent_answer_rate": _rate(
-                int(row["agent_answers"]), total, int(row["machine_answers"])
-            ),
-        }
-    return result
-
-
-def get_breakdown_by_device(
-    conn: sqlite3.Connection,
-    campaign_name: str,
-    day: date,
-    min_calls: int,
-) -> dict[str, dict]:
-    cursor = conn.execute(
-        f"""
-        SELECT device, {FULL_AGG_COLUMNS}
-        FROM daily_campaign_metrics
-        WHERE campaign = ? AND fecha = ?
-        GROUP BY device
-        HAVING SUM(total_calls) >= ?
-        """,
-        (campaign_name, day.isoformat(), min_calls),
-    )
-    result: dict[str, dict] = {}
-    for row in cursor.fetchall():
-        total = int(row["total_calls"])
-        result[str(row["device"])] = {
-            "device": str(row["device"]),
-            "total_calls": total,
-            "congestion_rate": _fraction(int(row["congestion_calls"]), total),
+            "agent_answer_rate": _rate(int(row["agent_answers"]), total),
         }
     return result
 
@@ -764,122 +668,52 @@ def build_compare_diagnostics(
     date_b: date,
     min_calls: int,
 ) -> dict:
-    from services.diagnostics_engine import compute_delta_percentage, evaluate_causes
+    """Comparar 2 días: the A-vs-B machinery of Comparar campañas with the same
+    campaign on both sides and a one-day range per side (Spec 060)."""
+    from services.diagnostics_engine import evaluate_causes
 
-    summary_a = get_day_totals(conn, campaign_name, date_a)
-    summary_b = get_day_totals(conn, campaign_name, date_b)
-
-    if summary_a is None or summary_b is None:
-        return {
-            "campaign": campaign_name,
-            "date_a": date_a.isoformat(),
-            "date_b": date_b.isoformat(),
-            "min_calls_applied": min_calls,
-            "summary": None,
-            "root_causes": [],
-            "positive_drivers": [],
-            "insights": [],
-            "bases_comparison": None,
-            "gateways_comparison": None,
-        }
-
-    total_a = summary_a["total_calls"] or 0
-    total_b = summary_b["total_calls"] or 0
-    rate_a = summary_a["agent_answer_rate"]
-    rate_b = summary_b["agent_answer_rate"]
-    from services.health import compute_health_score
-
-    summary = {
-        "total_calls_a": total_a,
-        "total_calls_b": total_b,
-        "delta_total_pct": compute_delta_percentage(
-            total_a if total_a else None, total_b
-        ),
-        "agent_answer_rate_a": rate_a,
-        "agent_answer_rate_b": rate_b,
-        "delta_rate": (
-            None
-            if rate_a is None or rate_b is None
-            else round(rate_b - rate_a, 6)
-        ),
-        "delta_percentage": compute_delta_percentage(rate_a, rate_b),
-        "busy_rate_a": summary_a["busy_rate"],
-        "busy_rate_b": summary_b["busy_rate"],
-        "congestion_rate_a": summary_a["congestion_rate"],
-        "congestion_rate_b": summary_b["congestion_rate"],
-        "congestion_rate": summary_b["congestion_rate"],
-        "health_score": compute_health_score(
-            rate_b, summary_b["busy_rate"], summary_b["congestion_rate"]
-        ),
-    }
-
-    bases_a = get_breakdown_by_base(conn, campaign_name, date_a, min_calls)
-    bases_b = get_breakdown_by_base(conn, campaign_name, date_b, min_calls)
-    common_bases = sorted(set(bases_a) & set(bases_b))
-
-    bases_comparison = []
-    engine_bases = []
-    for base in common_bases:
-        row_a = bases_a[base]
-        row_b = bases_b[base]
-        share_a = (row_a["total_calls"] / total_a) if total_a else None
-        share_b = (row_b["total_calls"] / total_b) if total_b else None
-        ra = row_a["agent_answer_rate"]
-        rb = row_b["agent_answer_rate"]
-        delta = None if ra is None or rb is None else round(rb - ra, 6)
-        share_delta = (
-            None if share_a is None or share_b is None else share_b - share_a
-        )
-        rel = compute_delta_percentage(ra, rb)
-        entry = {
-            "base": base,
-            "total_calls_a": row_a["total_calls"],
-            "total_calls_b": row_b["total_calls"],
-            "agent_answer_rate_a": ra,
-            "agent_answer_rate_b": rb,
-            "delta_rate": delta,
-            "share_a": share_a,
-            "share_b": share_b,
-            "share_delta": share_delta,
-            "relative_change_pct": rel,
-        }
-        bases_comparison.append(entry)
-        engine_bases.append(entry)
-
-    devices_a = get_breakdown_by_device(conn, campaign_name, date_a, min_calls)
-    devices_b = get_breakdown_by_device(conn, campaign_name, date_b, min_calls)
-    common_devices = sorted(set(devices_a) & set(devices_b))
-
-    gateways_comparison = []
-    for device in common_devices:
-        ca = devices_a[device]["congestion_rate"]
-        cb = devices_b[device]["congestion_rate"]
-        delta_c = (
-            None if ca is None or cb is None else round(cb - ca, 6)
-        )
-        gateways_comparison.append(
-            {
-                "device": device,
-                "congestion_rate_a": ca,
-                "congestion_rate_b": cb,
-                "delta_congestion": delta_c,
-            }
-        )
-
-    causes = evaluate_causes(summary_a, summary_b, engine_bases, gateways_comparison)
-
-    return {
+    envelope = {
         "campaign": campaign_name,
         "date_a": date_a.isoformat(),
         "date_b": date_b.isoformat(),
         "min_calls_applied": min_calls,
-        "summary": summary,
-        "root_causes": causes["root_causes"],
-        "positive_drivers": causes["positive_drivers"],
-        "insights": causes["insights"],
-        "bases_comparison": bases_comparison,
-        "gateways_comparison": gateways_comparison,
+        "summary": None,
+        "root_causes": [],
+        "positive_drivers": [],
+        "insights": [],
+        "bases_comparison": None,
+        "gateways_comparison": None,
     }
+
+    summary_a = get_range_totals(conn, campaign_name, date_a, date_a)
+    summary_b = get_range_totals(conn, campaign_name, date_b, date_b)
+    if summary_a is None or summary_b is None:
+        return envelope
+
+    bases_comparison = _cross_base_intersection(
+        conn,
+        campaign_name,
+        campaign_name,
+        date_a,
+        date_a,
+        min_calls,
+        summary_a["total_calls"] or 0,
+        summary_b["total_calls"] or 0,
+        date_b,
+        date_b,
+    )
+    gateways_comparison = _cross_gateway_intersection(
+        conn, campaign_name, campaign_name, date_a, date_a, min_calls, date_b, date_b
+    )
+    causes = evaluate_causes(summary_a, summary_b, bases_comparison, gateways_comparison)
+
+    envelope["summary"] = _cross_summary(summary_a, summary_b)
+    envelope["root_causes"] = causes["root_causes"]
+    envelope["positive_drivers"] = causes["positive_drivers"]
+    envelope["insights"] = causes["insights"]
+    envelope["bases_comparison"] = bases_comparison
+    envelope["gateways_comparison"] = gateways_comparison
+    return envelope
 
 
 def build_compare_recommendations(

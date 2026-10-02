@@ -270,3 +270,37 @@ def test_replace_day_with_empty_campaigns_clears_default_campaign(conn):
     replace_day(conn, "2026-09-01", metrics)
 
     assert [row[3] for row in fetch_all(conn)] == ["B"]
+
+
+def test_get_db_connection_initializes_each_file_once(monkeypatch, tmp_path):
+    db_file = tmp_path / "metrics.db"
+    monkeypatch.setattr(db_manager, "get_connection", lambda: get_connection(db_file))
+    monkeypatch.setattr(db_manager, "_initialized_files", set())
+    calls = []
+    real_init = db_manager.init_db
+    monkeypatch.setattr(db_manager, "init_db", lambda conn: (calls.append(1), real_init(conn)))
+
+    for _ in range(3):
+        dependency = db_manager.get_db_connection()
+        conn = next(dependency)
+        assert get_pk_columns(conn) == DEVICE_PK
+        with pytest.raises(StopIteration):
+            next(dependency)
+
+    assert len(calls) == 1
+    assert str(db_file) in db_manager._initialized_files
+
+
+def test_get_db_connection_always_initializes_in_memory_databases(monkeypatch):
+    monkeypatch.setattr(db_manager, "get_connection", lambda: get_connection(":memory:"))
+    calls = []
+    real_init = db_manager.init_db
+    monkeypatch.setattr(db_manager, "init_db", lambda conn: (calls.append(1), real_init(conn)))
+
+    for _ in range(2):
+        dependency = db_manager.get_db_connection()
+        next(dependency)
+        with pytest.raises(StopIteration):
+            next(dependency)
+
+    assert len(calls) == 2
