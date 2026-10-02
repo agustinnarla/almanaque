@@ -11,6 +11,10 @@ export interface ChartPalette {
   ink: { tick: string; grid: string; baseline: string }
   // Card surface: gaps between stacked segments and rings around dots.
   surface: string
+  // Spec 058: one-hue blue ramp for magnitude (heatmap), low → high. Steps
+  // 150…650 of the reference sequential ramp; dark mode reverses it so low
+  // values recede toward the dark surface.
+  sequential: readonly string[]
 }
 
 // Categorical slots of the reference data-viz palette, checked with the
@@ -25,6 +29,7 @@ export const CHART_PALETTES: Record<ColorScheme, ChartPalette> = {
     other: '#c3c2b7',
     ink: { tick: '#898781', grid: '#e1e0d9', baseline: '#c3c2b7' },
     surface: '#ffffff',
+    sequential: ['#b7d3f6', '#86b6ef', '#5598e7', '#2a78d6', '#1c5cab', '#104281'],
   },
   dark: {
     series: ['#3987e5', '#d95926'],
@@ -32,6 +37,7 @@ export const CHART_PALETTES: Record<ColorScheme, ChartPalette> = {
     other: '#64748b',
     ink: { tick: '#898781', grid: '#1e293b', baseline: '#334155' },
     surface: '#0f172a',
+    sequential: ['#104281', '#1c5cab', '#2a78d6', '#5598e7', '#86b6ef', '#b7d3f6'],
   },
 }
 

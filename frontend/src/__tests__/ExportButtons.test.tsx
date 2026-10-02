@@ -411,6 +411,9 @@ vi.mock('../lib/csv', async (importOriginal) => {
   return { ...actual, downloadCsv: vi.fn() }
 })
 vi.mock('../hooks/useCampaigns', () => ({ useCampaigns: vi.fn() }))
+vi.mock('../hooks/useHeatmap', () => ({
+  useHeatmap: () => ({ data: [], loading: false, refreshing: false, error: null, reload: () => {} }),
+}))
 vi.mock('../hooks/useRoutingChanges', () => ({
   useRoutingChanges: () => ({
     changes: [{ type: 'ROUTING_CHANGE', severity: 'INFO', date: '2026-09-09', entity: 'IPLAN', message: 'Desde el 2026-09-09 el 100% del volumen sale por IPLAN.' }],

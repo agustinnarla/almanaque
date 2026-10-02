@@ -123,6 +123,8 @@ describe('MethodologyModal', () => {
     panel = await showTab('Ruteo y volumen')
     expect(panel).toHaveTextContent('lleva el 80% o más del volumen')
     expect(panel).toHaveTextContent('apila las 5 troncales')
+    expect(panel).toHaveTextContent('Una celda con menos de 50 llamadas queda sin color')
+    expect(panel).toHaveTextContent('en 6 tramos de un mismo azul')
 
     panel = await showTab('Datos')
     expect(within(panel).getByText('--full')).toBeInTheDocument()

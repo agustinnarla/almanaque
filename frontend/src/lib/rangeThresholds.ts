@@ -15,3 +15,5 @@ export const LOW_VOLUME_MIN_DAYS = 3
 // Spec 053: best/worst hour or device needs at least this share of the range's
 // calls, on top of the absolute minimum (BEST_HOUR/DEVICE_MIN_CALLS).
 export const HIGHLIGHT_MIN_SHARE = 0.01
+// Spec 058: a heatmap cell (device × hour) needs this many calls to be colored.
+export const HEATMAP_MIN_CELL_CALLS = 50

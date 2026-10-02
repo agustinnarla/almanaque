@@ -9,6 +9,7 @@ import type {
   Recommendation,
   SummaryKpi,
   TrunkVolumeRow,
+  HourDeviceRow,
 } from '../types/api'
 
 import type { WeekdayComparePoint } from './chartData'
@@ -421,6 +422,21 @@ export function weekdayCompareRows(points: WeekdayComparePoint[]): CsvTable {
       p.fechaB,
       p.fechaB ? p.totalB : null,
       round(p.rateB),
+    ]),
+  }
+}
+
+// Spec 058: every (trunk, hour) of the range, both rates.
+export function heatmapRows(rows: HourDeviceRow[]): CsvTable {
+  return {
+    headers: ['Troncal', 'Hora', 'Llamadas', 'Agentes', 'Agent Answer %', 'AA sobre atendibles %'],
+    rows: rows.map((r) => [
+      r.device,
+      r.hora,
+      r.total_calls,
+      r.agent_answers,
+      pct(r.total_calls > 0 ? r.agent_answers / r.total_calls : null),
+      pct(r.total_calls - r.machine_answers > 0 ? r.agent_answers / (r.total_calls - r.machine_answers) : null),
     ]),
   }
 }

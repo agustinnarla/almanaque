@@ -167,6 +167,37 @@ def get_daily_device_rows(
     ]
 
 
+def get_hour_device_rows(
+    conn: sqlite3.Connection,
+    campaign_name: str,
+    start_date: date,
+    end_date: date,
+) -> list[dict]:
+    """Spec 058: calls per (device, hour) over the range, for the heatmap."""
+    cursor = conn.execute(
+        """
+        SELECT device, hora, SUM(total_calls) AS total_calls,
+               SUM(agent_answers) AS agent_answers,
+               SUM(machine_answers) AS machine_answers
+        FROM daily_campaign_metrics
+        WHERE campaign = ? AND fecha BETWEEN ? AND ?
+        GROUP BY device, hora
+        ORDER BY device, hora
+        """,
+        (campaign_name, start_date.isoformat(), end_date.isoformat()),
+    )
+    return [
+        {
+            "device": str(row["device"]),
+            "hora": int(row["hora"]),
+            "total_calls": int(row["total_calls"]),
+            "agent_answers": int(row["agent_answers"]),
+            "machine_answers": int(row["machine_answers"]),
+        }
+        for row in cursor.fetchall()
+    ]
+
+
 def get_day_metrics(
     conn: sqlite3.Connection,
     campaign_name: str,

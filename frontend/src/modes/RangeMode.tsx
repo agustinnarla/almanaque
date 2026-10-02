@@ -3,6 +3,7 @@ import { AlertTriangle, Trophy } from 'lucide-react'
 import { ExportCsvButton } from '../components/common/ExportCsvButton'
 import { PrintButton } from '../components/common/PrintButton'
 import { ExecutiveSummary } from '../components/Insights/ExecutiveSummary'
+import { useHeatmap } from '../hooks/useHeatmap'
 import { useRoutingChanges } from '../hooks/useRoutingChanges'
 import { useSegmentPeers } from '../hooks/useSegmentPeers'
 import { rangeSummaryItems } from '../lib/executiveSummary'
@@ -21,6 +22,7 @@ import { RecommendationsPanel } from '../components/Insights/RecommendationsPane
 import { BasesRankingTable } from '../components/overview/BasesRankingTable'
 import { DailyTrendChart } from '../components/overview/DailyTrendChart'
 import { GatewaysRangeTable } from '../components/overview/GatewaysRangeTable'
+import { HourDeviceHeatmap } from '../components/overview/HourDeviceHeatmap'
 import { HourlyAggregateChart } from '../components/overview/HourlyAggregateChart'
 import { OverviewKpis } from '../components/overview/OverviewKpis'
 import { SegmentRankingTable } from '../components/overview/SegmentRankingTable'
@@ -35,6 +37,7 @@ import {
   dailyRows,
   diagnosticRows,
   gatewaysRangeRows,
+  heatmapRows,
   hourlyRows,
   kpiRangeRows,
   patternComboRows,
@@ -103,6 +106,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
   })
   const segmentPeers = useSegmentPeers({ catalog, ...params })
   const routing = useRoutingChanges(params)
+  const heatmap = useHeatmap(range.campaign, range.from, range.to)
   const segment = segmentOf(catalog, range.campaign)
   const entry = campaignEntry(catalog, range.campaign)
   const missingDays = entry ? rangeMissingDays(entry, range.from, range.to) : []
@@ -510,7 +514,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             </div>
           </section>
 
-          <section id="sec-horaria" className="scroll-mt-16">
+          <section id="sec-horaria" className="grid scroll-mt-16 grid-cols-[minmax(0,1fr)] gap-6">
             <HourlyAggregateChart
               points={overview.hourly}
               headerAction={
@@ -520,6 +524,27 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 />
               }
             />
+            {heatmap.loading && !heatmap.refreshing && (
+              <div className="h-48 animate-pulse rounded-xl bg-slate-200" aria-busy="true" aria-label="Cargando mapa de calor" />
+            )}
+            {heatmap.error && (
+              <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                No se pudo cargar el mapa de calor: {heatmap.error}
+              </p>
+            )}
+            {(!heatmap.loading || heatmap.refreshing) && !heatmap.error && (
+              <div className={dimWhile(heatmap.refreshing && !overview.refreshing)}>
+                <HourDeviceHeatmap
+                  rows={heatmap.data ?? []}
+                  headerAction={
+                    <ExportCsvButton
+                      filename={`${filePrefix}_${range.campaign}_${range.from}_${range.to}_heatmap.csv`}
+                      {...heatmapRows(heatmap.data ?? [])}
+                    />
+                  }
+                />
+              </div>
+            )}
           </section>
         </div>
       )}

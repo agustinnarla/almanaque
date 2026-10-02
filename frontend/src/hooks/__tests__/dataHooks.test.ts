@@ -7,6 +7,7 @@ import { useCompareDiagnostics } from '../useCompareDiagnostics'
 import { useCrossCampaignCompare } from '../useCrossCampaignCompare'
 import { useCrossCampaignDiagnostics } from '../useCrossCampaignDiagnostics'
 import { useCrossCampaignRecommendations } from '../useCrossCampaignRecommendations'
+import { useHeatmap } from '../useHeatmap'
 import { useHourlyTrend } from '../useHourlyTrend'
 import { usePatternAlerts } from '../usePatternAlerts'
 import { useRangeDiagnostics } from '../useRangeDiagnostics'
@@ -94,6 +95,7 @@ describe('hooks de datos', () => {
     ['useCampaigns', () => useCampaigns(), 'campaigns', '/api/campaigns'],
     ['usePatternAlerts', () => usePatternAlerts({ from: '2026-09-01', to: '2026-09-30', minCalls: 50 }), 'alerts', '/api/patterns'],
     ['useRangeDiagnostics', () => useRangeDiagnostics({ ...range, minCalls: 50 }), 'data', '/api/campaigns/35/diagnostics'],
+    ['useHeatmap', () => useHeatmap('35', '2026-09-01', '2026-09-30'), 'data', '/api/campaigns/35/heatmap'],
     ['useRangeRecommendations', () => useRangeRecommendations({ ...range, minCalls: 50 }), 'data', '/api/campaigns/35/recommendations'],
     ['useCompareDiagnostics', () => useCompareDiagnostics(compare), 'data', '/api/campaigns/35/compare/diagnostics'],
     ['useRecommendations', () => useRecommendations(compare), 'data', '/api/campaigns/35/compare/recommendations'],
