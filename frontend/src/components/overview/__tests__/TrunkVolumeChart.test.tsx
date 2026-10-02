@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { TRUNK_COLORS } from '../../../lib/chartPalette'
+import { CHART_PALETTES } from '../../../lib/chartPalette'
 import { trunkVolumeRows } from '../../../lib/exporters'
 import { TrunkVolumeChart } from '../TrunkVolumeChart'
 
@@ -28,7 +28,7 @@ describe('TrunkVolumeChart', () => {
 
     const bars = screen.getAllByTestId('bar')
     expect(bars.map((b) => b.dataset.key)).toEqual(['IPLAN', 'GW20', 'GW37'])
-    expect(bars.map((b) => b.dataset.color)).toEqual(TRUNK_COLORS.slice(0, 3))
+    expect(bars.map((b) => b.dataset.color)).toEqual(CHART_PALETTES.light.trunks.slice(0, 3))
     expect(new Set(bars.map((b) => b.dataset.stack)).size).toBe(1)
     expect(screen.getAllByTestId('y-axis')).toHaveLength(1)
     expect(screen.getAllByTestId('trunk-legend-item').map((li) => li.textContent)).toEqual([

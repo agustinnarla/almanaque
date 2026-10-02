@@ -31,21 +31,22 @@ export function KpiGrid({ data, labelA = 'Día', labelB = 'Día' }: KpiGridProps
       : null
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
       <StatCard
-        title="Total de llamadas"
-        value={`${formatNumber(summary.total_calls_a)} → ${formatNumber(summary.total_calls_b)}`}
-        delta={summary.delta_total_pct}
-        deltaLabel="vs A"
-        subtitle={`${labelA} A: ${formatNumber(summary.total_calls_a)} · ${labelA} B: ${formatNumber(summary.total_calls_b)}`}
-      />
-      <StatCard
+        hero
         title="Tasa de contacto"
         value={`${formatRatePct(summary.agent_answer_rate_a)} → ${formatRatePct(summary.agent_answer_rate_b)}`}
         delta={summary.delta_rate != null ? summary.delta_rate * 100 : null}
         deltaIsPercent={false}
         deltaSuffix="pp"
         deltaSecondary={summary.delta_percentage}
+      />
+      <StatCard
+        title="Total de llamadas"
+        value={`${formatNumber(summary.total_calls_a)} → ${formatNumber(summary.total_calls_b)}`}
+        delta={summary.delta_total_pct}
+        deltaLabel="vs A"
+        subtitle={`${labelA} A: ${formatNumber(summary.total_calls_a)} · ${labelA} B: ${formatNumber(summary.total_calls_b)}`}
       />
       <StatCard
         title={`Congestión (${labelB} B)`}

@@ -25,14 +25,16 @@ describe('formatRatePct', () => {
 })
 
 describe('OverviewKpis', () => {
-  it('renderiza los 4 KPIs con valores formateados', () => {
+  it('renderiza los 4 KPIs con la tasa de contacto como cifra principal', () => {
     render(<OverviewKpis summary={summary} />)
     expect(screen.getByTestId('overview-kpis')).toBeInTheDocument()
+    const cards = screen.getAllByTestId('stat-card')
+    expect(cards.filter((card) => card.dataset.hero)).toEqual([cards[0]])
     const values = screen
       .getAllByTestId('stat-value')
       .map((el) => el.textContent)
-    expect(values[0]).toBe('35.413')
-    expect(values[1]).toBe('5.94%')
+    expect(values[0]).toBe('5.94%')
+    expect(values[1]).toBe('35.413')
     expect(values[2]).toBe('31.86%')
     expect(values[3]).toBe('22.027')
     expect(screen.getByText('No contesta / fallidas')).toBeInTheDocument()
@@ -47,7 +49,7 @@ describe('OverviewKpis', () => {
     const values = screen
       .getAllByTestId('stat-value')
       .map((el) => el.textContent)
-    expect(values[1]).toBe('—')
+    expect(values[0]).toBe('—')
     expect(values[2]).toBe('—')
   })
 })

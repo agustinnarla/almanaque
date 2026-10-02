@@ -19,6 +19,7 @@ interface State {
   devices: SegmentRankingResponse | null
   hours: SegmentRankingResponse | null
   loading: boolean
+  refreshing: boolean
   error: string | null
 }
 
@@ -27,7 +28,7 @@ export function useRangeRankings(params: RangeRankingsParams): State & {
 } {
   const { campaign, from, to, minCalls, limit } = params
 
-  const { data, loading, error, reload } = useApiResource(
+  const { data, loading, refreshing, error, reload } = useApiResource(
     async (signal) => {
       const [bases, devices, hours] = await Promise.all([
         fetchBasesRanking(campaign, from, to, minCalls, signal),
@@ -45,6 +46,7 @@ export function useRangeRankings(params: RangeRankingsParams): State & {
     devices: data?.devices ?? null,
     hours: data?.hours ?? null,
     loading,
+    refreshing,
     error,
     reload,
   }

@@ -1,5 +1,6 @@
 import type { TrunkVolumeRow } from '../types/api'
-import { OTHER_TRUNK_COLOR, TRUNK_COLORS } from './chartPalette'
+import type { ChartPalette } from './chartPalette'
+import type { CsvTable } from './exporters'
 
 // More than five stacked colors stop being distinguishable; the tail folds into "Otras".
 export const TRUNK_CHART_TOP = 5
@@ -19,8 +20,20 @@ export interface TrunkVolume {
 }
 
 // Slot order follows the trunk's volume rank in the range; the tail stays gray.
-export function trunkColor(trunk: TrunkTotal, index: number): string {
-  return trunk.name === OTHER_TRUNK ? OTHER_TRUNK_COLOR : TRUNK_COLORS[index]
+export function trunkColor(trunk: TrunkTotal, index: number, palette: ChartPalette): string {
+  return trunk.name === OTHER_TRUNK ? palette.other : palette.trunks[index]
+}
+
+// Table view of the chart: one row per day, one column per trunk, plus the total.
+export function trunkVolumeTable({ trunks, days }: TrunkVolume): CsvTable {
+  return {
+    headers: ['Fecha', ...trunks.map((trunk) => trunk.name), 'Total'],
+    rows: days.map((day) => [
+      day.fecha,
+      ...trunks.map((trunk) => Number(day[trunk.name])),
+      day.total,
+    ]),
+  }
 }
 
 export function buildTrunkVolume(rows: TrunkVolumeRow[], top = TRUNK_CHART_TOP): TrunkVolume {

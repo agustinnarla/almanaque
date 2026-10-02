@@ -12,6 +12,8 @@ interface StatCardProps {
   deltaSecondarySuffix?: string
   goodWhenNegative?: boolean
   subtitle?: ReactNode
+  // The one headline figure of the view: larger, proportional figures.
+  hero?: boolean
 }
 
 function formatSigned(value: number, suffix: string): string {
@@ -40,6 +42,7 @@ export function StatCard({
   deltaSecondarySuffix = '%',
   goodWhenNegative = false,
   subtitle,
+  hero = false,
 }: StatCardProps) {
   const primaryOk = delta != null && Number.isFinite(delta)
   const secondaryOk =
@@ -63,12 +66,16 @@ export function StatCard({
   return (
     <article
       data-testid="stat-card"
-      className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+      data-hero={hero || undefined}
+      className={`rounded-xl border border-slate-200 bg-white p-4 shadow-sm ${
+        hero ? 'sm:col-span-2 lg:col-span-1' : ''
+      }`}
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-        {title}
-      </p>
-      <p className="mt-2 text-2xl font-bold text-slate-900" data-testid="stat-value">
+      <p className="text-sm font-medium text-slate-500">{title}</p>
+      <p
+        className={`mt-2 font-semibold text-slate-900 ${hero ? 'text-4xl lg:text-5xl' : 'text-2xl'}`}
+        data-testid="stat-value"
+      >
         {value}
       </p>
       {showDelta && (

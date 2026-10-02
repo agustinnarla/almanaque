@@ -24,6 +24,7 @@ interface State {
   hourly: HourlyTrendPoint[]
   devices: DeviceRangeRow[]
   loading: boolean
+  refreshing: boolean
   error: string | null
 }
 
@@ -32,7 +33,7 @@ export function useCampaignOverview(
 ): State & { reload: () => void } {
   const { campaign, from, to } = params
 
-  const { data, loading, error, reload } = useApiResource(
+  const { data, loading, refreshing, error, reload } = useApiResource(
     async (signal) => {
       const [summary, daily, hourly, devices] = await Promise.all([
         fetchSummary(campaign, from, to, signal),
@@ -52,6 +53,7 @@ export function useCampaignOverview(
     hourly: data?.hourly ?? [],
     devices: data?.devices ?? [],
     loading,
+    refreshing,
     error,
     reload,
   }

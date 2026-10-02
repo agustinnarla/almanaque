@@ -67,7 +67,7 @@ export function PatternsPanel({ alerts, campaign }: PatternsPanelProps) {
                     style={{ width: `${width}%` }}
                   />
                 </span>
-                <span className="w-8 shrink-0 text-right font-mono text-xs text-slate-700">
+                <span className="w-8 shrink-0 text-right tabular-nums text-xs text-slate-700">
                   {day.alerts}
                 </span>
               </li>
@@ -116,11 +116,11 @@ export function PatternsPanel({ alerts, campaign }: PatternsPanelProps) {
                     <td className="truncate px-2 py-2 text-slate-700">
                       {combo.device}
                     </td>
-                    <td className="px-2 py-2 text-right font-mono text-slate-700">
+                    <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                       {combo.alerts}
                     </td>
                     <td className="px-2 py-2 text-right">
-                      <span className="block font-mono text-xs text-slate-700">
+                      <span className="block tabular-nums text-xs text-slate-700">
                         {share.toFixed(1)}%
                       </span>
                       <span className="mt-1 block h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
@@ -130,7 +130,7 @@ export function PatternsPanel({ alerts, campaign }: PatternsPanelProps) {
                         />
                       </span>
                     </td>
-                    <td className="px-2 py-2 text-right font-mono text-slate-700">
+                    <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                       {formatRatePct(combo.worstRate)}
                     </td>
                   </tr>

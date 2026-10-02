@@ -34,7 +34,7 @@ export function ExecutiveSummary({ items }: ExecutiveSummaryProps) {
             >
               <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${className}`} aria-hidden />
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <p className="text-xs font-semibold text-slate-500">
                   {item.label}
                 </p>
                 <p className="mt-0.5 text-sm text-slate-800">{item.text}</p>

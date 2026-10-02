@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { TrunkVolumeRow } from '../../types/api'
-import { OTHER_TRUNK_COLOR, TRUNK_COLORS } from '../chartPalette'
-import { buildTrunkVolume, trunkColor } from '../trunkVolume'
+import { CHART_PALETTES } from '../chartPalette'
+import { buildTrunkVolume, trunkColor, trunkVolumeTable } from '../trunkVolume'
 
 const row = (fecha: string, device: string, total_calls: number): TrunkVolumeRow => ({
   fecha,
@@ -45,8 +45,24 @@ describe('buildTrunkVolume', () => {
     expect(buildTrunkVolume([])).toEqual({ trunks: [], days: [] })
   })
 
-  it('asigna los slots en orden y gris a «Otras»', () => {
-    expect(trunkColor({ name: 'IPLAN', total: 1, share: 1 }, 0)).toBe(TRUNK_COLORS[0])
-    expect(trunkColor({ name: 'Otras', total: 1, share: 1 }, 5)).toBe(OTHER_TRUNK_COLOR)
+  it('asigna los slots en orden y gris a «Otras», según la paleta del modo', () => {
+    const { light, dark } = CHART_PALETTES
+    expect(trunkColor({ name: 'IPLAN', total: 1, share: 1 }, 0, light)).toBe(light.trunks[0])
+    expect(trunkColor({ name: 'Otras', total: 1, share: 1 }, 5, light)).toBe(light.other)
+    expect(trunkColor({ name: 'IPLAN', total: 1, share: 1 }, 0, dark)).toBe(dark.trunks[0])
+  })
+
+  it('arma la tabla pivote día × troncal con el total', () => {
+    const volume = buildTrunkVolume(
+      [row('2026-09-01', 'A', 100), row('2026-09-01', 'B', 50), row('2026-09-02', 'C', 30)],
+      2,
+    )
+    expect(trunkVolumeTable(volume)).toEqual({
+      headers: ['Fecha', 'A', 'B', 'Otras', 'Total'],
+      rows: [
+        ['2026-09-01', 100, 50, 0, 150],
+        ['2026-09-02', 0, 0, 30, 30],
+      ],
+    })
   })
 })

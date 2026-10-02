@@ -51,6 +51,7 @@ import {
 } from '../lib/rangeDiagnostics'
 import { mergeBaseRankings, mergeSegmentRankings } from '../lib/rankings'
 import { defaultCrossValues, segmentOf } from '../lib/catalog'
+import { dimWhile } from '../lib/refreshing'
 import type { CampaignCatalogEntry } from '../types/api'
 import { DEFAULT_MIN_CALLS, RANKING_LIMIT } from './defaults'
 
@@ -87,7 +88,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
     [cross.campaignA, cross.campaignB, cross.from, cross.to, cross.minCalls],
   )
 
-  const { data, loading, error, reload } = useCrossCampaignCompare(params)
+  const { data, loading, refreshing, error, reload } = useCrossCampaignCompare(params)
   const diagnostics = useCrossCampaignDiagnostics(params)
   const recommendations = useCrossCampaignRecommendations(params)
   const rankingsA = useRangeRankings({
@@ -130,6 +131,11 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
       : null
 
   const rankingsLoading = rankingsA.loading || rankingsB.loading
+  // Refreshing only when every pending side still has its previous result.
+  const rankingsRefreshing =
+    rankingsLoading &&
+    (!rankingsA.loading || rankingsA.refreshing) &&
+    (!rankingsB.loading || rankingsB.refreshing)
   const rankingsError = rankingsA.error ?? rankingsB.error
 
   const crossPositives = diagnostics.data
@@ -189,7 +195,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
         />
       </div>
 
-      {loading && (
+      {loading && !refreshing && (
         <div className="space-y-4" aria-busy="true" aria-label="Cargando campañas">
           <div className="h-28 animate-pulse rounded-xl bg-slate-200" />
           <div className="h-80 animate-pulse rounded-xl bg-slate-200" />
@@ -206,8 +212,8 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
         </p>
       )}
 
-      {!loading && !error && data && (
-        <>
+      {(!loading || refreshing) && !error && data && (
+        <div className={`space-y-6 ${dimWhile(refreshing)}`} aria-busy={refreshing || undefined}>
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-slate-400">
               {data.campaign_a} vs {data.campaign_b} · {data.start_date} →{' '}
@@ -245,7 +251,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             <KpiGrid data={data} labelA="Campaña" labelB="Campaña" />
           </section>
 
-          <section id="sec-diagnostico" aria-label="Diagnóstico entre campañas" className="scroll-mt-16">
+          <section id="sec-diagnostico" aria-label="Diagnóstico entre campañas" className={`scroll-mt-16 ${dimWhile(diagnostics.refreshing && !refreshing)}`} aria-busy={diagnostics.refreshing && !refreshing || undefined}>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Diagnóstico
@@ -255,7 +261,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                 {...diagnosticRows(crossNegatives, crossPositives)}
               />
             </div>
-            {diagnostics.loading && (
+            {diagnostics.loading && !diagnostics.refreshing && (
               <div
                 className="h-40 animate-pulse rounded-xl bg-slate-200"
                 aria-busy="true"
@@ -270,7 +276,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                 No se pudo cargar el diagnóstico: {diagnostics.error}
               </p>
             )}
-            {!diagnostics.loading && !diagnostics.error && diagnostics.data && (
+            {(!diagnostics.loading || diagnostics.refreshing) && !diagnostics.error && diagnostics.data && (
               <DiagnosticsFeed
                 rootCauses={crossNegatives}
                 positiveDrivers={crossPositives}
@@ -280,7 +286,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             )}
           </section>
 
-          <section id="sec-recomendaciones" aria-label="Recomendaciones entre campañas" className="scroll-mt-16">
+          <section id="sec-recomendaciones" aria-label="Recomendaciones entre campañas" className={`scroll-mt-16 ${dimWhile(recommendations.refreshing && !refreshing)}`} aria-busy={recommendations.refreshing && !refreshing || undefined}>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Recomendaciones
@@ -292,7 +298,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                 )}
               />
             </div>
-            {recommendations.loading && (
+            {recommendations.loading && !recommendations.refreshing && (
               <div
                 className="h-32 animate-pulse rounded-xl bg-slate-200"
                 aria-busy="true"
@@ -307,14 +313,14 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                 No se pudieron cargar las recomendaciones: {recommendations.error}
               </p>
             )}
-            {!recommendations.loading && !recommendations.error && (
+            {(!recommendations.loading || recommendations.refreshing) && !recommendations.error && (
               <RecommendationsPanel
                 recommendations={recommendations.data?.recommendations ?? []}
               />
             )}
           </section>
 
-          <section id="sec-rankings" aria-label="Rankings comparados" className="scroll-mt-16">
+          <section id="sec-rankings" aria-label="Rankings comparados" className={`scroll-mt-16 ${dimWhile(rankingsRefreshing && !refreshing)}`} aria-busy={rankingsRefreshing && !refreshing || undefined}>
             <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -344,7 +350,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                 />
               </div>
             </div>
-            {rankingsLoading && (
+            {rankingsLoading && !rankingsRefreshing && (
               <div
                 className="h-40 animate-pulse rounded-xl bg-slate-200"
                 aria-busy="true"
@@ -359,7 +365,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                 No se pudieron cargar los rankings: {rankingsError}
               </p>
             )}
-            {!rankingsLoading && !rankingsError && (
+            {(!rankingsLoading || rankingsRefreshing) && !rankingsError && (
               <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8">
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="mb-4">
@@ -402,7 +408,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             )}
           </section>
 
-          <section id="sec-alertas" aria-label="Alertas de patrones comparadas" className="scroll-mt-16">
+          <section id="sec-alertas" aria-label="Alertas de patrones comparadas" className={`scroll-mt-16 ${dimWhile(patternAlerts.refreshing && !refreshing)}`} aria-busy={patternAlerts.refreshing && !refreshing || undefined}>
             <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -427,7 +433,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                 />
               </div>
             </div>
-            {patternAlerts.loading && (
+            {patternAlerts.loading && !patternAlerts.refreshing && (
               <div
                 className="h-40 animate-pulse rounded-xl bg-slate-200"
                 aria-busy="true"
@@ -442,7 +448,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
                 No se pudieron cargar las alertas: {patternAlerts.error}
               </p>
             )}
-            {!patternAlerts.loading && !patternAlerts.error && (
+            {(!patternAlerts.loading || patternAlerts.refreshing) && !patternAlerts.error && (
               <PatternsComparePanel
                 alerts={patternAlerts.alerts}
                 campaignA={cross.campaignA}
@@ -522,7 +528,7 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
               }
             />
           </section>
-        </>
+        </div>
       )}
 
       {!loading && !error && !data && (

@@ -6,6 +6,7 @@ interface State {
   pointsA: HourlyTrendPoint[]
   pointsB: HourlyTrendPoint[]
   loading: boolean
+  refreshing: boolean
   error: string | null
 }
 
@@ -14,7 +15,7 @@ export function useHourlyTrend(
   dateA: string,
   dateB: string,
 ): State & { reload: () => void } {
-  const { data, loading, error, reload } = useApiResource(
+  const { data, loading, refreshing, error, reload } = useApiResource(
     async (signal) => {
       const [pointsA, pointsB] = await Promise.all([
         fetchHourlyTrend(campaign, dateA, signal),
@@ -30,6 +31,7 @@ export function useHourlyTrend(
     pointsA: data?.pointsA ?? [],
     pointsB: data?.pointsB ?? [],
     loading,
+    refreshing,
     error,
     reload,
   }

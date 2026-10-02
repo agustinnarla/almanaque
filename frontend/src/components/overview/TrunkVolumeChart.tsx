@@ -9,51 +9,15 @@ import {
   YAxis,
 } from 'recharts'
 import type { TrunkVolumeRow } from '../../types/api'
-import { CHART_INK } from '../../lib/chartPalette'
-import { buildTrunkVolume, trunkColor } from '../../lib/trunkVolume'
-
-const AXIS_TICK = { fontSize: 11, fill: CHART_INK.tick }
+import { MAX_BAR_SIZE, useChartPalette } from '../../lib/chartPalette'
+import { buildTrunkVolume, trunkColor, trunkVolumeTable } from '../../lib/trunkVolume'
+import { ChartCard } from '../charts/ChartCard'
+import { ChartTooltip, type TooltipPayloadItem } from '../charts/ChartTooltip'
 
 const formatCalls = (value: number) => Math.round(value).toLocaleString('es-AR')
 
-interface TooltipItem {
-  dataKey?: string | number
-  name?: string | number
-  value?: number | string | null
-  color?: string
-  payload?: { total?: number }
-}
-
-interface TrunkTooltipProps {
-  active?: boolean
-  payload?: TooltipItem[]
-  label?: string | number
-}
-
-function TrunkTooltip({ active, payload, label }: TrunkTooltipProps) {
-  if (!active || !payload || payload.length === 0) return null
-  const total = payload[0].payload?.total ?? 0
-  return (
-    <div
-      data-testid="trunk-tooltip"
-      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-md"
-    >
-      <p className="mb-1 font-semibold text-slate-800">{label}</p>
-      {[...payload].reverse().map((item) => (
-        <p key={String(item.dataKey)} className="text-slate-600">
-          <span
-            className="mr-2 inline-block h-2 w-2 rounded-full align-middle"
-            style={{ background: item.color }}
-          />
-          {item.name}: {formatCalls(Number(item.value ?? 0))}
-        </p>
-      ))}
-      <p className="mt-1 border-t border-slate-100 pt-1 font-semibold text-slate-700">
-        Total: {formatCalls(total)}
-      </p>
-    </div>
-  )
-}
+const dayTotal = (payload: TooltipPayloadItem[]) =>
+  `Total: ${formatCalls(Number(payload[0].payload?.total ?? 0))}`
 
 interface TrunkVolumeChartProps {
   rows: TrunkVolumeRow[]
@@ -61,7 +25,9 @@ interface TrunkVolumeChartProps {
 }
 
 export function TrunkVolumeChart({ rows, headerAction }: TrunkVolumeChartProps) {
-  const { trunks, days } = buildTrunkVolume(rows)
+  const palette = useChartPalette()
+  const volume = buildTrunkVolume(rows)
+  const { trunks, days } = volume
 
   if (days.length === 0) {
     return (
@@ -74,29 +40,22 @@ export function TrunkVolumeChart({ rows, headerAction }: TrunkVolumeChartProps) 
     )
   }
 
+  const axisTick = { fontSize: 11, fill: palette.ink.tick }
+
   return (
-    <div
-      data-testid="trunk-volume-chart"
-      className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+    <ChartCard
+      testId="trunk-volume-chart"
+      title="Volumen diario por troncal"
+      subtitle="Llamadas por día, apiladas por troncal · las 5 con más volumen del rango; el resto, en «Otras»"
+      table={trunkVolumeTable(volume)}
+      headerAction={headerAction}
     >
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div>
-          <h2 className="mb-1 text-base font-semibold text-slate-900">
-            Volumen diario por troncal
-          </h2>
-          <p className="text-xs text-slate-500">
-            Llamadas por día, apiladas por troncal · las 5 con más volumen del
-            rango; el resto, en «Otras»
-          </p>
-        </div>
-        {headerAction}
-      </div>
       <ul className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600" aria-label="Troncales">
         {trunks.map((trunk, index) => (
           <li key={trunk.name} data-testid="trunk-legend-item" className="flex items-center">
             <span
               className="mr-1.5 inline-block h-2.5 w-2.5 rounded-sm"
-              style={{ background: trunkColor(trunk, index) }}
+              style={{ background: trunkColor(trunk, index, palette) }}
               aria-hidden
             />
             {trunk.name} · {(trunk.share * 100).toFixed(0)}%
@@ -106,37 +65,44 @@ export function TrunkVolumeChart({ rows, headerAction }: TrunkVolumeChartProps) 
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={days} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke={CHART_INK.grid} />
+            <CartesianGrid vertical={false} stroke={palette.ink.grid} />
             <XAxis
               dataKey="label"
-              tick={AXIS_TICK}
+              tick={axisTick}
               tickLine={false}
-              axisLine={{ stroke: CHART_INK.baseline }}
+              axisLine={{ stroke: palette.ink.baseline }}
             />
             <YAxis
               width={56}
-              tick={AXIS_TICK}
+              tick={axisTick}
               axisLine={false}
               tickLine={false}
               tickFormatter={formatCalls}
-              label={{ value: 'Llamadas', angle: -90, position: 'insideLeft', fontSize: 11, fill: CHART_INK.tick }}
+              label={{ value: 'Llamadas', angle: -90, position: 'insideLeft', fontSize: 11, fill: palette.ink.tick }}
             />
-            <Tooltip content={<TrunkTooltip />} cursor={{ fill: CHART_INK.grid, opacity: 0.4 }} />
+            <Tooltip
+              content={
+                <ChartTooltip formatValue={(_key, value) => formatCalls(value)} reverse footer={dayTotal} />
+              }
+              cursor={{ fill: palette.ink.grid, opacity: 0.4 }}
+            />
+            {/* A 1px stroke in the surface color on each segment leaves a 2px
+                surface gap between stacked neighbours. */}
             {trunks.map((trunk, index) => (
               <Bar
                 key={trunk.name}
                 dataKey={trunk.name}
                 name={trunk.name}
                 stackId="trunks"
-                fill={trunkColor(trunk, index)}
-                stroke="#ffffff"
+                fill={trunkColor(trunk, index, palette)}
+                stroke={palette.surface}
                 strokeWidth={1}
-                maxBarSize={28}
+                maxBarSize={MAX_BAR_SIZE}
               />
             ))}
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </ChartCard>
   )
 }

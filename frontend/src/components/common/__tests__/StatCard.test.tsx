@@ -90,4 +90,14 @@ describe('StatCard', () => {
     expect(delta).toHaveTextContent('−12.50%')
     expect(delta).toHaveAttribute('data-bad')
   })
+  it('hero agranda el valor; el título va en mayúscula inicial', () => {
+    const { rerender } = render(<StatCard title="Tasa de contacto" value="5.94%" hero />)
+    expect(screen.getByTestId('stat-card')).toHaveAttribute('data-hero')
+    expect(screen.getByTestId('stat-value').className).toContain('lg:text-5xl')
+    expect(screen.getByText('Tasa de contacto').className).not.toContain('uppercase')
+
+    rerender(<StatCard title="Total" value="35.413" />)
+    expect(screen.getByTestId('stat-card')).not.toHaveAttribute('data-hero')
+    expect(screen.getByTestId('stat-value').className).toContain('text-2xl')
+  })
 })

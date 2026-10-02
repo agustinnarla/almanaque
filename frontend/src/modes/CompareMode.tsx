@@ -24,6 +24,7 @@ import {
   recommendationRows,
 } from '../lib/exporters'
 import { defaultCompareValues } from '../lib/catalog'
+import { dimWhile } from '../lib/refreshing'
 import type { CampaignCatalogEntry } from '../types/api'
 import { DEFAULT_MIN_CALLS } from './defaults'
 
@@ -60,7 +61,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
     ],
   )
 
-  const { data, loading, error, reload } = useCompareDiagnostics(params)
+  const { data, loading, refreshing, error, reload } = useCompareDiagnostics(params)
   const hourly = useHourlyTrend(filters.campaign, filters.dateA, filters.dateB)
   const recommendations = useRecommendations(params)
 
@@ -84,7 +85,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
         />
       </div>
 
-      {loading && (
+      {loading && !refreshing && (
         <div className="space-y-4" aria-busy="true" aria-label="Cargando">
           <div className="h-28 animate-pulse rounded-xl bg-slate-200" />
           <div className="h-40 animate-pulse rounded-xl bg-slate-200" />
@@ -101,8 +102,8 @@ export function CompareMode({ catalog }: CompareModeProps) {
         </p>
       )}
 
-      {!loading && !error && data && (
-        <>
+      {(!loading || refreshing) && !error && data && (
+        <div className={`space-y-6 ${dimWhile(refreshing)}`} aria-busy={refreshing || undefined}>
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-slate-400">
               {data.campaign} · {data.date_a} → {data.date_b} · min_calls{' '}
@@ -155,7 +156,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
             />
           </section>
 
-          <section id="sec-recomendaciones" aria-label="Recomendaciones" className="scroll-mt-16">
+          <section id="sec-recomendaciones" aria-label="Recomendaciones" className={`scroll-mt-16 ${dimWhile(recommendations.refreshing && !refreshing)}`} aria-busy={recommendations.refreshing && !refreshing || undefined}>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Recomendaciones
@@ -167,7 +168,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
                 )}
               />
             </div>
-            {recommendations.loading && !recommendations.error && (
+            {recommendations.loading && !recommendations.refreshing && !recommendations.error && (
               <div
                 className="h-32 animate-pulse rounded-xl bg-slate-200"
                 aria-busy="true"
@@ -183,7 +184,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
                 {recommendations.error}
               </p>
             )}
-            {!recommendations.loading && !recommendations.error && (
+            {(!recommendations.loading || recommendations.refreshing) && !recommendations.error && (
               <RecommendationsPanel
                 recommendations={recommendations.data?.recommendations ?? []}
               />
@@ -193,10 +194,11 @@ export function CompareMode({ catalog }: CompareModeProps) {
           <section
             id="sec-temporal"
             aria-label="Análisis temporal e infraestructura"
-            className="grid scroll-mt-16 grid-cols-[minmax(0,1fr)] gap-6"
+            className={`grid scroll-mt-16 grid-cols-[minmax(0,1fr)] gap-6 ${dimWhile(hourly.refreshing && !refreshing)}`}
+            aria-busy={(hourly.refreshing && !refreshing) || undefined}
           >
             <div>
-              {hourly.loading && !hourly.error && (
+              {hourly.loading && !hourly.refreshing && !hourly.error && (
                 <div
                   className="h-80 animate-pulse rounded-xl bg-slate-200"
                   aria-busy="true"
@@ -211,7 +213,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
                   No se pudo cargar la tendencia horaria: {hourly.error}
                 </p>
               )}
-              {!hourly.loading && !hourly.error && (
+              {(!hourly.loading || hourly.refreshing) && !hourly.error && (
                 <HourlyTrendChart
                   pointsA={hourly.pointsA}
                   pointsB={hourly.pointsB}
@@ -245,7 +247,7 @@ export function CompareMode({ catalog }: CompareModeProps) {
               <GatewaysTable rows={data.gateways_comparison} />
             </div>
           </section>
-        </>
+        </div>
       )}
 
       {!loading && !error && !data && (

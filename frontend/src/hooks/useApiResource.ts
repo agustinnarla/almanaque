@@ -8,6 +8,9 @@ export interface ApiResourceOptions {
 export interface ApiResource<T> {
   data: T | null
   loading: boolean
+  // Loading while the previous result is still on screen: views keep it,
+  // dimmed, instead of flashing a skeleton.
+  refreshing: boolean
   error: string | null
   reload: () => void
 }
@@ -66,6 +69,7 @@ export function useApiResource<T>(
   return {
     data: result.data,
     loading,
+    refreshing: loading && result.data !== null,
     error: loading ? null : result.error,
     reload,
   }

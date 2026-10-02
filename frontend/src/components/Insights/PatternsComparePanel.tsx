@@ -98,7 +98,7 @@ export function PatternsComparePanel({
                   />
                 </span>
               </span>
-              <span className="flex w-14 shrink-0 flex-col text-right font-mono text-[10px] leading-tight text-slate-700">
+              <span className="flex w-14 shrink-0 flex-col text-right tabular-nums text-[10px] leading-tight text-slate-700">
                 <span>{day.alertsA}</span>
                 <span>{day.alertsB}</span>
               </span>
@@ -153,13 +153,13 @@ export function PatternsComparePanel({
                   <td className="truncate px-2 py-2 text-slate-700">
                     {combo.device}
                   </td>
-                  <td className="px-2 py-2 text-right font-mono text-slate-700">
+                  <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                     {combo.alertsA || '—'}
                   </td>
-                  <td className="px-2 py-2 text-right font-mono text-slate-700">
+                  <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                     {combo.alertsB || '—'}
                   </td>
-                  <td className="px-2 py-2 text-right font-mono font-semibold text-slate-900">
+                  <td className="px-2 py-2 text-right tabular-nums font-semibold text-slate-900">
                     {combo.total}
                   </td>
                 </tr>

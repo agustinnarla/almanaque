@@ -51,17 +51,17 @@ export function BasesRankingTable({ rows, minCalls }: BasesRankingTableProps) {
               data-best-rate={best || undefined}
               className={`transition-colors hover:bg-slate-50 ${best ? 'bg-emerald-50' : ''}`}
             >
-              <td className="px-3 py-2.5 font-mono text-xs text-slate-500">
+              <td className="px-3 py-2.5 tabular-nums text-xs text-slate-500">
                 #{index + 1}
               </td>
               <td className="truncate px-3 py-2.5 font-semibold text-slate-900">
                 {row.base}
               </td>
-              <td className="px-3 py-2.5 text-right font-mono text-slate-700">
+              <td className="px-3 py-2.5 text-right tabular-nums text-slate-700">
                 {formatNumber(row.total_calls)}
               </td>
               <td
-                className={`px-3 py-2.5 text-right font-mono ${best ? 'font-bold text-emerald-700' : 'text-slate-700'}`}
+                className={`px-3 py-2.5 text-right tabular-nums ${best ? 'font-bold text-emerald-700' : 'text-slate-700'}`}
                 title={best ? 'Mejor AA entre las bases que compiten' : undefined}
               >
                 {formatRatePct(row.agent_answer_rate)}
@@ -85,12 +85,12 @@ export function BasesRankingTable({ rows, minCalls }: BasesRankingTableProps) {
               data-ranked="false"
               className="text-slate-400"
             >
-              <td className="px-3 py-2.5 font-mono text-xs">—</td>
+              <td className="px-3 py-2.5 tabular-nums text-xs">—</td>
               <td className="truncate px-3 py-2.5">{row.base}</td>
-              <td className="px-3 py-2.5 text-right font-mono">
+              <td className="px-3 py-2.5 text-right tabular-nums">
                 {formatNumber(row.total_calls)}
               </td>
-              <td className="px-3 py-2.5 text-right font-mono">
+              <td className="px-3 py-2.5 text-right tabular-nums">
                 {formatRatePct(row.agent_answer_rate)}
               </td>
             </tr>

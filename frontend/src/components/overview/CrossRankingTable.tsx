@@ -132,37 +132,37 @@ export function CrossRankingTable({ kind, rows }: CrossRankingTableProps) {
                 <td className={`${cellPadding} truncate font-semibold text-slate-900`}>
                   {row.key}
                 </td>
-                <td className={`${cellPadding} text-right font-mono text-slate-700`}>
+                <td className={`${cellPadding} text-right tabular-nums text-slate-700`}>
                   {formatNumber(row.attemptsA)}
                 </td>
-                <td className={`${cellPadding} text-right font-mono text-slate-700`}>
+                <td className={`${cellPadding} text-right tabular-nums text-slate-700`}>
                   {formatRatePct(row.rateA)}
                 </td>
                 {meta.withHealth && (
                   <td
                     {...(toneA ? { [toneA.attribute]: 'true' } : {})}
-                    className={`${cellPadding} text-right font-mono font-semibold ${toneA?.className ?? 'text-slate-500'}`}
+                    className={`${cellPadding} text-right tabular-nums font-semibold ${toneA?.className ?? 'text-slate-500'}`}
                   >
                     {formatScore(row.healthA)}
                   </td>
                 )}
-                <td className={`${cellPadding} text-right font-mono text-slate-700`}>
+                <td className={`${cellPadding} text-right tabular-nums text-slate-700`}>
                   {formatNumber(row.attemptsB)}
                 </td>
-                <td className={`${cellPadding} text-right font-mono text-slate-700`}>
+                <td className={`${cellPadding} text-right tabular-nums text-slate-700`}>
                   {formatRatePct(row.rateB)}
                 </td>
                 {meta.withHealth && (
                   <td
                     {...(toneB ? { [toneB.attribute]: 'true' } : {})}
-                    className={`${cellPadding} text-right font-mono font-semibold ${toneB?.className ?? 'text-slate-500'}`}
+                    className={`${cellPadding} text-right tabular-nums font-semibold ${toneB?.className ?? 'text-slate-500'}`}
                   >
                     {formatScore(row.healthB)}
                   </td>
                 )}
                 <td
                   {...{ [delta.attribute]: 'true' }}
-                  className={`${cellPadding} text-right font-mono font-semibold ${delta.className}`}
+                  className={`${cellPadding} text-right tabular-nums font-semibold ${delta.className}`}
                 >
                   {formatDelta(row.delta)}
                 </td>

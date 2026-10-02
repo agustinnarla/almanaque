@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import type { HourlyTrendPoint } from '../../types/api'
-import { SERIES_COLORS } from '../../lib/chartPalette'
+import { useChartPalette } from '../../lib/chartPalette'
+import { hourlyRows } from '../../lib/exporters'
+import { ChartCard } from '../charts/ChartCard'
 import { RateVolumeChart } from '../charts/RateVolumeChart'
 
 interface HourlyAggregateChartProps {
@@ -9,6 +11,8 @@ interface HourlyAggregateChartProps {
 }
 
 export function HourlyAggregateChart({ points, headerAction }: HourlyAggregateChartProps) {
+  const palette = useChartPalette()
+
   if (points.length === 0) {
     return (
       <p
@@ -27,30 +31,22 @@ export function HourlyAggregateChart({ points, headerAction }: HourlyAggregateCh
   }))
 
   return (
-    <div
-      data-testid="hourly-agg-chart"
-      className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+    <ChartCard
+      testId="hourly-agg-chart"
+      title="Tendencia horaria del rango"
+      subtitle="Tasa de contacto % (arriba) y llamadas (abajo) agregadas por hora"
+      table={hourlyRows(points)}
+      headerAction={headerAction}
     >
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <div>
-          <h2 className="mb-1 text-base font-semibold text-slate-900">
-            Tendencia horaria del rango
-          </h2>
-          <p className="text-xs text-slate-500">
-            Tasa de contacto % (arriba) y llamadas (abajo) agregadas por hora
-          </p>
-        </div>
-        {headerAction}
-      </div>
       <RateVolumeChart
         data={data}
         xKey="hora"
         xLabel="Hora"
         syncId="hourly-aggregate"
         series={[
-          { name: 'Campaña', rateKey: 'rate', totalKey: 'total', color: SERIES_COLORS[0] },
+          { name: 'Campaña', rateKey: 'rate', totalKey: 'total', color: palette.series[0] },
         ]}
       />
-    </div>
+    </ChartCard>
   )
 }

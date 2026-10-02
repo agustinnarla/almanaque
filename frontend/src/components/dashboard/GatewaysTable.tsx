@@ -47,13 +47,13 @@ export function GatewaysTable({ rows }: GatewaysTableProps) {
                 <td className="truncate px-2 py-2 font-semibold text-slate-900">
                   {row.device}
                 </td>
-                <td className="px-2 py-2 text-right font-mono text-slate-700">
+                <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                   {formatRatePct(row.congestion_rate_a)}
                 </td>
-                <td className="px-2 py-2 text-right font-mono text-slate-700">
+                <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                   {formatRatePct(row.congestion_rate_b)}
                 </td>
-                <td className="px-2 py-2 text-right font-mono text-slate-700">
+                <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                   {formatDeltaPp(row.delta_congestion)}
                 </td>
                 <td className="px-2 py-2">

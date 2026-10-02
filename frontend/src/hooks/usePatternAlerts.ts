@@ -11,6 +11,7 @@ export interface PatternAlertsParams {
 interface State {
   alerts: PatternAlert[] | null
   loading: boolean
+  refreshing: boolean
   error: string | null
 }
 
@@ -19,11 +20,11 @@ export function usePatternAlerts(params: PatternAlertsParams): State & {
 } {
   const { from, to, minCalls } = params
 
-  const { data, loading, error, reload } = useApiResource(
+  const { data, loading, refreshing, error, reload } = useApiResource(
     (signal) => fetchPatterns(from, to, minCalls, signal),
     [from, to, minCalls],
     { errorMessage: 'No se pudieron cargar las alertas de patrones' },
   )
 
-  return { alerts: data, loading, error, reload }
+  return { alerts: data, loading, refreshing, error, reload }
 }

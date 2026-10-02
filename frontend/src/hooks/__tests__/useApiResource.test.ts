@@ -148,4 +148,20 @@ describe('useApiResource', () => {
     expect(result.current.loading).toBe(true)
     expect(result.current.error).toBeNull()
   })
+  it('marca refreshing al recargar con un dato previo, y no en la primera carga', async () => {
+    const { calls, fetcher } = controlledFetcher<string>()
+    const { result } = renderHook(() => useApiResource(fetcher, ['a'], OPTIONS))
+
+    expect(result.current.refreshing).toBe(false)
+    await act(async () => calls[0].request.resolve('primero'))
+
+    act(() => result.current.reload())
+    expect(result.current.loading).toBe(true)
+    expect(result.current.refreshing).toBe(true)
+    expect(result.current.data).toBe('primero')
+
+    await act(async () => calls[1].request.resolve('segundo'))
+    expect(result.current.refreshing).toBe(false)
+    expect(result.current.data).toBe('segundo')
+  })
 })

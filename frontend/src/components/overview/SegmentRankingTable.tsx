@@ -83,18 +83,18 @@ function RankingBlock({ title, items, kind }: RankingBlockProps) {
                   <td className="truncate px-3 py-2.5 font-semibold text-slate-900">
                     {segmentLabel(item, kind)}
                   </td>
-                  <td className="px-3 py-2.5 text-right font-mono text-slate-700">
+                  <td className="px-3 py-2.5 text-right tabular-nums text-slate-700">
                     {formatNumber(item.total_calls)}
                   </td>
-                  <td className="px-3 py-2.5 text-right font-mono text-slate-700">
+                  <td className="px-3 py-2.5 text-right tabular-nums text-slate-700">
                     {formatRatePct(item.agent_answer_rate)}
                   </td>
-                  <td className="px-3 py-2.5 text-right font-mono text-slate-700">
+                  <td className="px-3 py-2.5 text-right tabular-nums text-slate-700">
                     {formatRatePct(item.busy_rate)}
                   </td>
                   <td
                     {...(tone ? { [tone.attribute]: 'true' } : {})}
-                    className={`px-3 py-2.5 text-right font-mono font-semibold ${tone?.className ?? 'text-slate-700'}`}
+                    className={`px-3 py-2.5 text-right tabular-nums font-semibold ${tone?.className ?? 'text-slate-700'}`}
                   >
                     {formatScore(item.health_score)}
                   </td>

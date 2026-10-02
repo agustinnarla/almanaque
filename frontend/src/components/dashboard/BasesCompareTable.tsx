@@ -39,19 +39,19 @@ export function BasesCompareTable({ rows }: BasesCompareTableProps) {
               <td className="truncate px-2 py-2 font-semibold text-slate-900">
                 {row.base}
               </td>
-              <td className="px-2 py-2 text-right font-mono text-slate-700">
+              <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                 {formatRatePct(row.agent_answer_rate_a)}
               </td>
-              <td className="px-2 py-2 text-right font-mono text-slate-700">
+              <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                 {formatRatePct(row.agent_answer_rate_b)}
               </td>
-              <td className="px-2 py-2 text-right font-mono text-slate-700">
+              <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                 {formatDeltaPp(row.delta_rate)}
               </td>
-              <td className="px-2 py-2 text-right font-mono text-slate-500">
+              <td className="px-2 py-2 text-right tabular-nums text-slate-500">
                 {formatRatePct(row.share_a, 1)}
               </td>
-              <td className="px-2 py-2 text-right font-mono text-slate-500">
+              <td className="px-2 py-2 text-right tabular-nums text-slate-500">
                 {formatRatePct(row.share_b, 1)}
               </td>
             </tr>

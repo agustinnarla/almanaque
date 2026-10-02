@@ -52,6 +52,7 @@ import {
   defaultWeekValues,
 } from '../lib/catalog'
 import { buildWeekOptions, findWeekByStart } from '../lib/weeks'
+import { dimWhile } from '../lib/refreshing'
 import type { CampaignCatalogEntry } from '../types/api'
 import { DEFAULT_MIN_CALLS, RANKING_LIMIT } from './defaults'
 
@@ -188,7 +189,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
         )}
       </div>
 
-      {overview.loading && (
+      {overview.loading && !overview.refreshing && (
         <div className="space-y-4" aria-busy="true" aria-label="Cargando campaña">
           <div className="h-28 animate-pulse rounded-xl bg-slate-200" />
           <div className="h-80 animate-pulse rounded-xl bg-slate-200" />
@@ -205,8 +206,8 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
         </p>
       )}
 
-      {!overview.loading && !overview.error && overview.summary && (
-        <>
+      {(!overview.loading || overview.refreshing) && !overview.error && overview.summary && (
+        <div className={`space-y-6 ${dimWhile(overview.refreshing)}`} aria-busy={overview.refreshing || undefined}>
           <div className="flex items-center justify-between gap-3">
             <p className="text-xs text-slate-400">
               {overview.summary.campaign}
@@ -253,7 +254,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             <OverviewKpis summary={overview.summary} />
           </section>
 
-          <section id="sec-diagnostico" aria-label="Diagnóstico del rango" className="scroll-mt-16">
+          <section id="sec-diagnostico" aria-label="Diagnóstico del rango" className={`scroll-mt-16 ${dimWhile(diagnostics.refreshing && !overview.refreshing)}`} aria-busy={diagnostics.refreshing && !overview.refreshing || undefined}>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Diagnóstico del rango
@@ -265,7 +266,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 />
               )}
             </div>
-            {diagnostics.loading && (
+            {diagnostics.loading && !diagnostics.refreshing && (
               <div className="h-40 animate-pulse rounded-xl bg-slate-200" aria-busy="true" aria-label="Cargando diagnóstico" />
             )}
             {diagnostics.error && (
@@ -273,7 +274,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 No se pudo cargar el diagnóstico: {diagnostics.error}
               </p>
             )}
-            {!diagnostics.loading && !diagnostics.error && rangeDiag && (
+            {(!diagnostics.loading || diagnostics.refreshing) && !diagnostics.error && rangeDiag && (
               <DiagnosticsFeed
                 rootCauses={rangeDiag.rootCauses}
                 positiveDrivers={rangeDiag.positiveDrivers}
@@ -283,7 +284,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             )}
           </section>
 
-          <section id="sec-recomendaciones" aria-label="Recomendaciones del rango" className="scroll-mt-16">
+          <section id="sec-recomendaciones" aria-label="Recomendaciones del rango" className={`scroll-mt-16 ${dimWhile(recommendations.refreshing && !overview.refreshing)}`} aria-busy={recommendations.refreshing && !overview.refreshing || undefined}>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-slate-900">
                 Recomendaciones del rango
@@ -295,7 +296,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 )}
               />
             </div>
-            {recommendations.loading && (
+            {recommendations.loading && !recommendations.refreshing && (
               <div className="h-32 animate-pulse rounded-xl bg-slate-200" aria-busy="true" aria-label="Cargando recomendaciones" />
             )}
             {recommendations.error && (
@@ -303,14 +304,14 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 No se pudieron cargar las recomendaciones: {recommendations.error}
               </p>
             )}
-            {!recommendations.loading && !recommendations.error && (
+            {(!recommendations.loading || recommendations.refreshing) && !recommendations.error && (
               <RecommendationsPanel
                 recommendations={recommendations.data?.recommendations ?? []}
               />
             )}
           </section>
 
-          <section id="sec-rankings" aria-label="Rankings del rango" className="scroll-mt-16">
+          <section id="sec-rankings" aria-label="Rankings del rango" className={`scroll-mt-16 ${dimWhile(rankings.refreshing && !overview.refreshing)}`} aria-busy={rankings.refreshing && !overview.refreshing || undefined}>
             <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -351,7 +352,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 />
               </div>
             </div>
-            {rankings.loading && (
+            {rankings.loading && !rankings.refreshing && (
               <div
                 className="h-40 animate-pulse rounded-xl bg-slate-200"
                 aria-busy="true"
@@ -366,7 +367,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 No se pudieron cargar los rankings: {rankings.error}
               </p>
             )}
-            {!rankings.loading && !rankings.error && (
+            {(!rankings.loading || rankings.refreshing) && !rankings.error && (
               <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-8">
                 <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="mb-4">
@@ -404,7 +405,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
             )}
           </section>
 
-          <section id="sec-alertas" aria-label="Alertas de patrones" className="scroll-mt-16">
+          <section id="sec-alertas" aria-label="Alertas de patrones" className={`scroll-mt-16 ${dimWhile(patternAlerts.refreshing && !overview.refreshing)}`} aria-busy={patternAlerts.refreshing && !overview.refreshing || undefined}>
             <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
@@ -431,7 +432,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 </div>
               )}
             </div>
-            {patternAlerts.loading && (
+            {patternAlerts.loading && !patternAlerts.refreshing && (
               <div
                 className="h-40 animate-pulse rounded-xl bg-slate-200"
                 aria-busy="true"
@@ -446,7 +447,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 No se pudieron cargar las alertas: {patternAlerts.error}
               </p>
             )}
-            {!patternAlerts.loading && !patternAlerts.error && (
+            {(!patternAlerts.loading || patternAlerts.refreshing) && !patternAlerts.error && (
               <PatternsPanel
                 alerts={patternAlerts.alerts}
                 campaign={range.campaign}
@@ -507,7 +508,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
               }
             />
           </section>
-        </>
+        </div>
       )}
 
       {!overview.loading && !overview.error && !overview.summary && (

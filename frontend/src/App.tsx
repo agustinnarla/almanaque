@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ThemeToggle } from './components/common/ThemeToggle'
 import { useCampaigns } from './hooks/useCampaigns'
 import { CampaignsCompareMode } from './modes/CampaignsCompareMode'
 import { CompareMode } from './modes/CompareMode'
@@ -77,17 +78,20 @@ function App() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <header className="mb-6 print:hidden">
-        <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
-          Call Center · Análisis
-        </p>
-        <h1 className="text-2xl font-bold text-slate-900">
-          Diagnóstico de Agent Answer
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Analizá la campaña completa o por semana, compará dos días o contrastá
-          dos campañas para detectar causas de caída y factores de mejora.
-        </p>
+      <header className="mb-6 flex items-start justify-between gap-4 print:hidden">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
+            Call Center · Análisis
+          </p>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Diagnóstico de Agent Answer
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Analizá la campaña completa o por semana, compará dos días o contrastá
+            dos campañas para detectar causas de caída y factores de mejora.
+          </p>
+        </div>
+        <ThemeToggle />
       </header>
 
       <ModeTabs mode={mode} onChange={setMode} />
