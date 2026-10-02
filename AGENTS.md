@@ -1,4 +1,4 @@
-# Contexto del Asistente (AGENT.md)
+# Proyecto Almanaque — Contexto del Asistente (AGENTS.md)
 
 ## Visión del Proyecto
 **Objetivo:** Analizar datos históricos de telefonía de un Call Center para encontrar patrones, detectar áreas de mejora e incrementar la métrica de *Agent Answer*.
@@ -23,6 +23,13 @@
 1. **Contexto Activo:** Siempre lee este archivo y la especificación (spec) activa antes de escribir o modificar código.
 2. **Restricción de Iniciativa:** Nunca añadas dependencias, librerías o funcionalidades extra sin preguntar, salvo que se solicite explícitamente.
 3. **Alineación:** Ajustate estrictamente a las reglas de negocio y los *Inputs/Outputs* definidos en la spec actual.
+
+## Git (GitHub Flow)
+Reglas completas en `docs/github-flow.md`.
+- **Nunca** commitear ni hacer push directo a `main`: cada spec o cambio va en su rama `<tipo>/<NNN>-<slug>` (p. ej. `feat/049-low-volume-days`).
+- Commits con Conventional Commits en español: `<tipo>(<NNN>): <descripción en minúscula, imperativo, sin punto>` (≤ 72 caracteres en la primera línea).
+- Stagear rutas explícitas (`git add frontend backend spec docs`), nunca `git add -A`.
+- Cierre: `/cerrar-spec` en verde → push de la rama → PR con la tabla de criterios → `gh pr merge --squash --delete-branch` → `git switch main && git pull`.
 
 ## Cierre de Tareas
 - Al terminar cualquier tarea, verificar siempre con los tests locales para garantizar que la nueva lógica no rompa funciones anteriores.

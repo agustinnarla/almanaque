@@ -320,6 +320,15 @@ describe('ModeTabs', () => {
     mockCatalog()
   })
 
+  it('muestra el nombre del proyecto en el encabezado', () => {
+    render(<App />)
+    const header = screen.getByRole('banner')
+    expect(header).toHaveTextContent('Proyecto Almanaque')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      'Diagnóstico de Agent Answer',
+    )
+  })
+
   it('muestra cuatro tabs', () => {
     render(<App />)
     expect(screen.getByTestId('tab-range')).toBeInTheDocument()
