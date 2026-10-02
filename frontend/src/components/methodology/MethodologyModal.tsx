@@ -6,6 +6,7 @@ import {
   BEST_DAY_MIN_CALLS,
   BEST_DEVICE_MIN_CALLS,
   BEST_HOUR_MIN_CALLS,
+  HEATMAP_MIN_CELL_CALLS,
   HIGHLIGHT_MIN_SHARE,
   LOW_VOLUME_DAY_SHARE,
   LOW_VOLUME_MIN_DAYS,
@@ -16,6 +17,7 @@ import {
   TRUNK_MAX_CONGESTION,
   TRUNK_MIN_SHARE,
 } from '../../lib/rangeThresholds'
+import { HEAT_BINS } from '../../lib/heatmap'
 import { TRUNK_CHART_TOP } from '../../lib/trunkVolume'
 import type { Methodology } from '../../types/api'
 import {
@@ -261,6 +263,11 @@ function Routing({ data }: { data: Methodology }) {
       <Rule term="Volumen por troncal">
         El gráfico apila las {TRUNK_CHART_TOP} troncales con más volumen del rango; el resto se suma en
         «Otras».
+      </Rule>
+      <Rule term="Mapa de calor troncal × hora">
+        Muestra las troncales con el {pct(HIGHLIGHT_MIN_SHARE)} o más del volumen del rango. Una celda
+        con menos de {HEATMAP_MIN_CELL_CALLS} llamadas queda sin color («·») y no entra en la escala, que
+        va del valor más bajo al más alto del mapa en {HEAT_BINS} tramos de un mismo azul.
       </Rule>
     </Rules>
   )

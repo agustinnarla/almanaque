@@ -2,6 +2,7 @@ import type {
   CampaignSummary,
   DailyTrendPoint,
   DeviceRangeRow,
+  HourDeviceRow,
   HourlyTrendPoint,
   RangeDiagnosticsResponse,
   RangeRecommendationsResponse,
@@ -98,4 +99,13 @@ export function fetchRangeDiagnostics(
     { start_date: from, end_date: to, min_calls: String(minCalls) },
     signal,
   )
+}
+
+export function fetchHeatmap(
+  campaign: string,
+  from: string,
+  to: string,
+  signal?: AbortSignal,
+): Promise<HourDeviceRow[]> {
+  return fetchJson(campaign, 'heatmap', { start_date: from, end_date: to }, signal)
 }

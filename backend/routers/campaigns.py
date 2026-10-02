@@ -16,6 +16,7 @@ from repositories.campaigns_repo import (
     get_campaign_diagnostics,
     get_daily_device_rows,
     get_daily_trend,
+    get_hour_device_rows,
     get_day_metrics,
     get_device_metrics,
     get_device_rankings,
@@ -135,6 +136,16 @@ def campaign_routing(
         for row in sorted(rows, key=lambda row: (row["fecha"], row["device"]))
     ]
     return {**detect_routing(rows), "volume": volume}
+
+
+@router.get("/{campaign_name}/heatmap")
+def campaign_heatmap(
+    campaign_name: str,
+    start_date: date = Query(...),
+    end_date: date = Query(...),
+    conn: sqlite3.Connection = Depends(get_db_connection),
+):
+    return get_hour_device_rows(conn, campaign_name, start_date, end_date)
 
 
 @router.get("/{campaign_name}/hourly-trend")

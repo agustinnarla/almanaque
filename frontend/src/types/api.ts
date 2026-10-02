@@ -306,3 +306,12 @@ export interface Methodology {
   patterns: { relative_factor: number; min_calls: number }
   routing: { concentration_share: number; active_share: number; min_day_calls: number; amd_note_share: number }
 }
+
+// Spec 058: GET /api/campaigns/{c}/heatmap.
+export interface HourDeviceRow {
+  device: string
+  hora: number
+  total_calls: number
+  agent_answers: number
+  machine_answers: number
+}

@@ -11,6 +11,7 @@ import {
 import {
   fetchDailySeries,
   fetchDevicesRange,
+  fetchHeatmap,
   fetchHourlyRange,
   fetchRangeDiagnostics,
   fetchRangeRecommendations,
@@ -48,6 +49,7 @@ const CASES: [string, (signal: AbortSignal) => Promise<unknown>, string][] = [
   ['horaria del rango', (s) => fetchHourlyRange('35', '2026-09-01', '2026-09-30', s), `/api/campaigns/35/hourly-trend?${RANGE}`],
   ['gateways del rango', (s) => fetchDevicesRange('35', '2026-09-01', '2026-09-30', s), `/api/campaigns/35/devices?${RANGE}`],
   ['ruteo', (s) => fetchRouting('35', '2026-09-01', '2026-09-30', s), `/api/campaigns/35/routing?${RANGE}`],
+  ['mapa de calor', (s) => fetchHeatmap('35', '2026-09-01', '2026-09-30', s), `/api/campaigns/35/heatmap?${RANGE}`],
   ['recomendaciones del rango', (s) => fetchRangeRecommendations('35', '2026-09-01', '2026-09-30', 50, s), `/api/campaigns/35/recommendations?${RANGE}&min_calls=50`],
   ['diagnóstico del rango', (s) => fetchRangeDiagnostics('35', '2026-09-01', '2026-09-30', 50, s), `/api/campaigns/35/diagnostics?${RANGE}&min_calls=50`],
   ['ranking de bases', (s) => fetchBasesRanking('35', '2026-09-01', '2026-09-30', 50, s), `/api/campaigns/35/bases-ranking?${RANGE}&min_calls=50`],

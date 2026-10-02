@@ -26,6 +26,9 @@ vi.mock('../../hooks/useRangeRankings', () => ({
 }))
 vi.mock('../../hooks/usePatternAlerts', () => ({ usePatternAlerts: () => ({ ...idle, alerts: [] }) }))
 vi.mock('../../hooks/useSegmentPeers', () => ({ useSegmentPeers: () => ({ peers: [], loading: false, error: null }) }))
+vi.mock('../../hooks/useHeatmap', () => ({
+  useHeatmap: () => ({ data: [], loading: false, refreshing: false, error: null, reload: () => {} }),
+}))
 vi.mock('../../hooks/useRoutingChanges', () => ({ useRoutingChanges: () => ({ changes: [], volume: [] }) }))
 
 const summary = {
