@@ -128,6 +128,8 @@ export interface CampaignSummary {
   machine_answers: number
   rejected_calls: number
   agent_answer_rate: number | null
+  // Spec 051: agent_answers / (total_calls − machine_answers).
+  attendable_answer_rate: number | null
 }
 
 export interface DailyTrendPoint {
@@ -146,6 +148,7 @@ export interface DeviceRangeRow {
   busy_calls: number
   congestion_calls: number
   agent_answer_rate: number | null
+  attendable_answer_rate: number | null
   busy_rate: number | null
   congestion_rate: number | null
 }

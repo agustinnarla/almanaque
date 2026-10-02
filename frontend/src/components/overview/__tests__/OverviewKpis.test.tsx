@@ -11,6 +11,7 @@ const summary: CampaignSummary = {
   machine_answers: 11282,
   rejected_calls: 22027,
   agent_answer_rate: 0.0594,
+  attendable_answer_rate: 2104 / (35413 - 11282),
 }
 
 describe('formatRatePct', () => {
@@ -25,7 +26,7 @@ describe('formatRatePct', () => {
 })
 
 describe('OverviewKpis', () => {
-  it('renderiza los 4 KPIs con la tasa de contacto como cifra principal', () => {
+  it('renderiza los 5 KPIs con la tasa de contacto como cifra principal', () => {
     render(<OverviewKpis summary={summary} />)
     expect(screen.getByTestId('overview-kpis')).toBeInTheDocument()
     const cards = screen.getAllByTestId('stat-card')
@@ -34,22 +35,27 @@ describe('OverviewKpis', () => {
       .getAllByTestId('stat-value')
       .map((el) => el.textContent)
     expect(values[0]).toBe('5.94%')
-    expect(values[1]).toBe('35.413')
-    expect(values[2]).toBe('31.86%')
-    expect(values[3]).toBe('22.027')
+    expect(values[1]).toBe('8.72%')
+    expect(values[2]).toBe('35.413')
+    expect(values[3]).toBe('31.86%')
+    expect(values[4]).toBe('22.027')
+    expect(screen.getByText('AA sobre atendibles')).toBeInTheDocument()
+    expect(screen.getByText('Agentes ÷ llamadas sin contestador')).toBeInTheDocument()
+    expect(cards[0].className).toContain('lg:row-span-2')
     expect(screen.getByText('No contesta / fallidas')).toBeInTheDocument()
   })
 
   it('muestra — cuando agent_answer_rate es null', () => {
     render(
       <OverviewKpis
-        summary={{ ...summary, agent_answer_rate: null, total_calls: 0 }}
+        summary={{ ...summary, agent_answer_rate: null, attendable_answer_rate: null, total_calls: 0 }}
       />,
     )
     const values = screen
       .getAllByTestId('stat-value')
       .map((el) => el.textContent)
     expect(values[0]).toBe('—')
-    expect(values[2]).toBe('—')
+    expect(values[1]).toBe('—')
+    expect(values[3]).toBe('—')
   })
 })

@@ -235,6 +235,7 @@ def test_campaign_summary_sums_bases(client, memory_conn):
     assert data["machine_answers"] == 60
     assert data["rejected_calls"] == 192
     assert data["agent_answer_rate"] == pytest.approx(38 / 290)
+    assert data["attendable_answer_rate"] == pytest.approx(38 / (290 - 60))
 
 
 def test_campaign_summary_unknown_campaign_returns_zeros(client):
@@ -246,6 +247,7 @@ def test_campaign_summary_unknown_campaign_returns_zeros(client):
     data = response.json()
     assert data["total_calls"] == 0
     assert data["agent_answer_rate"] is None
+    assert data["attendable_answer_rate"] is None
 
 
 def test_campaign_compare_with_both_days(client, memory_conn):
@@ -481,9 +483,11 @@ def test_devices_endpoint_contract_and_order(client, memory_conn):
         "busy_calls",
         "congestion_calls",
         "agent_answer_rate",
+        "attendable_answer_rate",
         "busy_rate",
         "congestion_rate",
     }
+    assert gw37["attendable_answer_rate"] == pytest.approx(80 / (300 - 10))
 
 
 def test_devices_endpoint_empty_range_returns_empty_list(client):
@@ -1141,6 +1145,7 @@ def test_cross_campaign_compare_includes_device_metrics(client, memory_conn):
             "busy_calls",
             "congestion_calls",
             "agent_answer_rate",
+            "attendable_answer_rate",
             "busy_rate",
             "congestion_rate",
         }
@@ -1368,3 +1373,12 @@ def test_campaigns_catalog_empty_db_returns_empty_list(client):
     response = client.get("/api/campaigns")
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_attendable_rate_leaves_answering_machines_out():
+    from repositories.campaigns_repo import _attendable_rate
+
+    # Campaign 35, IPLAN, 01→30/09: 7,80% AA but 15,92% over attendable calls.
+    assert _attendable_rate(3180, 40755, 20778) == pytest.approx(0.1592, abs=1e-4)
+    assert _attendable_rate(0, 100, 100) is None  # every call hit a machine
+    assert _attendable_rate(0, 0, 0) is None

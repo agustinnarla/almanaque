@@ -14,6 +14,8 @@ interface StatCardProps {
   subtitle?: ReactNode
   // The one headline figure of the view: larger, proportional figures.
   hero?: boolean
+  // Placement in the parent grid (spans), when the default is not enough.
+  className?: string
 }
 
 function formatSigned(value: number, suffix: string): string {
@@ -43,6 +45,7 @@ export function StatCard({
   goodWhenNegative = false,
   subtitle,
   hero = false,
+  className = '',
 }: StatCardProps) {
   const primaryOk = delta != null && Number.isFinite(delta)
   const secondaryOk =
@@ -69,7 +72,7 @@ export function StatCard({
       data-hero={hero || undefined}
       className={`rounded-xl border border-slate-200 bg-white p-4 shadow-sm ${
         hero ? 'sm:col-span-2 lg:col-span-1' : ''
-      }`}
+      } ${className}`}
     >
       <p className="text-sm font-medium text-slate-500">{title}</p>
       <p

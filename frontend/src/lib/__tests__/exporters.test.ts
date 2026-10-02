@@ -36,6 +36,7 @@ const summary: CampaignSummary = {
   machine_answers: 200000,
   rejected_calls: 27785,
   agent_answer_rate: 0.0594,
+  attendable_answer_rate: 35413 / (263198 - 200000),
 }
 
 const kpi: SummaryKpi = {
@@ -82,6 +83,7 @@ describe('kpiRangeRows', () => {
       ['Total de llamadas', 263198],
       ['Respuestas de agente', 35413],
       ['Agent Answer %', 5.94],
+      ['AA sobre atendibles %', 56.04],
       ['Contestadores %', 75.99],
       ['No contesta / fallidas', 27785],
       ['No contesta %', 10.56],
@@ -90,8 +92,9 @@ describe('kpiRangeRows', () => {
 
   it('devuelve null en shares cuando total_calls es 0', () => {
     const table = kpiRangeRows({ ...summary, total_calls: 0 })
-    expect(table.rows[3][1]).toBeNull()
-    expect(table.rows[5][1]).toBeNull()
+    const value = (metric: string) => table.rows.find((row) => row[0] === metric)?.[1]
+    expect(value('Contestadores %')).toBeNull()
+    expect(value('No contesta %')).toBeNull()
   })
 })
 
@@ -214,11 +217,13 @@ describe('gatewaysRangeRows', () => {
         busy_calls: 30,
         congestion_calls: 10,
         agent_answer_rate: 0.06,
+        attendable_answer_rate: 60 / (1000 - 900),
         busy_rate: 0.03,
         congestion_rate: 0.01,
       },
     ])
     expect(table.headers[0]).toBe('Dispositivo')
+    expect(table.headers[7]).toBe('AA sobre atendibles %')
     expect(table.rows[0]).toEqual([
       'GW20',
       1000,
@@ -227,6 +232,7 @@ describe('gatewaysRangeRows', () => {
       30,
       10,
       6,
+      60,
       3,
       1,
     ])

@@ -34,6 +34,7 @@ const summary91 = {
   machine_answers: 0,
   rejected_calls: 0,
   agent_answer_rate: 20327 / 734207,
+  attendable_answer_rate: 20327 / 734207, // no answering machines in this fixture
 }
 
 function kpi(rateA: number, rateB: number): SummaryKpi {
