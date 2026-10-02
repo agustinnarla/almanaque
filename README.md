@@ -52,11 +52,17 @@ npm install
 
 ## Ingesta
 
-Carga todos los archivos de `data/` en `callcenter_metrics.db`. Es idempotente, así que re-ejecutarlo no duplica filas.
+Carga los archivos de `data/` en `callcenter_metrics.db`. Es **incremental**: la tabla `ingested_files` recuerda el tamaño y la fecha de modificación de cada archivo ya cargado, y en cada corrida solo se leen los nuevos o modificados.
+- **Días recalculados:** los que tocan esos archivos o los eliminados de `data/`. Cada uno se recalcula con todos sus archivos, así que el resultado es igual al de una recarga completa.
+- **Sin cambios:** si no hay nada nuevo, la corrida termina en segundos con «la base está al día».
 
 ```powershell
-.venv\Scripts\python backend\main.py
+.venv\Scripts\python backend\main.py          # incremental
+.venv\Scripts\python backend\main.py --full   # reprocesa todo (no duplica filas)
 ```
+
+- La primera corrida sobre una base sin registro procesa todo, una sola vez.
+- Si se borra de `data/` el único archivo de un día, sus datos quedan en la base y la corrida lo avisa.
 
 Desde Claude Code, `/ingesta` hace lo mismo y además controla antes y después los nombres, la integridad de `/data` y el resumen de la DB.
 
