@@ -626,3 +626,58 @@ describe('mapRangeDiagnostics', () => {
     expect(positiveDrivers[4].entity).toBe('IPLAN')
   })
 })
+
+// Real per-device totals, 01→30/09: [device, calls, agents, answering machines].
+const DEVICES_35: [string, number, number, number][] = [
+  ['IPLAN', 40755, 3180, 20778], ['GW37', 6133, 365, 1113], ['GW20', 5610, 205, 591],
+  ['GW39', 5577, 287, 917], ['IPLAN2', 1555, 55, 313], ['GW28', 108, 9, 32],
+  ['GW23', 106, 13, 21], ['GW21', 103, 5, 44], ['SPX_GSM14_GW14', 100, 10, 30],
+  ['SPX_GSM_15_GW15', 94, 6, 37], ['GW26', 56, 9, 16], ['SPX_GSM19_GW19_4G', 54, 4, 16],
+  ['GW42', 14, 5, 4],
+]
+const DEVICES_91: [string, number, number, number][] = [
+  ['IPLANPREMIUM', 228639, 8830, 166105], ['GW28', 189081, 5813, 55932],
+  ['SPX_GSM14_GW14', 148416, 5361, 67027], ['GW26', 121968, 3384, 45468],
+  ['GW42', 88986, 2340, 27578], ['GW37', 82950, 2609, 23560],
+  ['SPX_GSM13_GW13', 78957, 1567, 24848], ['SPX_GSM12_GW12', 77919, 2054, 26693],
+  ['GW40', 68418, 1713, 21762], ['GW23', 68362, 1304, 13464], ['IPLAN', 62429, 1944, 41998],
+  ['SPX_GSM18_GW18_4G', 61416, 1995, 18991], ['SPX_GSM_15_GW15', 54953, 1828, 23842],
+  ['IPLANPREMIUMCBA', 38057, 1167, 26947], ['GW35', 35684, 1479, 15598],
+  ['GSM8', 27827, 745, 12805], ['GW20', 26465, 1051, 11191],
+  ['SPX_GSM19_GW19_4G', 26021, 474, 5262], ['SPX_GSM17_GW17', 24376, 481, 4746],
+  ['IPLAN2', 19579, 430, 5815], ['SPX_GSM6_GW6', 16912, 487, 7352], ['GW21', 16463, 451, 6655],
+  ['GW22', 15641, 172, 2447], ['GSM33', 14854, 301, 3084], ['GW25', 13825, 458, 4487],
+  ['GSM7', 6181, 146, 2189], ['SPX_GSM11_GW11', 5662, 131, 2769],
+  ['SPX_GSM16_GW16', 5582, 124, 1871], ['GW39', 3386, 24, 455],
+  ['66F1BB5474D33B01C029B111', 3090, 0, 0], ['GSM35', 1104, 23, 355], ['PRUEBA', 399, 9, 182],
+]
+const realDevices = (rows: [string, number, number, number][]) =>
+  rows.map(([name, total, agents, machines]) => device(name, total, agents, machines, 0, 0))
+
+describe('mejor y peor con volumen mínimo relativo (Spec 053)', () => {
+  it('campaña 35: el mejor dispositivo es IPLAN, no GW26 (56 llamadas, 0,09%)', () => {
+    const best = buildBestDevice(realDevices(DEVICES_35), '35')
+    expect(best!.entity).toBe('IPLAN · 35')
+    expect(best!.message).toContain('7.80%')
+    expect(best!.message).toContain('3180 de 40755')
+    expect(buildWorstDevice(realDevices(DEVICES_35))!.entity).toBe('IPLAN2')
+  })
+
+  it('campaña 91: el peor dispositivo deja de ser la troncal de prueba (0,19%)', () => {
+    const worst = buildWorstDevice(realDevices(DEVICES_91))
+    expect(worst!.entity).toBe('SPX_GSM19_GW19_4G')
+    expect(worst!.message).toContain('474 de 26021')
+    expect(buildBestDevice(realDevices(DEVICES_91))!.entity).toBe('GW35')
+  })
+
+  it('una hora con menos del 1% de las llamadas no es mejor ni peor', () => {
+    const hours = [hour(10, 0.05, 6000, 300), hour(11, 0.04, 6000, 240), hour(20, 0.2, 60, 12)]
+    expect(buildBestHour(hours)!.entity).toBe('10')
+    expect(buildWorstHour([hour(10, 0.05, 6000, 300), hour(20, 0, 60, 0)])!.entity).toBe('10')
+  })
+
+  it('sin candidatos con volumen suficiente no emite nada', () => {
+    expect(buildBestDevice([device('A', 40, 4, 0, 0, 0)])).toBeNull()
+    expect(buildWorstHour([hour(9, 0.1, 40, 4)])).toBeNull()
+  })
+})
