@@ -285,6 +285,12 @@ function Data() {
         Incremental: solo se leen los archivos nuevos o modificados, y los días afectados se recalculan
         con todos sus archivos. <code>--full</code> reprocesa todo.
       </Rule>
+      <Rule term="Cobertura de días">
+        Se cuentan los días hábiles (lunes a viernes) desde el primer día de cada campaña hasta el
+        último día con datos de cualquier campaña. Si a una campaña le faltan días, o su último día es
+        anterior, se avisa debajo de las pestañas, con el badge «Faltan N días» en el rango elegido y
+        en «Comparar campañas». No hay calendario de feriados: un día hábil sin datos puede ser uno.
+      </Rule>
     </Rules>
   )
 }
