@@ -920,6 +920,13 @@ def build_range_recommendations(
     return payload
 
 
+def _range_b(
+    start_date: date, end_date: date, start_date_b: date | None, end_date_b: date | None
+) -> tuple[date, date]:
+    """Side B's range (Spec 057): its own when given, else the same as side A."""
+    return start_date_b or start_date, end_date_b or end_date
+
+
 def _cross_gateway_intersection(
     conn: sqlite3.Connection,
     campaign_a: str,
@@ -927,12 +934,15 @@ def _cross_gateway_intersection(
     start_date: date,
     end_date: date,
     min_calls: int,
+    start_date_b: date | None = None,
+    end_date_b: date | None = None,
 ) -> list[dict]:
+    start_b, end_b = _range_b(start_date, end_date, start_date_b, end_date_b)
     devices_a = get_breakdown_by_device_range(
         conn, campaign_a, start_date, end_date, min_calls
     )
     devices_b = get_breakdown_by_device_range(
-        conn, campaign_b, start_date, end_date, min_calls
+        conn, campaign_b, start_b, end_b, min_calls
     )
     common_devices = sorted(set(devices_a) & set(devices_b))
     return [
@@ -964,14 +974,17 @@ def _cross_base_intersection(
     min_calls: int,
     total_a: int,
     total_b: int,
+    start_date_b: date | None = None,
+    end_date_b: date | None = None,
 ) -> list[dict]:
     from services.diagnostics_engine import compute_delta_percentage
 
+    start_b, end_b = _range_b(start_date, end_date, start_date_b, end_date_b)
     bases_a = get_breakdown_by_base_range(
         conn, campaign_a, start_date, end_date, min_calls
     )
     bases_b = get_breakdown_by_base_range(
-        conn, campaign_b, start_date, end_date, min_calls
+        conn, campaign_b, start_b, end_b, min_calls
     )
     common_bases = sorted(set(bases_a) & set(bases_b))
     bases_comparison = []
@@ -1042,12 +1055,17 @@ def build_cross_campaign_compare(
     start_date: date,
     end_date: date,
     min_calls: int,
+    start_date_b: date | None = None,
+    end_date_b: date | None = None,
 ) -> dict:
+    start_b, end_b = _range_b(start_date, end_date, start_date_b, end_date_b)
     envelope = {
         "campaign_a": campaign_a,
         "campaign_b": campaign_b,
         "start_date": start_date.isoformat(),
         "end_date": end_date.isoformat(),
+        "start_date_b": start_b.isoformat(),
+        "end_date_b": end_b.isoformat(),
         "min_calls_applied": min_calls,
         "summary": None,
         "gateways_comparison": None,
@@ -1061,13 +1079,13 @@ def build_cross_campaign_compare(
     }
 
     totals_a = get_range_totals(conn, campaign_a, start_date, end_date)
-    totals_b = get_range_totals(conn, campaign_b, start_date, end_date)
+    totals_b = get_range_totals(conn, campaign_b, start_b, end_b)
     if totals_a is None or totals_b is None:
         return envelope
 
     envelope["summary"] = _cross_summary(totals_a, totals_b)
     envelope["gateways_comparison"] = _cross_gateway_intersection(
-        conn, campaign_a, campaign_b, start_date, end_date, min_calls
+        conn, campaign_a, campaign_b, start_date, end_date, min_calls, start_b, end_b
     )
     envelope["bases_comparison"] = _cross_base_intersection(
         conn,
@@ -1078,14 +1096,16 @@ def build_cross_campaign_compare(
         min_calls,
         totals_a["total_calls"] or 0,
         totals_b["total_calls"] or 0,
+        start_b,
+        end_b,
     )
 
     envelope["hourly_a"] = get_hourly_trend(conn, campaign_a, start_date, end_date)
-    envelope["hourly_b"] = get_hourly_trend(conn, campaign_b, start_date, end_date)
+    envelope["hourly_b"] = get_hourly_trend(conn, campaign_b, start_b, end_b)
     envelope["daily_a"] = get_daily_trend(conn, campaign_a, start_date, end_date)
-    envelope["daily_b"] = get_daily_trend(conn, campaign_b, start_date, end_date)
+    envelope["daily_b"] = get_daily_trend(conn, campaign_b, start_b, end_b)
     envelope["devices_a"] = get_device_metrics(conn, campaign_a, start_date, end_date)
-    envelope["devices_b"] = get_device_metrics(conn, campaign_b, start_date, end_date)
+    envelope["devices_b"] = get_device_metrics(conn, campaign_b, start_b, end_b)
     return envelope
 
 
@@ -1096,14 +1116,19 @@ def build_cross_campaign_diagnostics(
     start_date: date,
     end_date: date,
     min_calls: int,
+    start_date_b: date | None = None,
+    end_date_b: date | None = None,
 ) -> dict:
     from services.diagnostics_engine import evaluate_causes
 
+    start_b, end_b = _range_b(start_date, end_date, start_date_b, end_date_b)
     envelope = {
         "campaign_a": campaign_a,
         "campaign_b": campaign_b,
         "start_date": start_date.isoformat(),
         "end_date": end_date.isoformat(),
+        "start_date_b": start_b.isoformat(),
+        "end_date_b": end_b.isoformat(),
         "min_calls_applied": min_calls,
         "summary": None,
         "root_causes": [],
@@ -1114,7 +1139,7 @@ def build_cross_campaign_diagnostics(
     }
 
     totals_a = get_range_totals(conn, campaign_a, start_date, end_date)
-    totals_b = get_range_totals(conn, campaign_b, start_date, end_date)
+    totals_b = get_range_totals(conn, campaign_b, start_b, end_b)
     if totals_a is None or totals_b is None:
         return envelope
 
@@ -1127,9 +1152,11 @@ def build_cross_campaign_diagnostics(
         min_calls,
         totals_a["total_calls"] or 0,
         totals_b["total_calls"] or 0,
+        start_b,
+        end_b,
     )
     gateways_comparison = _cross_gateway_intersection(
-        conn, campaign_a, campaign_b, start_date, end_date, min_calls
+        conn, campaign_a, campaign_b, start_date, end_date, min_calls, start_b, end_b
     )
     causes = evaluate_causes(
         totals_a, totals_b, bases_comparison, gateways_comparison
@@ -1151,23 +1178,28 @@ def build_cross_campaign_recommendations(
     start_date: date,
     end_date: date,
     min_calls: int,
+    start_date_b: date | None = None,
+    end_date_b: date | None = None,
 ) -> dict:
     from services.recommendations_engine import build_recommendations
 
+    start_b, end_b = _range_b(start_date, end_date, start_date_b, end_date_b)
     payload = {
         "campaign_a": campaign_a,
         "campaign_b": campaign_b,
         "start_date": start_date.isoformat(),
         "end_date": end_date.isoformat(),
+        "start_date_b": start_b.isoformat(),
+        "end_date_b": end_b.isoformat(),
         "min_calls_applied": min_calls,
         "recommendations": [],
     }
 
-    if get_range_totals(conn, campaign_b, start_date, end_date) is None:
+    if get_range_totals(conn, campaign_b, start_b, end_b) is None:
         return payload
 
-    devices = get_device_metrics(conn, campaign_b, start_date, end_date)
-    hourly = get_hourly_trend(conn, campaign_b, start_date, end_date)
+    devices = get_device_metrics(conn, campaign_b, start_b, end_b)
+    hourly = get_hourly_trend(conn, campaign_b, start_b, end_b)
     if not devices and not hourly:
         return payload
 

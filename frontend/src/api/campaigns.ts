@@ -21,16 +21,24 @@ export interface CrossCampaignParams {
   startDate: string
   endDate: string
   minCalls: number
+  // Spec 057: side B's own range (week vs week); omitted = same as side A.
+  startDateB?: string
+  endDateB?: string
 }
 
 function crossQuery(params: CrossCampaignParams): URLSearchParams {
-  return new URLSearchParams({
+  const query = new URLSearchParams({
     campaign_a: params.campaignA,
     campaign_b: params.campaignB,
     start_date: params.startDate,
     end_date: params.endDate,
     min_calls: String(params.minCalls),
   })
+  if (params.startDateB && params.endDateB) {
+    query.set('start_date_b', params.startDateB)
+    query.set('end_date_b', params.endDateB)
+  }
+  return query
 }
 
 export async function fetchCampaigns(

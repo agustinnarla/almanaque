@@ -69,6 +69,8 @@ export interface CrossCampaignCompareResponse {
   campaign_b: string
   start_date: string
   end_date: string
+  start_date_b: string
+  end_date_b: string
   min_calls_applied: number
   summary: SummaryKpi | null
   gateways_comparison: GatewayComparison[] | null
@@ -86,6 +88,8 @@ export interface CrossCampaignDiagnosticsResponse {
   campaign_b: string
   start_date: string
   end_date: string
+  start_date_b: string
+  end_date_b: string
   min_calls_applied: number
   summary: SummaryKpi | null
   root_causes: DiagnosticEvent[]
@@ -117,6 +121,8 @@ export interface CrossCampaignRecommendationsResponse {
   campaign_b: string
   start_date: string
   end_date: string
+  start_date_b: string
+  end_date_b: string
   min_calls_applied: number
   recommendations: Recommendation[]
 }

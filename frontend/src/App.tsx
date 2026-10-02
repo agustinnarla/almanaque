@@ -6,8 +6,9 @@ import { useCampaigns } from './hooks/useCampaigns'
 import { CampaignsCompareMode } from './modes/CampaignsCompareMode'
 import { CompareMode } from './modes/CompareMode'
 import { RangeMode } from './modes/RangeMode'
+import { WeeksCompareMode } from './modes/WeeksCompareMode'
 
-type ViewMode = 'range' | 'compare' | 'campaigns' | 'week'
+type ViewMode = 'range' | 'compare' | 'campaigns' | 'week' | 'weeks'
 
 interface ModeTabsProps {
   mode: ViewMode
@@ -68,6 +69,16 @@ function ModeTabs({ mode, onChange }: ModeTabsProps) {
         onClick={() => onChange('week')}
       >
         Por semana
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={mode === 'weeks'}
+        data-testid="tab-weeks"
+        className={tabClass(mode === 'weeks')}
+        onClick={() => onChange('weeks')}
+      >
+        Comparar semanas
       </button>
     </div>
   )
@@ -131,6 +142,7 @@ function App() {
           {mode === 'compare' && <CompareMode catalog={catalog} />}
           {mode === 'campaigns' && <CampaignsCompareMode catalog={catalog} />}
           {mode === 'week' && <RangeMode catalog={catalog} variant="week" />}
+          {mode === 'weeks' && <WeeksCompareMode catalog={catalog} />}
         </>
       )}
     </div>

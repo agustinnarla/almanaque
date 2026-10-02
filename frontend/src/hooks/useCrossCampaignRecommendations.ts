@@ -8,14 +8,14 @@ import { useApiResource, type ApiResource } from './useApiResource'
 export function useCrossCampaignRecommendations(
   params: CrossCampaignParams,
 ): ApiResource<CrossCampaignRecommendationsResponse> {
-  const { campaignA, campaignB, startDate, endDate, minCalls } = params
+  const { campaignA, campaignB, startDate, endDate, minCalls, startDateB, endDateB } = params
   return useApiResource(
     (signal) =>
       fetchCrossCampaignRecommendations(
-        { campaignA, campaignB, startDate, endDate, minCalls },
+        { campaignA, campaignB, startDate, endDate, minCalls, startDateB, endDateB },
         signal,
       ),
-    [campaignA, campaignB, startDate, endDate, minCalls],
+    [campaignA, campaignB, startDate, endDate, minCalls, startDateB, endDateB],
     { errorMessage: 'No se pudieron cargar las recomendaciones entre campañas' },
   )
 }

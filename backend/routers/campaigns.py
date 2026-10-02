@@ -43,10 +43,12 @@ def cross_campaign_compare(
     start_date: date = Query(...),
     end_date: date = Query(...),
     min_calls: int = Query(50, ge=1),
+    start_date_b: date | None = Query(None),
+    end_date_b: date | None = Query(None),
     conn: sqlite3.Connection = Depends(get_db_connection),
 ):
     return build_cross_campaign_compare(
-        conn, campaign_a, campaign_b, start_date, end_date, min_calls
+        conn, campaign_a, campaign_b, start_date, end_date, min_calls, start_date_b, end_date_b
     )
 
 
@@ -57,10 +59,12 @@ def cross_campaign_diagnostics(
     start_date: date = Query(...),
     end_date: date = Query(...),
     min_calls: int = Query(50, ge=1),
+    start_date_b: date | None = Query(None),
+    end_date_b: date | None = Query(None),
     conn: sqlite3.Connection = Depends(get_db_connection),
 ):
     return build_cross_campaign_diagnostics(
-        conn, campaign_a, campaign_b, start_date, end_date, min_calls
+        conn, campaign_a, campaign_b, start_date, end_date, min_calls, start_date_b, end_date_b
     )
 
 
@@ -71,10 +75,12 @@ def cross_campaign_recommendations(
     start_date: date = Query(...),
     end_date: date = Query(...),
     min_calls: int = Query(50, ge=1),
+    start_date_b: date | None = Query(None),
+    end_date_b: date | None = Query(None),
     conn: sqlite3.Connection = Depends(get_db_connection),
 ):
     return build_cross_campaign_recommendations(
-        conn, campaign_a, campaign_b, start_date, end_date, min_calls
+        conn, campaign_a, campaign_b, start_date, end_date, min_calls, start_date_b, end_date_b
     )
 
 

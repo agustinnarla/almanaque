@@ -82,3 +82,22 @@ export function findWeekByStart(
 ): WeekOption | null {
   return weeks.find((week) => week.start === start) ?? null
 }
+
+// Spec 057: Comparar semanas defaults to the last complete week (B) against
+// the complete week before it (A); with fewer weeks, the last two available.
+export function defaultWeekPair(weeks: WeekOption[]): { a: WeekOption; b: WeekOption } | null {
+  const complete = weeks.filter((week) => !week.partial)
+  const pool = complete.length >= 2 ? complete : weeks
+  if (pool.length < 2) return null
+  return { a: pool[pool.length - 2], b: pool[pool.length - 1] }
+}
+
+// Totals of weeks with a different number of days are not comparable; rates are.
+export function weekMismatchNote(a: WeekOption, b: WeekOption): string | null {
+  if (a.dataDays === b.dataDays && !a.partial && !b.partial) return null
+  const days = (n: number) => `${n} ${n === 1 ? 'día' : 'días'}`
+  return (
+    `La ${a.label} tiene ${days(a.dataDays)} con datos y la ${b.label}, ${b.dataDays}: ` +
+    'los totales no son comparables; las tasas sí.'
+  )
+}
