@@ -17,4 +17,4 @@
 ## 4. Verificación y cierre
 - [x] Smoke con la API real (35): 5 troncales (8 ocultas por < 1%), 4 celdas sin color (IPLAN2 9, 15, 16 y 17 h), IPLAN 9 h AA 14,28%
 - [x] `/cerrar-spec 058` en verde (pytest 219 · 98,04% · vitest 393 · líneas 97% / ramas 83,65% · tsc · lint 0/0 · build · baseline); piso de líneas → 97
-- [ ] PR con CI en verde y squash merge
+- [x] PR #11 con CI en verde (Backend 30s · Frontend 44s · Título 5s) y squash merge
