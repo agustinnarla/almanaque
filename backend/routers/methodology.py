@@ -2,12 +2,13 @@
 so the «¿Cómo se calcula?» modal never drifts from the real rules."""
 from fastapi import APIRouter
 
+import schemas
 import config
 
 router = APIRouter(prefix="/api", tags=["methodology"])
 
 
-@router.get("/methodology")
+@router.get("/methodology", response_model=schemas.Methodology)
 def methodology() -> dict:
     return {
         "segments": dict(config.CAMPAIGN_SEGMENTS),

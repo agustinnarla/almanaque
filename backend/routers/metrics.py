@@ -3,13 +3,14 @@ from datetime import date
 from fastapi import APIRouter, Depends, Query
 import sqlite3
 
+import schemas
 from db_manager import get_db_connection
 from repositories.metrics_repo import fetch_metrics
 
 router = APIRouter(prefix="/api", tags=["metrics"])
 
 
-@router.get("/metrics")
+@router.get("/metrics", response_model=list[schemas.MetricRow])
 def list_metrics(
     start_date: date = Query(...),
     end_date: date = Query(...),

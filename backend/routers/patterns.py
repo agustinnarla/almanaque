@@ -3,6 +3,7 @@ import sqlite3
 
 from fastapi import APIRouter, Depends, Query
 
+import schemas
 from config import PATTERN_MIN_CALLS
 from db_manager import get_db_connection
 from repositories.metrics_repo import fetch_metrics
@@ -11,7 +12,7 @@ from services.pattern_detector import evaluate_campaigns
 router = APIRouter(prefix="/api", tags=["patterns"])
 
 
-@router.get("/patterns")
+@router.get("/patterns", response_model=list[schemas.PatternAlert])
 def list_patterns(
     start_date: date = Query(...),
     end_date: date = Query(...),
