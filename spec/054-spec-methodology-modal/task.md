@@ -15,4 +15,4 @@
 
 ## 4. Verificación y cierre
 - [x] `/cerrar-spec 054` en verde (pytest 214 · 98,02% · vitest 352 · líneas 96,63% / ramas 82,46% · tsc · lint 0/0 · build · baseline)
-- [ ] PR con CI en verde y squash merge
+- [x] PR #7 con CI en verde (Backend 28s · Frontend 57s · Título 6s) y squash merge
