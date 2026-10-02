@@ -50,6 +50,17 @@ Nunca marcar ✅ sin evidencia de esta sesión. Si algo no se pudo verificar (p.
 - Pasar a `[x]` solo los ítems verificados. Los que fallan o no se verificaron quedan `[ ]` y se informan.
 - Si la spec agregó archivos a `/data` o aprobó dependencias nuevas, y todo lo demás está en verde, proponer actualizar el baseline (`.venv/Scripts/python .claude/scripts/baseline.py save`) y hacerlo solo con el OK del usuario.
 
-## 6. Reporte final
+## 6. Commit, Pull Request y merge (GitHub Flow)
 
-Resumen corto en español: estado de cada paso con conteos (pytest N, vitest N, lint warnings/errores), smoke, `/data` intacto, dependencias, y qué quedó pendiente si algo quedó.
+Solo si todo lo anterior está en verde. Reglas: `docs/github-flow.md`.
+
+1. Confirmar que se está en la rama de la spec (`git branch --show-current`), nunca en `main`.
+2. Stagear rutas explícitas (`git add frontend backend spec docs …`), nunca `git add -A`: en la raíz hay archivos locales que no son del proyecto.
+3. Commit en Conventional Commits, en español: `<tipo>(NNN): <descripción en minúscula, sin punto>` (≤ 72 caracteres), cuerpo con el detalle y los conteos de tests, y el trailer de co-autoría. El hook `commit-msg` rechaza otros formatos.
+4. `git push -u origin <rama>`; el hook `pre-push` bloquea `main` y nombres fuera de formato.
+5. `gh pr create --base main --title "<mismo formato que el commit>" --body …` con **Resumen**, **Criterios de finalización** (la tabla del paso 4) y **Decisiones a revisar**.
+6. `gh pr merge --squash --delete-branch`, y después `git switch main && git pull`.
+
+## 7. Reporte final
+
+Resumen corto en español: estado de cada paso con conteos (pytest N, vitest N, lint warnings/errores), smoke, `/data` intacto, dependencias, enlace al PR integrado, y qué quedó pendiente si algo quedó.

@@ -1,4 +1,7 @@
-# Diagnóstico de Agent Answer — Call Center
+# Proyecto Almanaque
+
+Diagnóstico de Agent Answer para el call center.
+
 
 Herramienta interna para analizar la telefonía histórica de un call center, encontrar patrones y áreas de mejora, y así **subir el Agent Answer (AA)**: la proporción de intentos que termina atendida por un agente humano.
 
@@ -20,7 +23,8 @@ backend/        Pipeline de ingesta, API FastAPI, motores de diagnóstico y reco
 frontend/       Dashboard React (Vite); tests junto a cada componente en __tests__/
 data/           Archivos crudos .xls/.xlsx — SOLO LECTURA, no se versionan
 spec/           Specs SDD numeradas (NNN-spec-*/{spec,plan,task}.md)
-docs/           constitution.md: principios innegociables del proyecto
+docs/           constitution.md (principios innegociables) y github-flow.md (ramas, commits y PR)
+.githooks/      Hooks de git: formato de commits y bloqueo de push a main
 .claude/        Skills, hook de protección de /data y scripts de verificación
 AGENTS.md       Reglas de trabajo para asistentes de IA
 ```
@@ -87,10 +91,22 @@ Desde Claude Code, `/cerrar-spec` corre todo lo anterior y además verifica que 
 
 Ningún cambio de código se hace sin una spec aprobada (`docs/constitution.md`, principio 5):
 
-1. **`/nueva-spec`**: crea `spec/NNN-spec-<slug>/{spec,plan,task}.md` y se detiene hasta que se aprueba.
+1. **`/nueva-spec`**: crea la rama `<tipo>/NNN-<slug>` y `spec/NNN-spec-<slug>/{spec,plan,task}.md`, y se detiene hasta que se aprueba.
 2. Implementación según `plan.md`.
-3. **`/cerrar-spec NNN`**: regresión completa, control de `/data` y dependencias, criterios de finalización y `task.md` en `[x]`.
+3. **`/cerrar-spec NNN`**: regresión completa, control de `/data` y dependencias, criterios de finalización y `task.md` en `[x]`. Termina con commit, Pull Request y squash merge.
 4. **`/smoke`**: valida los números con la API real (campaña, rango, 3 modos).
+
+## Git: GitHub Flow
+
+Cada cambio va en una rama (`feat/049-low-volume-days`), con commits en formato Conventional Commits en español (`feat(049): marca los días con poco volumen`) y un Pull Request que se integra con squash merge. Las reglas completas están en [`docs/github-flow.md`](docs/github-flow.md).
+
+Después de clonar, hay que activar los hooks que controlan el formato de los commits y bloquean los push directos a `main`:
+
+```powershell
+git config core.hooksPath .githooks
+```
+
+## Protección de `/data`
 
 Un hook de Claude Code (`.claude/hooks/protect_data.py`) **bloquea** cualquier escritura en `data/` y **pide confirmación** ante comandos de shell que parezcan modificarla.
 

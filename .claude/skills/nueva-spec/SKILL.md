@@ -19,6 +19,17 @@ El repo sigue Spec-Driven Development: **ningún cambio de código sin una spec 
 
 Si falta información de negocio (umbrales, qué campaña, qué rango), **preguntar al usuario** en vez de inventar.
 
+## 1.b Rama (GitHub Flow)
+
+Antes de escribir los documentos, desde `main` actualizado (`docs/github-flow.md`):
+
+```bash
+git switch main && git pull
+git switch -c <tipo>/NNN-<slug>   # p. ej. feat/049-low-volume-days
+```
+
+`<tipo>`: `feat` (funcionalidad), `fix` (error), `docs`, `refactor`, `test`, `perf`, `chore`, `build`, `ci`. El slug es el mismo de la carpeta de la spec. Nunca se trabaja sobre `main`.
+
 ## 2. `spec.md`
 
 ```markdown
@@ -67,7 +78,7 @@ Analista / supervisor del call center (usuario interno). <Problema concreto que 
 Reglas de redacción:
 - RF numerados, cada uno verificable (números, nombres de funciones/archivos, orden, límites, qué pasa con vacíos/null).
 - Constantes nuevas: nombre en inglés MAYÚSCULAS y dónde viven.
-- Textos de UI, mensajes de API y commits en **español**; identificadores y archivos en **inglés**.
+- Textos de UI, mensajes de API y commits en **español** (Conventional Commits: `<tipo>(NNN): <descripción>`); identificadores, archivos y ramas en **inglés**.
 
 ## 3. `plan.md`
 

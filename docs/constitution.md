@@ -1,3 +1,5 @@
+# Proyecto Almanaque — Constitución
+
 Principios innegociables. Toda spec, plan y tarea debe cumplirlos
 
 1. Stack Cerrado: Backend exclusivo en Python (Pandas + FastAPI/Uvicorn/Pydantic para la API) y Frontend en React (Tailwind).

@@ -1,0 +1,28 @@
+#!/bin/sh
+# Proyecto Almanaque: commits en formato Conventional Commits, en español.
+# Reglas: docs/github-flow.md. Se activa con: git config core.hooksPath .githooks
+export LC_ALL=C.UTF-8
+
+first_line=$(grep -v '^#' "$1" | grep -v '^[[:space:]]*$' | head -n 1 | tr -d '\r')
+
+case "$first_line" in
+  "Merge "* | "Revert "* | "fixup! "* | "squash! "*) exit 0 ;;
+esac
+
+types='feat|fix|docs|refactor|test|perf|chore|build|ci'
+if ! printf '%s\n' "$first_line" | grep -Eq "^($types)(\([a-z0-9-]+\))?!?: [^A-Z ].*[^. ]$"; then
+  {
+    echo "Error: mensaje de commit fuera de formato (docs/github-flow.md):"
+    echo "    $first_line"
+    echo "  Esperado: <tipo>(<NNN>): <descripción en minúscula, sin punto final>"
+    echo "  Tipos: feat, fix, docs, refactor, test, perf, chore, build, ci"
+    echo "  Ejemplo: feat(049): marca los días con poco volumen"
+  } >&2
+  exit 1
+fi
+
+length=$(printf '%s' "$first_line" | wc -m)
+if [ "$length" -gt 72 ]; then
+  echo "Error: la primera línea del commit tiene $length caracteres (máximo 72)." >&2
+  exit 1
+fi

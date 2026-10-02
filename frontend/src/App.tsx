@@ -81,7 +81,7 @@ function App() {
       <header className="mb-6 flex items-start justify-between gap-4 print:hidden">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600">
-            Call Center · Análisis
+            Proyecto Almanaque
           </p>
           <h1 className="text-2xl font-bold text-slate-900">
             Diagnóstico de Agent Answer
