@@ -8,3 +8,7 @@ export const BEST_HOUR_MIN_CALLS = 50
 export const BEST_DEVICE_MIN_CALLS = 50
 export const POSITIVE_DRIVERS_MAX = 5
 export const NEGATIVE_DRIVERS_MAX = 5
+// Spec 050: a day under this share of the range's median daily volume is
+// "low volume" (its AA is noisy); with fewer days the median means little.
+export const LOW_VOLUME_DAY_SHARE = 0.5
+export const LOW_VOLUME_MIN_DAYS = 3

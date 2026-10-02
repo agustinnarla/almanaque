@@ -212,6 +212,36 @@ describe('buildBestDay', () => {
     expect(event!.message).toContain('8.52%')
   })
 
+  it('excluye el día de poco volumen (campaña 35, 14→18/09 reales)', () => {
+    const event = buildBestDay([
+      day('2026-09-14', 263 / 3693, 3693, 263),
+      day('2026-09-15', 92 / 2357, 2357, 92),
+      day('2026-09-16', 206 / 3318, 3318, 206),
+      day('2026-09-17', 197 / 2998, 2998, 197),
+      day('2026-09-18', 168 / 1151, 1151, 168),
+    ])
+    expect(event!.entity).toBe('2026-09-14')
+    expect(event!.message).toContain('7.12%')
+    expect(event!.message).toContain('263 de 3693')
+  })
+
+  it('devuelve null si el único día con buena tasa es de poco volumen', () => {
+    expect(
+      buildBestDay([
+        day('2026-09-01', 0.05, 3000, 150),
+        day('2026-09-02', 0.06, 3000, 180),
+        day('2026-09-03', 0.15, 1000, 150),
+      ])!.entity,
+    ).toBe('2026-09-02')
+    expect(
+      buildBestDay([
+        day('2026-09-01', null, 3000, 0),
+        day('2026-09-02', null, 3000, 0),
+        day('2026-09-03', 0.15, 1000, 150),
+      ]),
+    ).toBeNull()
+  })
+
   it('devuelve null sin candidatos', () => {
     expect(buildBestDay([])).toBeNull()
     expect(buildBestDay([day('2026-09-01', null)])).toBeNull()
