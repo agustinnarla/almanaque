@@ -124,9 +124,23 @@ def migrate_recreate_device(conn: sqlite3.Connection) -> None:
     )
 
 
+# Spec 060: database files already initialized by this process. init_db runs
+# once per file instead of on every request; in-memory databases (no file)
+# are always fresh, so they are always initialized.
+_initialized_files: set[str] = set()
+
+
+def _database_file(conn: sqlite3.Connection) -> str:
+    return next((row[2] for row in conn.execute("PRAGMA database_list") if row[1] == "main"), "")
+
+
 def get_db_connection():
     conn = get_connection()
-    init_db(conn)
+    path = _database_file(conn)
+    if not path or path not in _initialized_files:
+        init_db(conn)
+        if path:
+            _initialized_files.add(path)
     try:
         yield conn
     finally:
