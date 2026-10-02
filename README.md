@@ -76,16 +76,19 @@ npm run dev
 ## Tests y verificación
 
 ```powershell
-.venv\Scripts\python -m pytest -q
+.venv\Scripts\python -m pytest -q --cov --cov-report=term-missing   # piso en .coveragerc
 
 cd frontend
-npm test
+npm test                  # rápido, sin cobertura
+npm run test:coverage     # con cobertura y umbrales; reporte HTML en frontend/coverage/
 npx tsc -b
 npm run lint
 npm run build
 ```
 
 Desde Claude Code, `/cerrar-spec` corre todo lo anterior y además verifica que `/data` y las dependencias no hayan cambiado.
+
+**CI:** `.github/workflows/ci.yml` corre los mismos checks en cada Pull Request y en cada push a `main`, y además valida el título del PR. Un PR se integra solo con el CI en verde.
 
 ## Flujo de trabajo (Spec-Driven Development)
 

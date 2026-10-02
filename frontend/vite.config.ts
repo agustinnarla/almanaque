@@ -14,5 +14,20 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.ts',
+    // `npm run test:coverage` (Spec 049). Thresholds are a floor: the
+    // coverage reached, rounded down; they only go up.
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/__tests__/**', 'src/test/**', 'src/main.tsx', 'src/**/*.d.ts'],
+      reporter: ['text-summary', 'html', 'json-summary', 'lcov'],
+      reportsDirectory: './coverage',
+      thresholds: {
+        statements: 95,
+        branches: 81,
+        functions: 95,
+        lines: 96,
+      },
+    },
   },
 })

@@ -1,0 +1,73 @@
+# Proyecto Almanaque — CI (Spec 049). Mismos checks que /cerrar-spec:
+# el squash merge a main se hace solo con los 3 jobs en verde.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (pytest + cobertura)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      # Umbral en .coveragerc (fail_under).
+      - run: python -m pytest -q --cov --cov-report=term-missing
+
+  frontend:
+    name: Frontend (lint, tipos, vitest + cobertura, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc -b
+      # Umbrales en vite.config.ts (test.coverage.thresholds).
+      - run: npm run test:coverage
+      - run: npm run build
+      - name: Reporte de cobertura
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cobertura-frontend
+          path: frontend/coverage/
+          if-no-files-found: ignore
+
+  pr-title:
+    name: Título del PR (Conventional Commits)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # El título es el mensaje del squash en main: misma regla que el hook commit-msg.
+      - name: Validar el título
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          printf '%s\n' "$PR_TITLE" > "$RUNNER_TEMP/pr-title"
+          sh .githooks/commit-msg "$RUNNER_TEMP/pr-title"

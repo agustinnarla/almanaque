@@ -2,8 +2,10 @@ import sqlite3
 
 import pandas as pd
 
+import main
 from db_manager import get_connection
-from main import run_pipeline
+from file_scanner import scan_data_dir
+from main import _read_dates, run_pipeline
 from test_processor import make_base_frame
 
 
@@ -237,3 +239,41 @@ def test_run_pipeline_without_call_id_keeps_every_row(tmp_path):
 
     assert run_pipeline(data_dir, db_path) == 2
     assert sum(row[4] for row in read_metrics(db_path)) == 4
+
+
+def test_scan_data_dir_warns_when_missing(tmp_path, capsys):
+    assert scan_data_dir(tmp_path / "no-existe") == []
+    assert "no existe" in capsys.readouterr().out
+
+
+def test_scan_data_dir_keeps_only_excel_files(tmp_path):
+    for name in ("35_01-09.xls", "35_02-09.XLSX", "notas.txt", "35_03-09.csv"):
+        (tmp_path / name).write_bytes(b"")
+    (tmp_path / "carpeta.xlsx").mkdir()
+    assert [p.name for p in scan_data_dir(tmp_path)] == ["35_01-09.xls", "35_02-09.XLSX"]
+
+
+def test_read_dates_of_unreadable_file_is_empty(tmp_path):
+    broken = tmp_path / "70_05-09.xlsx"
+    broken.write_bytes(b"no es un excel")
+    assert _read_dates(broken) == []
+
+
+def test_run_pipeline_skips_unexpected_errors_and_keeps_rest(tmp_path, monkeypatch, capsys):
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    write_xlsx(data_dir / "70_06-09.xlsx", make_base_frame(FECHA=[20260906]))
+    write_xlsx(data_dir / "71_06-09.xlsx", make_base_frame(FECHA=[20260906]))
+    real_load = main.load_and_clean
+
+    def flaky_load(path):
+        if path.name.startswith("70"):
+            raise RuntimeError("archivo dañado")
+        return real_load(path)
+
+    monkeypatch.setattr(main, "load_and_clean", flaky_load)
+    db_path = str(tmp_path / "pipeline.db")
+
+    assert run_pipeline(data_dir, db_path) == 1
+    assert "Error inesperado en 70_06-09.xlsx: archivo dañado" in capsys.readouterr().out
+    assert {row[2] for row in read_metrics(db_path)} == {"71"}

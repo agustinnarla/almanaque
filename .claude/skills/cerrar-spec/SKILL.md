@@ -22,7 +22,9 @@ argument-hint: "[número de spec, p. ej. 036]"
 .venv/Scripts/python .claude/skills/cerrar-spec/scripts/run_checks.py --expected-pytest <N>
 ```
 
-Corre en orden `pytest -q` · `npm test` · `npx tsc -b` · `npm run lint` · `npm run build` · `baseline.py check` y resume OK/FALLA por paso (tarda ~1–2 min; usar timeout amplio).
+Corre en orden `pytest --cov` · `npm run test:coverage` · `npx tsc -b` · `npm run lint` · `npm run build` · `baseline.py check` y resume OK/FALLA por paso con conteos y cobertura (tarda ~1–2 min; usar timeout amplio). Son los mismos checks del CI (`.github/workflows/ci.yml`).
+
+- **Cobertura:** si queda por debajo del piso (`.coveragerc` → `fail_under`; `frontend/vite.config.ts` → `coverage.thresholds`), el paso falla: sumar tests, nunca bajar el piso. Si la spec sube la cobertura, subir el piso al nuevo valor redondeado hacia abajo.
 
 - `baseline check` compara `/data` (tamaño + mtime de cada archivo) y las dependencias npm/pip contra `.claude/baseline.json`.
   - Si reporta **CAMBIADO/ELIMINADO en `[data]`** → incumplimiento grave de la constitución: detenerse y avisar al usuario.
@@ -59,7 +61,8 @@ Solo si todo lo anterior está en verde. Reglas: `docs/github-flow.md`.
 3. Commit en Conventional Commits, en español: `<tipo>(NNN): <descripción en minúscula, sin punto>` (≤ 72 caracteres), cuerpo con el detalle y los conteos de tests, y el trailer de co-autoría. El hook `commit-msg` rechaza otros formatos.
 4. `git push -u origin <rama>`; el hook `pre-push` bloquea `main` y nombres fuera de formato.
 5. `gh pr create --base main --title "<mismo formato que el commit>" --body …` con **Resumen**, **Criterios de finalización** (la tabla del paso 4) y **Decisiones a revisar**.
-6. `gh pr merge --squash --delete-branch`, y después `git switch main && git pull`.
+6. Esperar el CI: `gh pr checks <n> --watch --fail-fast`. Los 3 jobs tienen que estar en verde: Backend, Frontend y Título del PR. Si alguno falla, corregir en la rama, pushear y volver a esperar; **nunca** mergear con el CI en rojo.
+7. `gh pr merge --squash --delete-branch`, y después `git switch main && git pull`.
 
 ## 7. Reporte final
 

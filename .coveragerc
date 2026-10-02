@@ -1,0 +1,15 @@
+# Cobertura del backend (Spec 049). Uso: pytest --cov --cov-report=term-missing
+[run]
+source = backend
+branch = True
+omit =
+    backend/test_*.py
+
+[report]
+# Piso: la cobertura alcanzada, redondeada hacia abajo. Solo se sube.
+fail_under = 98
+show_missing = True
+skip_covered = True
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
