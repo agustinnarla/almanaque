@@ -47,11 +47,13 @@ import { summarizePatterns } from '../lib/patterns'
 import { mapRangeDiagnostics } from '../lib/rangeDiagnostics'
 import {
   campaignDates,
+  campaignEntry,
   segmentOf,
   defaultRangeValues,
   defaultWeekValues,
 } from '../lib/catalog'
 import { buildWeekOptions, findWeekByStart } from '../lib/weeks'
+import { describeDays, rangeMissingDays } from '../lib/coverage'
 import { dimWhile } from '../lib/refreshing'
 import type { CampaignCatalogEntry } from '../types/api'
 import { DEFAULT_MIN_CALLS, RANKING_LIMIT } from './defaults'
@@ -102,6 +104,8 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
   const segmentPeers = useSegmentPeers({ catalog, ...params })
   const routing = useRoutingChanges(params)
   const segment = segmentOf(catalog, range.campaign)
+  const entry = campaignEntry(catalog, range.campaign)
+  const missingDays = entry ? rangeMissingDays(entry, range.from, range.to) : []
   const patternAlerts = usePatternAlerts({
     from: range.from,
     to: range.to,
@@ -221,6 +225,15 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                   className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700"
                 >
                   Parcial
+                </span>
+              )}
+              {missingDays.length > 0 && (
+                <span
+                  data-testid="missing-days-badge"
+                  title="Días hábiles del rango sin datos de esta campaña (pueden ser feriados)"
+                  className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-700"
+                >
+                  Faltan {missingDays.length} {missingDays.length === 1 ? 'día' : 'días'}: {describeDays(missingDays)}
                 </span>
               )}
             </p>

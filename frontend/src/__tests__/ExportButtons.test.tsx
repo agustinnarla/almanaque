@@ -643,6 +643,53 @@ describe('Exportación por modo', () => {
     )
   })
 
+  // Spec 055: same catalog with one campaign trimmed.
+  function catalogWith(campaign: string, keep: (date: string) => boolean) {
+    const catalog = TEST_CATALOG.map((entry) => {
+      if (entry.campaign !== campaign) return entry
+      const dates = entry.dates.filter(keep)
+      return { ...entry, dates, days: dates.length, last_day: dates.at(-1)! }
+    })
+    vi.mocked(useCampaigns).mockReturnValue({ campaigns: catalog, loading: false, error: null, reload: vi.fn() })
+  }
+
+  it('avisa la cobertura: al día, y una campaña atrasada en todos los modos', async () => {
+    const { unmount } = render(<App />)
+    expect(screen.getByTestId('coverage-notice')).toHaveTextContent(
+      'Datos al día: 2 campañas del 01/09 al 15/09 (11 días hábiles).',
+    )
+    unmount()
+
+    catalogWith('38', (date) => date <= '2026-09-11')
+    render(<App />)
+    const notice = screen.getByTestId('coverage-notice')
+    expect(notice).toHaveTextContent('Cobertura incompleta: 38 llega hasta el 11/09.')
+    await userEvent.click(within(notice).getByRole('button', { name: 'Ver detalle' }))
+    const rows = within(notice).getAllByTestId('coverage-row')
+    expect(rows[1]).toHaveTextContent('38')
+    expect(rows[1]).toHaveTextContent('14/09 y 15/09')
+    expect(notice).toHaveTextContent('Un día hábil sin datos puede ser feriado.')
+
+    await userEvent.click(screen.getByTestId('tab-campaigns'))
+    expect(screen.getByTestId('cross-coverage-warning')).toHaveTextContent(
+      'La campaña 38 no tiene datos de 2 días hábiles del rango (14/09 y 15/09); sus totales cubren menos días que los de la 35.',
+    )
+  })
+
+  it('RangeMode marca los días hábiles sin datos del rango elegido', () => {
+    catalogWith('35', (date) => date !== '2026-09-08')
+    render(<App />)
+    expect(screen.getByTestId('missing-days-badge')).toHaveTextContent('Faltan 1 día: 08/09')
+    expect(screen.getByTestId('coverage-notice')).toHaveTextContent('35: falta el 08/09')
+  })
+
+  it('sin huecos no hay badge ni aviso en Comparar campañas', async () => {
+    render(<App />)
+    expect(screen.queryByTestId('missing-days-badge')).not.toBeInTheDocument()
+    await userEvent.click(screen.getByTestId('tab-campaigns'))
+    expect(screen.queryByTestId('cross-coverage-warning')).not.toBeInTheDocument()
+  })
+
   it('CampaignsCompareMode ofrece 12 CSV + imprimir', async () => {
     render(<App />)
     await userEvent.click(screen.getByTestId('tab-campaigns'))
