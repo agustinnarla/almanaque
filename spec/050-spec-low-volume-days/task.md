@@ -15,4 +15,4 @@
 ## 4. Verificación y cierre
 - [x] Tests nuevos con los valores reales
 - [x] `/cerrar-spec 050` en verde (pytest 203 · 98,04% · vitest 340 · líneas 96,44% / ramas 82,23% · tsc · lint 0/0 · build · baseline); pisos vitest → 95/82/96/96
-- [ ] PR con CI en verde y squash merge
+- [x] PR #3 con CI en verde (Backend 1m6s · Frontend 1m39s · Título 7s) y squash merge
