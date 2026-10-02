@@ -58,9 +58,19 @@ chore(048): renombra el proyecto a Proyecto Almanaque
 
 ## 4. Merge
 
-1. `/cerrar-spec NNN` en verde: pytest, vitest, tsc, lint, build y baseline de `/data`.
-2. `gh pr merge --squash --delete-branch`: un commit por cambio en `main`, y la rama se borra.
-3. `git switch main && git pull`.
+1. `/cerrar-spec NNN` en verde: pytest y vitest con cobertura, tsc, lint, build y baseline de `/data`.
+2. CI en verde en el PR: `gh pr checks <n> --watch --fail-fast`. `.github/workflows/ci.yml` corre tres jobs:
+   - **Backend:** pytest con cobertura.
+   - **Frontend:** lint, tipos, vitest con cobertura y build.
+   - **Título del PR:** valida que el título cumpla las mismas reglas que un commit.
+3. `gh pr merge --squash --delete-branch`: un commit por cambio en `main`, y la rama se borra.
+4. `git switch main && git pull`.
+
+La cobertura tiene un piso que hace fallar el CI:
+- **Backend:** `.coveragerc` → `fail_under`.
+- **Frontend:** `frontend/vite.config.ts` → `coverage.thresholds`.
+
+El piso solo sube. Cuando una spec mejora la cobertura, se sube al nuevo valor redondeado hacia abajo.
 
 El repo solo admite squash merge y borra las ramas integradas automáticamente.
 

@@ -1,8 +1,11 @@
 """Full regression gate required by every spec's "Criterios de Finalización".
 
-Runs, in order: pytest -q, npm test, npx tsc -b, npm run lint, npm run build,
-then the /data + dependencies baseline check. Prints one summary line per step
-(with test counts when available) and the tail of the output for failures.
+Runs, in order: pytest with coverage, vitest with coverage (npm run
+test:coverage), npx tsc -b, npm run lint, npm run build, then the /data +
+dependencies baseline check — the same gates as CI (.github/workflows/ci.yml).
+Coverage floors live in .coveragerc and frontend/vite.config.ts. Prints one
+summary line per step (with test counts and coverage when available) and the
+tail of the output for failures.
 
 Usage:
     .venv/Scripts/python .claude/skills/cerrar-spec/scripts/run_checks.py [--expected-pytest N]
@@ -48,12 +51,20 @@ def _pytest_count(output: str) -> str:
         parts.append(f"{match.group(1)} passed")
     if failed:
         parts.append(f"{failed.group(1)} failed")
+    coverage = re.search(r"Total coverage: ([\d.]+%)", output)
+    if coverage:
+        parts.append(f"cobertura {coverage.group(1)}")
     return ", ".join(parts)
 
 
 def _vitest_count(output: str) -> str:
     match = re.search(r"Tests\s+(.+?\(\d+\))", output)
-    return match.group(1).strip() if match else ""
+    detail = match.group(1).strip() if match else ""
+    lines = re.search(r"Lines\s*:\s*([\d.]+%)", output)
+    branches = re.search(r"Branches\s*:\s*([\d.]+%)", output)
+    if lines and branches:
+        detail += f", cobertura líneas {lines.group(1)} · ramas {branches.group(1)}"
+    return detail
 
 
 def _lint_count(output: str) -> str:
@@ -69,8 +80,8 @@ def main() -> int:
     args = parser.parse_args()
 
     steps = [
-        ("pytest -q", f'"{VENV_PYTHON}" -m pytest -q', PROJECT_DIR, _pytest_count),
-        ("npm test", "npm test", FRONTEND_DIR, _vitest_count),
+        ("pytest --cov", f'"{VENV_PYTHON}" -m pytest -q --cov --cov-report=term', PROJECT_DIR, _pytest_count),
+        ("npm run test:coverage", "npm run test:coverage", FRONTEND_DIR, _vitest_count),
         ("npx tsc -b", "npx tsc -b", FRONTEND_DIR, None),
         ("npm run lint", "npm run lint", FRONTEND_DIR, _lint_count),
         ("npm run build", "npm run build", FRONTEND_DIR, None),
@@ -84,7 +95,7 @@ def main() -> int:
         code, output = _run(command, cwd)
         detail = counter(output) if counter else ""
         ok = code == 0
-        if label == "pytest -q" and args.expected_pytest is not None:
+        if label == "pytest --cov" and args.expected_pytest is not None:
             passed = re.search(r"(\d+) passed", output)
             if not passed or int(passed.group(1)) != args.expected_pytest:
                 ok = False

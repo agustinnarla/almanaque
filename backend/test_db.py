@@ -3,9 +3,11 @@ import sqlite3
 import pandas as pd
 import pytest
 
+import db_manager
 from db_manager import (
     get_connection,
     init_db,
+    migrate_add_campaign,
     migrate_recreate_device,
     migrate_recreate_hourly,
     replace_day,
@@ -221,3 +223,50 @@ def test_replace_day_persists_busy_and_congestion(conn):
     ).fetchone()
     assert row["busy_calls"] == 1
     assert row["congestion_calls"] == 1
+
+
+def test_migrate_add_campaign_adds_missing_column(capsys):
+    conn = get_connection(":memory:")
+    conn.execute("CREATE TABLE daily_campaign_metrics (fecha DATE, base TEXT, total_calls INTEGER)")
+    migrate_add_campaign(conn)
+    columns = {info[1] for info in conn.execute("PRAGMA table_info(daily_campaign_metrics)")}
+    assert "campaign" in columns
+    assert "columna campaign agregada" in capsys.readouterr().out
+    conn.close()
+
+
+def test_migrations_do_nothing_without_table():
+    conn = get_connection(":memory:")
+    migrate_recreate_hourly(conn)
+    migrate_recreate_device(conn)
+    assert conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall() == []
+    conn.close()
+
+
+def test_get_db_connection_initializes_and_closes(monkeypatch):
+    opened = get_connection(":memory:")
+    monkeypatch.setattr(db_manager, "get_connection", lambda: opened)
+
+    dependency = db_manager.get_db_connection()
+    conn = next(dependency)
+    assert get_pk_columns(conn) == DEVICE_PK
+    with pytest.raises(StopIteration):
+        next(dependency)
+    with pytest.raises(sqlite3.ProgrammingError):
+        conn.execute("SELECT 1")
+
+
+def test_replace_day_without_campaign_column_uses_default(conn):
+    metrics = make_metrics("2026-09-01", ["A"]).drop(columns=["campaign"])
+    replace_day(conn, "2026-09-01", metrics)
+    assert fetch_all(conn) == [("2026-09-01", 10, "Sin Campaña", "A", "GW37", 10)]
+
+
+def test_replace_day_with_empty_campaigns_clears_default_campaign(conn):
+    replace_day(conn, "2026-09-01", make_metrics("2026-09-01", ["A"], campaign="Sin Campaña"))
+    metrics = make_metrics("2026-09-01", ["B"])
+    metrics["campaign"] = None
+
+    replace_day(conn, "2026-09-01", metrics)
+
+    assert [row[3] for row in fetch_all(conn)] == ["B"]

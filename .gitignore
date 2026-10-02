@@ -9,6 +9,13 @@ __pycache__/
 .pytest_cache/
 *.tsbuildinfo
 
+# Reportes de cobertura (se regeneran con test:coverage / pytest --cov)
+frontend/coverage/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
 # Datos locales: crudos de solo lectura (~831 MB) y DB regenerable con el pipeline
 /data/
 /callcenter_metrics.db

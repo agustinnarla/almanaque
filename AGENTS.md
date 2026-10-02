@@ -29,7 +29,8 @@ Reglas completas en `docs/github-flow.md`.
 - **Nunca** commitear ni hacer push directo a `main`: cada spec o cambio va en su rama `<tipo>/<NNN>-<slug>` (p. ej. `feat/049-low-volume-days`).
 - Commits con Conventional Commits en español: `<tipo>(<NNN>): <descripción en minúscula, imperativo, sin punto>` (≤ 72 caracteres en la primera línea).
 - Stagear rutas explícitas (`git add frontend backend spec docs`), nunca `git add -A`.
-- Cierre: `/cerrar-spec` en verde → push de la rama → PR con la tabla de criterios → `gh pr merge --squash --delete-branch` → `git switch main && git pull`.
+- Cierre: `/cerrar-spec` en verde → push de la rama → PR con la tabla de criterios → CI en verde (`gh pr checks <n> --watch`) → `gh pr merge --squash --delete-branch` → `git switch main && git pull`.
+- La cobertura (pytest y vitest) tiene un piso que solo sube: si baja, se suman tests, nunca se baja el piso.
 
 ## Cierre de Tareas
 - Al terminar cualquier tarea, verificar siempre con los tests locales para garantizar que la nueva lógica no rompa funciones anteriores.
