@@ -1,4 +1,6 @@
+import json
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -25,6 +27,18 @@ CREATE TABLE IF NOT EXISTS daily_campaign_metrics (
 """
 
 
+# Spec 052: one row per /data file already loaded, to ingest only what changed.
+CREATE_INGESTED_FILES_SQL = """
+CREATE TABLE IF NOT EXISTS ingested_files (
+    name TEXT PRIMARY KEY,
+    size INTEGER NOT NULL,
+    mtime_ns INTEGER NOT NULL,
+    days TEXT NOT NULL,
+    ingested_at TEXT NOT NULL
+)
+"""
+
+
 def get_connection(db_path: Path | str = DEFAULT_DB_PATH) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path, check_same_thread=False)
     conn.row_factory = sqlite3.Row
@@ -34,6 +48,7 @@ def get_connection(db_path: Path | str = DEFAULT_DB_PATH) -> sqlite3.Connection:
 
 def init_db(conn: sqlite3.Connection) -> None:
     conn.execute(CREATE_TABLE_SQL)
+    conn.execute(CREATE_INGESTED_FILES_SQL)
     conn.commit()
     migrate_add_campaign(conn)
     migrate_recreate_hourly(conn)
@@ -163,3 +178,36 @@ def replace_day(conn: sqlite3.Connection, fecha, metrics_df: pd.DataFrame) -> in
             rows,
         )
     return len(rows)
+
+
+def load_ingested_files(conn: sqlite3.Connection) -> dict[str, dict]:
+    """name -> {size, mtime_ns, days: set[(campaign, fecha)]}."""
+    files = {}
+    for row in conn.execute("SELECT name, size, mtime_ns, days FROM ingested_files"):
+        files[row["name"]] = {
+            "size": int(row["size"]),
+            "mtime_ns": int(row["mtime_ns"]),
+            "days": {tuple(day) for day in json.loads(row["days"])},
+        }
+    return files
+
+
+def record_ingested_file(
+    conn: sqlite3.Connection, name: str, size: int, mtime_ns: int, days: set[tuple[str, str]]
+) -> None:
+    with conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO ingested_files (name, size, mtime_ns, days, ingested_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (name, size, mtime_ns, json.dumps(sorted(days)), datetime.now().isoformat(timespec="seconds")),
+        )
+
+
+def forget_ingested_file(conn: sqlite3.Connection, name: str) -> None:
+    with conn:
+        conn.execute("DELETE FROM ingested_files WHERE name = ?", (name,))
+
+
+def clear_ingested_files(conn: sqlite3.Connection) -> None:
+    with conn:
+        conn.execute("DELETE FROM ingested_files")

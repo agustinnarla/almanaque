@@ -105,7 +105,10 @@ def test_run_pipeline_is_idempotent(tmp_path):
 
     assert run_pipeline(data_dir, db_path) == 1
     first = read_metrics(db_path)
-    assert run_pipeline(data_dir, db_path) == 1
+    # Spec 052: an unchanged file is not read again...
+    assert run_pipeline(data_dir, db_path) == 0
+    # ...and a full reload replaces the day instead of duplicating it.
+    assert run_pipeline(data_dir, db_path, full=True) == 1
     second = read_metrics(db_path)
 
     assert first == second

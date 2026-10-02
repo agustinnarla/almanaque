@@ -36,14 +36,21 @@ Todas las rutas son relativas a la raíz del proyecto. En PowerShell usar `.\.ve
 ## 2. Pipeline
 
 ```bash
-.venv/Scripts/python backend/main.py
+.venv/Scripts/python backend/main.py          # incremental (Spec 052)
+.venv/Scripts/python backend/main.py --full   # reprocesa todo
 ```
 
-- Procesa **todos** los archivos de `/data` cada vez (no es incremental): primero lee solo `FECHA` para agrupar por `(campaña, fecha)`, después une los fragmentos del mismo día y hace `replace_day` (DELETE + INSERT por fecha y campaña). Es idempotente (Spec 029 RF4).
-- Con ~60 archivos tarda varios minutos: correrlo en background o con timeout alto (600000 ms).
+- Es **incremental** (Spec 052):
+  - **Registro:** la tabla `ingested_files` guarda nombre, tamaño, `mtime_ns` y días de cada archivo cargado.
+  - **Qué lee:** solo los archivos nuevos o modificados. Recalcula los `(campaña, fecha)` que tocan esos archivos o los eliminados, cada uno con **todos** sus archivos: une fragmentos y hojas, descarta IDs repetidos y hace `replace_day`.
+  - **Sin cambios:** imprime «Sin archivos nuevos ni modificados: la base está al día.» y termina en segundos.
+  - **Antes de procesar:** imprime `Nuevos o modificados: N · eliminados: M · días a recalcular: D.`
+- `--full` reprocesa todo, como antes de la 052. Usarlo si se sospecha de la base o si cambió la lógica de limpieza o de métricas: el modo incremental no detecta cambios de código.
+- Una corrida completa (la primera o `--full`) con ~100 archivos tarda varios minutos: correrla en background o con timeout alto (600000 ms).
 - Pico de memoria ≈ un día de una campaña (~140K filas crudas); no paralelizar.
 - Controlar la salida:
-  - Última línea `Pipeline finalizado. Archivos procesados: X/Y.` → **X debe ser igual a Y**.
+  - Última línea `Pipeline finalizado. Archivos procesados: X/Y.` → **X debe ser igual a Y** (Y = archivos que había que leer en esta corrida).
+  - `Aviso: campaña C F: ya no hay archivos en /data…` → se borró de `/data` el único archivo de un día: informarlo (los datos quedan en la base).
   - Cualquier `Error en <archivo>` o `Error inesperado` → reportarlo con el archivo y el motivo.
   - `Alerta: faltan columnas…` → informar.
 
