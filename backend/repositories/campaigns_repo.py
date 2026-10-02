@@ -77,6 +77,15 @@ def _rate(agent_answers: int, total_calls: int, machine_answers: int) -> float |
     return agent_answers / denominator
 
 
+def _attendable_rate(agent_answers: int, total_calls: int, machine_answers: int) -> float | None:
+    """AA over the calls a person could answer (Spec 051): answering machines
+    leave the denominator. The headline AA keeps total_calls (Spec 012)."""
+    attendable = total_calls - machine_answers
+    if attendable <= 0:
+        return None
+    return agent_answers / attendable
+
+
 def _row_to_day(row: sqlite3.Row | dict, fecha: str | None = None) -> dict:
     total = int(row["total_calls"])
     agents = int(row["agent_answers"])
@@ -118,10 +127,17 @@ def get_summary(
             "machine_answers": 0,
             "rejected_calls": 0,
             "agent_answer_rate": None,
+            "attendable_answer_rate": None,
         }
     day = _row_to_day(row, fecha=None)
     day.pop("fecha", None)
-    return {"campaign": campaign_name, **day}
+    return {
+        "campaign": campaign_name,
+        **day,
+        "attendable_answer_rate": _attendable_rate(
+            day["agent_answers"], day["total_calls"], day["machine_answers"]
+        ),
+    }
 
 
 def get_daily_device_rows(
@@ -332,6 +348,7 @@ def get_device_metrics(
                 "busy_calls": busy,
                 "congestion_calls": congestion,
                 "agent_answer_rate": _rate(agents, total, machines),
+                "attendable_answer_rate": _attendable_rate(agents, total, machines),
                 "busy_rate": _fraction(busy, total),
                 "congestion_rate": _fraction(congestion, total),
             }

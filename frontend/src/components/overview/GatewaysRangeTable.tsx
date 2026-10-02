@@ -22,14 +22,20 @@ export function GatewaysRangeTable({ rows }: GatewaysRangeTableProps) {
       data-testid="gateways-range-table"
       className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm"
     >
-      <table className="w-full min-w-[560px] table-fixed text-left text-sm">
+      <table className="w-full min-w-[640px] table-fixed text-left text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-            <th className="w-[30%] px-2 py-2 font-semibold">Troncal</th>
-            <th className="w-[16%] px-2 py-2 text-right font-semibold">Intentos</th>
-            <th className="w-[16%] px-2 py-2 text-right font-semibold">AA %</th>
-            <th className="w-[19%] px-2 py-2 text-right font-semibold">Ocupado %</th>
-            <th className="w-[19%] px-2 py-2 text-right font-semibold">Congestión %</th>
+            <th className="w-[24%] px-2 py-2 font-semibold">Troncal</th>
+            <th className="w-[14%] px-2 py-2 text-right font-semibold">Intentos</th>
+            <th className="w-[14%] px-2 py-2 text-right font-semibold">AA %</th>
+            <th
+              className="w-[16%] px-2 py-2 text-right font-semibold"
+              title="Agent Answer sobre las llamadas que no atendió un contestador: agentes ÷ (intentos − contestadores)"
+            >
+              AA atend. %
+            </th>
+            <th className="w-[16%] px-2 py-2 text-right font-semibold">Ocupado %</th>
+            <th className="w-[16%] px-2 py-2 text-right font-semibold">Congestión %</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -43,6 +49,9 @@ export function GatewaysRangeTable({ rows }: GatewaysRangeTableProps) {
               </td>
               <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                 {formatRatePct(row.agent_answer_rate)}
+              </td>
+              <td className="px-2 py-2 text-right tabular-nums text-slate-700">
+                {formatRatePct(row.attendable_answer_rate)}
               </td>
               <td className="px-2 py-2 text-right tabular-nums text-slate-700">
                 {formatRatePct(row.busy_rate)}

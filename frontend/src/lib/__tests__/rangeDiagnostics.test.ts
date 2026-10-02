@@ -57,6 +57,7 @@ function device(
     busy_calls: Math.round((busy ?? 0) * total),
     congestion_calls: Math.round((congestion ?? 0) * total),
     agent_answer_rate: total > 0 ? agents / total : null,
+    attendable_answer_rate: total - machines > 0 ? agents / (total - machines) : null,
     busy_rate: busy,
     congestion_rate: congestion,
   }
