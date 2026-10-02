@@ -82,6 +82,18 @@ describe('api', () => {
     await expect(call(new AbortController().signal)).rejects.toThrow('Error de API: 500')
   })
 
+  it('compara semanas: suma el rango B solo si viene completo', async () => {
+    const fetchMock = mockFetch({ ok: true })
+    const weeks = { ...cross, campaignB: '35', startDateB: '2026-09-21', endDateB: '2026-09-27' }
+    await fetchCrossCampaignCompare(weeks)
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      '/api/campaigns/compare-campaigns?campaign_a=35&campaign_b=35&start_date=2026-09-01&end_date=2026-09-30' +
+        '&min_calls=50&start_date_b=2026-09-21&end_date_b=2026-09-27',
+    )
+    await fetchCrossCampaignDiagnostics({ ...cross, startDateB: '2026-09-21' })
+    expect(fetchMock.mock.calls[1][0]).toBe(`/api/campaigns/compare-campaigns/diagnostics?${CROSS}`)
+  })
+
   it('codifica la campaña en la URL', async () => {
     const fetchMock = mockFetch({ ok: true })
     await fetchSummary('Sin Campaña/1', '2026-09-01', '2026-09-30')

@@ -11,6 +11,7 @@ import type {
   TrunkVolumeRow,
 } from '../types/api'
 
+import type { WeekdayComparePoint } from './chartData'
 import type { PatternCombo, PatternCompareCombo, PatternCompareDay, PatternDayCount } from './patterns'
 import type { CrossRankingKind } from './rankings'
 import type {
@@ -403,6 +404,23 @@ export function patternCompareComboRows(combos: PatternCompareCombo[]): CsvTable
       combo.alertsA,
       combo.alertsB,
       combo.total,
+    ]),
+  }
+}
+
+// Spec 057: one row per weekday, each week with its own date.
+export function weekdayCompareRows(points: WeekdayComparePoint[]): CsvTable {
+  const round = (value: number | null) => (value == null ? null : Math.round(value * 100) / 100)
+  return {
+    headers: ['Día', 'Fecha A', 'Llamadas A', 'Agent Answer A %', 'Fecha B', 'Llamadas B', 'Agent Answer B %'],
+    rows: points.map((p) => [
+      p.label,
+      p.fechaA,
+      p.fechaA ? p.totalA : null,
+      round(p.rateA),
+      p.fechaB,
+      p.fechaB ? p.totalB : null,
+      round(p.rateB),
     ]),
   }
 }

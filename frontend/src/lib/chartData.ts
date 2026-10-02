@@ -96,3 +96,48 @@ export function mergeDailyPoints(
   }
   return [...byFecha.values()]
 }
+
+// Spec 057: two weeks aligned by weekday (Monday with Monday…), since their
+// dates never match. Each side keeps its own date for the tooltip and table.
+const WEEKDAYS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'] as const
+
+export interface WeekdayComparePoint {
+  label: string
+  weekday: number
+  fechaA: string | null
+  fechaB: string | null
+  totalA: number
+  totalB: number
+  rateA: number | null
+  rateB: number | null
+}
+
+export function mergeDailyByWeekday(
+  pointsA: DailyTrendPoint[],
+  pointsB: DailyTrendPoint[],
+): WeekdayComparePoint[] {
+  const byWeekday = new Map<number, WeekdayComparePoint>()
+  const ensure = (fecha: string): WeekdayComparePoint => {
+    const weekday = new Date(`${fecha}T00:00:00Z`).getUTCDay()
+    let row = byWeekday.get(weekday)
+    if (!row) {
+      row = { label: WEEKDAYS[weekday], weekday, fechaA: null, fechaB: null, totalA: 0, totalB: 0, rateA: null, rateB: null }
+      byWeekday.set(weekday, row)
+    }
+    return row
+  }
+  for (const p of pointsA) {
+    const row = ensure(p.fecha)
+    row.fechaA = p.fecha
+    row.totalA = p.total_calls
+    row.rateA = p.agent_answer_rate != null ? p.agent_answer_rate * 100 : null
+  }
+  for (const p of pointsB) {
+    const row = ensure(p.fecha)
+    row.fechaB = p.fecha
+    row.totalB = p.total_calls
+    row.rateB = p.agent_answer_rate != null ? p.agent_answer_rate * 100 : null
+  }
+  // Monday first, Sunday last.
+  return [...byWeekday.values()].sort((a, b) => ((a.weekday + 6) % 7) - ((b.weekday + 6) % 7))
+}
