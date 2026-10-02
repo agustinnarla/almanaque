@@ -3,6 +3,7 @@ import sqlite3
 
 from fastapi import APIRouter, Depends, Query
 
+import schemas
 from db_manager import get_db_connection
 from services.routing_detector import detect_routing
 from repositories.campaigns_repo import (
@@ -30,14 +31,14 @@ from repositories.campaigns_repo import (
 router = APIRouter(prefix="/api/campaigns", tags=["campaigns"])
 
 
-@router.get("")
+@router.get("", response_model=list[schemas.CatalogEntry])
 def campaigns_catalog(
     conn: sqlite3.Connection = Depends(get_db_connection),
 ):
     return list_campaigns(conn)
 
 
-@router.get("/compare-campaigns")
+@router.get("/compare-campaigns", response_model=schemas.CrossCompare)
 def cross_campaign_compare(
     campaign_a: str = Query(..., min_length=1),
     campaign_b: str = Query(..., min_length=1),
@@ -53,7 +54,7 @@ def cross_campaign_compare(
     )
 
 
-@router.get("/compare-campaigns/diagnostics")
+@router.get("/compare-campaigns/diagnostics", response_model=schemas.CrossDiagnostics)
 def cross_campaign_diagnostics(
     campaign_a: str = Query(..., min_length=1),
     campaign_b: str = Query(..., min_length=1),
@@ -69,7 +70,7 @@ def cross_campaign_diagnostics(
     )
 
 
-@router.get("/compare-campaigns/recommendations")
+@router.get("/compare-campaigns/recommendations", response_model=schemas.CrossRecommendations, response_model_exclude_unset=True)
 def cross_campaign_recommendations(
     campaign_a: str = Query(..., min_length=1),
     campaign_b: str = Query(..., min_length=1),
@@ -85,7 +86,7 @@ def cross_campaign_recommendations(
     )
 
 
-@router.get("/{campaign_name}/summary")
+@router.get("/{campaign_name}/summary", response_model=schemas.Summary)
 def campaign_summary(
     campaign_name: str,
     start_date: date = Query(...),
@@ -95,7 +96,7 @@ def campaign_summary(
     return get_summary(conn, campaign_name, start_date, end_date)
 
 
-@router.get("/{campaign_name}/compare")
+@router.get("/{campaign_name}/compare", response_model=schemas.DaysCompare)
 def campaign_compare(
     campaign_name: str,
     date_a: date = Query(...),
@@ -112,7 +113,7 @@ def campaign_compare(
     }
 
 
-@router.get("/{campaign_name}/bases-ranking")
+@router.get("/{campaign_name}/bases-ranking", response_model=list[schemas.BaseRankingRow])
 def campaign_bases_ranking(
     campaign_name: str,
     start_date: date = Query(...),
@@ -123,7 +124,7 @@ def campaign_bases_ranking(
     return get_ranking(conn, campaign_name, start_date, end_date, min_calls)
 
 
-@router.get("/{campaign_name}/routing")
+@router.get("/{campaign_name}/routing", response_model=schemas.Routing)
 def campaign_routing(
     campaign_name: str,
     start_date: date = Query(...),
@@ -138,7 +139,7 @@ def campaign_routing(
     return {**detect_routing(rows), "volume": volume}
 
 
-@router.get("/{campaign_name}/heatmap")
+@router.get("/{campaign_name}/heatmap", response_model=list[schemas.HourDeviceRow])
 def campaign_heatmap(
     campaign_name: str,
     start_date: date = Query(...),
@@ -148,7 +149,7 @@ def campaign_heatmap(
     return get_hour_device_rows(conn, campaign_name, start_date, end_date)
 
 
-@router.get("/{campaign_name}/hourly-trend")
+@router.get("/{campaign_name}/hourly-trend", response_model=list[schemas.HourlyPoint])
 def campaign_hourly_trend(
     campaign_name: str,
     start_date: date = Query(...),
@@ -158,7 +159,7 @@ def campaign_hourly_trend(
     return get_hourly_trend(conn, campaign_name, start_date, end_date)
 
 
-@router.get("/{campaign_name}/devices")
+@router.get("/{campaign_name}/devices", response_model=list[schemas.DeviceRow])
 def campaign_devices(
     campaign_name: str,
     start_date: date = Query(...),
@@ -168,7 +169,7 @@ def campaign_devices(
     return get_device_metrics(conn, campaign_name, start_date, end_date)
 
 
-@router.get("/{campaign_name}/daily")
+@router.get("/{campaign_name}/daily", response_model=list[schemas.DailyPoint])
 def campaign_daily(
     campaign_name: str,
     start_date: date = Query(...),
@@ -178,7 +179,7 @@ def campaign_daily(
     return get_daily_trend(conn, campaign_name, start_date, end_date)
 
 
-@router.get("/{campaign_name}/devices/ranking")
+@router.get("/{campaign_name}/devices/ranking", response_model=schemas.DeviceRanking)
 def campaign_devices_ranking(
     campaign_name: str,
     start_date: date = Query(...),
@@ -192,7 +193,7 @@ def campaign_devices_ranking(
     )
 
 
-@router.get("/{campaign_name}/hours/ranking")
+@router.get("/{campaign_name}/hours/ranking", response_model=schemas.HourRanking)
 def campaign_hours_ranking(
     campaign_name: str,
     start_date: date = Query(...),
@@ -206,7 +207,7 @@ def campaign_hours_ranking(
     )
 
 
-@router.get("/{campaign_name}/compare/diagnostics")
+@router.get("/{campaign_name}/compare/diagnostics", response_model=schemas.CompareDiagnostics)
 def campaign_compare_diagnostics(
     campaign_name: str,
     date_a: date = Query(...),
@@ -217,7 +218,7 @@ def campaign_compare_diagnostics(
     return build_compare_diagnostics(conn, campaign_name, date_a, date_b, min_calls)
 
 
-@router.get("/{campaign_name}/compare/recommendations")
+@router.get("/{campaign_name}/compare/recommendations", response_model=schemas.CompareRecommendations, response_model_exclude_unset=True)
 def campaign_compare_recommendations(
     campaign_name: str,
     date_a: date = Query(...),
@@ -230,7 +231,7 @@ def campaign_compare_recommendations(
     )
 
 
-@router.get("/{campaign_name}/recommendations")
+@router.get("/{campaign_name}/recommendations", response_model=schemas.RangeRecommendations, response_model_exclude_unset=True)
 def campaign_range_recommendations(
     campaign_name: str,
     start_date: date = Query(...),
@@ -243,7 +244,7 @@ def campaign_range_recommendations(
     )
 
 
-@router.get("/{campaign_name}/diagnostics")
+@router.get("/{campaign_name}/diagnostics", response_model=schemas.RangeDiagnostics)
 def campaign_diagnostics(
     campaign_name: str,
     start_date: date = Query(...),
