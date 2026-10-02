@@ -16,6 +16,12 @@ interface StatCardProps {
   hero?: boolean
   // Placement in the parent grid (spans), when the default is not enough.
   className?: string
+  // Spec 059: a delta that is neither good nor bad (call volume) stays gray.
+  neutral?: boolean
+  // Tooltip of the delta (e.g. which period it compares with).
+  deltaTitle?: string
+  // Small chart under the value (sparkline).
+  trend?: ReactNode
 }
 
 function formatSigned(value: number, suffix: string): string {
@@ -46,6 +52,9 @@ export function StatCard({
   subtitle,
   hero = false,
   className = '',
+  neutral = false,
+  deltaTitle,
+  trend,
 }: StatCardProps) {
   const primaryOk = delta != null && Number.isFinite(delta)
   const secondaryOk =
@@ -61,8 +70,8 @@ export function StatCard({
 
   const rawPositive = showDelta && effective > 0
   const rawNegative = showDelta && effective < 0
-  const isGood = goodWhenNegative ? rawNegative : rawPositive
-  const isBad = goodWhenNegative ? rawPositive : rawNegative
+  const isGood = !neutral && (goodWhenNegative ? rawNegative : rawPositive)
+  const isBad = !neutral && (goodWhenNegative ? rawPositive : rawNegative)
 
   const primarySuffix = resolvePrimarySuffix(deltaIsPercent, deltaSuffix)
 
@@ -84,6 +93,7 @@ export function StatCard({
       {showDelta && (
         <p
           data-testid="stat-delta"
+          title={deltaTitle}
           data-good={isGood || undefined}
           data-bad={isBad || undefined}
           className={`mt-1 inline-flex flex-wrap items-center gap-1 text-sm font-semibold ${
@@ -115,6 +125,7 @@ export function StatCard({
           ) : null}
         </p>
       )}
+      {trend ? <div className="mt-2">{trend}</div> : null}
       {subtitle ? (
         <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
       ) : null}

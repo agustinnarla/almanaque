@@ -8,6 +8,7 @@ import { useCrossCampaignCompare } from '../useCrossCampaignCompare'
 import { useCrossCampaignDiagnostics } from '../useCrossCampaignDiagnostics'
 import { useCrossCampaignRecommendations } from '../useCrossCampaignRecommendations'
 import { useHeatmap } from '../useHeatmap'
+import { usePreviousSummary } from '../usePreviousSummary'
 import { useHourlyTrend } from '../useHourlyTrend'
 import { usePatternAlerts } from '../usePatternAlerts'
 import { useRangeDiagnostics } from '../useRangeDiagnostics'
@@ -64,6 +65,13 @@ describe('hooks de datos', () => {
     expect(result.current.hourly).toEqual([{ hora: 9, fecha: '2026-09-01' }])
     expect(result.current.devices).toEqual({ path: '/api/campaigns/35/devices' })
     expect(result.current.refreshing).toBe(false)
+  })
+
+  it('usePreviousSummary pide el resumen del período anterior', async () => {
+    const { result } = await settle(() => usePreviousSummary('35', '2026-09-21', '2026-09-27'))
+    expect(result.current.range).toEqual({ from: '2026-09-14', to: '2026-09-20' })
+    expect(result.current.summary).toMatchObject({ campaign: '35', total_calls: 100 })
+    expect(fetchMock.mock.calls.at(-1)![0]).toBe('/api/campaigns/35/summary?start_date=2026-09-14&end_date=2026-09-20')
   })
 
   it('useHourlyTrend pide un día por serie', async () => {

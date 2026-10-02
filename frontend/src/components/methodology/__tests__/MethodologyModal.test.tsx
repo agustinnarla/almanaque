@@ -81,6 +81,7 @@ describe('MethodologyModal', () => {
 
   it('muestra las 8 pestañas y los segmentos del backend', async () => {
     await openModal()
+    expect(screen.getByRole('tabpanel')).toHaveTextContent('se compara con el tramo del mismo largo inmediatamente anterior')
     expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
       'Métricas', 'Health score', 'Diagnóstico', 'Destacados', 'Patrones', 'Recomendaciones',
       'Ruteo y volumen', 'Datos',

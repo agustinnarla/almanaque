@@ -100,4 +100,18 @@ describe('StatCard', () => {
     expect(screen.getByTestId('stat-card')).not.toHaveAttribute('data-hero')
     expect(screen.getByTestId('stat-value').className).toContain('text-2xl')
   })
+  it('neutral: la variación queda en gris aunque suba o baje', () => {
+    render(<StatCard title="Total" value="9.451" delta={-30.08} neutral deltaTitle="Comparado con 14/09 → 20/09" />)
+    const delta = screen.getByTestId('stat-delta')
+    expect(delta).toHaveTextContent('−30.08%')
+    expect(delta.className).toContain('text-slate-500')
+    expect(delta).not.toHaveAttribute('data-bad')
+    expect(delta).toHaveAttribute('title', 'Comparado con 14/09 → 20/09')
+  })
+
+  it('muestra la mini línea debajo de la variación', () => {
+    render(<StatCard title="AA" value="10.08%" delta={3.23} trend={<svg data-testid="trend" />} />)
+    const delta = screen.getByTestId('stat-delta')
+    expect(delta.compareDocumentPosition(screen.getByTestId('trend')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
 })

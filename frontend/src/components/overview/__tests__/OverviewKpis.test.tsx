@@ -58,4 +58,54 @@ describe('OverviewKpis', () => {
     expect(values[1]).toBe('—')
     expect(values[3]).toBe('—')
   })
+
+  describe('con el período anterior', () => {
+    // Real campaign 35: S39 against S38.
+    const s39 = {
+      campaign: '35', total_calls: 9451, agent_answers: 953, machine_answers: 4601, rejected_calls: 3897,
+      agent_answer_rate: 953 / 9451, attendable_answer_rate: 953 / (9451 - 4601),
+    }
+    const s38 = {
+      campaign: '35', total_calls: 13517, agent_answers: 926, machine_answers: 6988, rejected_calls: 5603,
+      agent_answer_rate: 926 / 13517, attendable_answer_rate: 926 / (13517 - 6988),
+    }
+    const previous = { summary: s38, range: { from: '2026-09-14', to: '2026-09-20' }, label: 'vs semana anterior' }
+    const day = (fecha: string, rate: number) => ({
+      fecha, total_calls: 1000, agent_answers: rate * 1000, machine_answers: 0, agent_answer_rate: rate,
+    })
+
+    it('muestra cada variación con su color según el significado', () => {
+      render(<OverviewKpis summary={s39} previous={previous} />)
+      const deltas = screen.getAllByTestId('stat-delta')
+      expect(deltas[0]).toHaveTextContent('+3.23 pp')
+      expect(deltas[0]).toHaveTextContent('vs semana anterior')
+      expect(deltas[0]).toHaveAttribute('data-good')
+      expect(deltas[0]).toHaveAttribute('title', 'Comparado con 14/09 → 20/09')
+      expect(deltas[2]).toHaveTextContent('−30.08%')
+      expect(deltas[2]).not.toHaveAttribute('data-good')
+      expect(deltas[2]).not.toHaveAttribute('data-bad')
+      // Answering machines: 51.70% → 48.68% of the calls, a good drop.
+      expect(deltas[3]).toHaveTextContent('−3.02 pp')
+      expect(deltas[3]).toHaveAttribute('data-good')
+      expect(screen.queryByTestId('no-previous-period')).not.toBeInTheDocument()
+    })
+
+    it('sin datos del período anterior lo dice y no muestra variaciones', () => {
+      render(
+        <OverviewKpis
+          summary={s39}
+          previous={{ summary: { ...s38, total_calls: 0 }, range: { from: '2026-08-01', to: '2026-08-31' }, label: 'vs período anterior' }}
+        />,
+      )
+      expect(screen.queryAllByTestId('stat-delta')).toHaveLength(0)
+      expect(screen.getByTestId('no-previous-period')).toHaveTextContent(
+        'Sin datos del período anterior (01/08 → 31/08): no hay variaciones para mostrar.',
+      )
+    })
+
+    it('la tarjeta principal lleva la mini línea del AA diario', () => {
+      render(<OverviewKpis summary={s39} daily={[day('2026-09-21', 0.0959), day('2026-09-22', 0.1113)]} />)
+      expect(screen.getByRole('img', { name: 'AA diario del 21/09 al 22/09: de 9.59% a 11.13%' })).toBeInTheDocument()
+    })
+  })
 })

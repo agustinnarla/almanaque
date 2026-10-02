@@ -4,6 +4,7 @@ import { ExportCsvButton } from '../components/common/ExportCsvButton'
 import { PrintButton } from '../components/common/PrintButton'
 import { ExecutiveSummary } from '../components/Insights/ExecutiveSummary'
 import { useHeatmap } from '../hooks/useHeatmap'
+import { usePreviousSummary } from '../hooks/usePreviousSummary'
 import { useRoutingChanges } from '../hooks/useRoutingChanges'
 import { useSegmentPeers } from '../hooks/useSegmentPeers'
 import { rangeSummaryItems } from '../lib/executiveSummary'
@@ -107,6 +108,7 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
   const segmentPeers = useSegmentPeers({ catalog, ...params })
   const routing = useRoutingChanges(params)
   const heatmap = useHeatmap(range.campaign, range.from, range.to)
+  const previous = usePreviousSummary(range.campaign, range.from, range.to)
   const segment = segmentOf(catalog, range.campaign)
   const entry = campaignEntry(catalog, range.campaign)
   const missingDays = entry ? rangeMissingDays(entry, range.from, range.to) : []
@@ -268,7 +270,19 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                 {...kpiRangeRows(overview.summary)}
               />
             </div>
-            <OverviewKpis summary={overview.summary} />
+            <OverviewKpis
+              summary={overview.summary}
+              daily={overview.daily}
+              previous={
+                previous.loading
+                  ? null
+                  : {
+                      summary: previous.summary,
+                      range: previous.range,
+                      label: isWeek ? 'vs semana anterior' : 'vs período anterior',
+                    }
+              }
+            />
           </section>
 
           <section id="sec-diagnostico" aria-label="Diagnóstico del rango" className={`scroll-mt-16 ${dimWhile(diagnostics.refreshing && !overview.refreshing)}`} aria-busy={diagnostics.refreshing && !overview.refreshing || undefined}>

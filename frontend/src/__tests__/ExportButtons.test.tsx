@@ -411,6 +411,9 @@ vi.mock('../lib/csv', async (importOriginal) => {
   return { ...actual, downloadCsv: vi.fn() }
 })
 vi.mock('../hooks/useCampaigns', () => ({ useCampaigns: vi.fn() }))
+vi.mock('../hooks/usePreviousSummary', () => ({
+  usePreviousSummary: () => ({ summary: null, range: { from: '2026-08-01', to: '2026-08-31' }, loading: false }),
+}))
 vi.mock('../hooks/useHeatmap', () => ({
   useHeatmap: () => ({ data: [], loading: false, refreshing: false, error: null, reload: () => {} }),
 }))
