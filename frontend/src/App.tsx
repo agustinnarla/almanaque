@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ThemeToggle } from './components/common/ThemeToggle'
+import { MethodologyButton } from './components/methodology/MethodologyButton'
 import { useCampaigns } from './hooks/useCampaigns'
 import { CampaignsCompareMode } from './modes/CampaignsCompareMode'
 import { CompareMode } from './modes/CompareMode'
@@ -91,7 +92,10 @@ function App() {
             dos campañas para detectar causas de caída y factores de mejora.
           </p>
         </div>
-        <ThemeToggle />
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+          <MethodologyButton />
+          <ThemeToggle />
+        </div>
       </header>
 
       <ModeTabs mode={mode} onChange={setMode} />
