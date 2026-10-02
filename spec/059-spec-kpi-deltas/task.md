@@ -16,4 +16,4 @@
 - [x] Tests vitest
 - [x] Smoke con la API real (35 · S39 vs S38): AA 6,85% → 10,08% (+3,23 pp); llamadas 13.517 → 9.451 (−30,08%); todo septiembre → agosto sin datos (nota)
 - [x] `/cerrar-spec 059` en verde (pytest 219 · vitest 407 · líneas 97,09% / ramas 83,9% · tsc · lint 0/0 · build · baseline)
-- [ ] PR con CI en verde y squash merge
+- [x] PR #12 con CI en verde (Backend 29s · Frontend 51s · Título 4s) y squash merge
