@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CoverageNotice } from './components/common/CoverageNotice'
 import { ThemeToggle } from './components/common/ThemeToggle'
 import { MethodologyButton } from './components/methodology/MethodologyButton'
 import { useCampaigns } from './hooks/useCampaigns'
@@ -125,6 +126,7 @@ function App() {
 
       {catalog && catalog.length > 0 && (
         <>
+          <CoverageNotice catalog={catalog} />
           {mode === 'range' && <RangeMode catalog={catalog} />}
           {mode === 'compare' && <CompareMode catalog={catalog} />}
           {mode === 'campaigns' && <CampaignsCompareMode catalog={catalog} />}

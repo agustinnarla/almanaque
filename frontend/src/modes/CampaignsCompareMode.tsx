@@ -50,7 +50,8 @@ import {
   buildWorstHour,
 } from '../lib/rangeDiagnostics'
 import { mergeBaseRankings, mergeSegmentRankings } from '../lib/rankings'
-import { defaultCrossValues, segmentOf } from '../lib/catalog'
+import { campaignEntry, defaultCrossValues, segmentOf } from '../lib/catalog'
+import { crossCoverageNotes } from '../lib/coverage'
 import { dimWhile } from '../lib/refreshing'
 import type { CampaignCatalogEntry } from '../types/api'
 import { DEFAULT_MIN_CALLS, RANKING_LIMIT } from './defaults'
@@ -129,6 +130,11 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
           cross.campaignB,
         )
       : null
+
+  const entryA = campaignEntry(catalog, cross.campaignA)
+  const entryB = campaignEntry(catalog, cross.campaignB)
+  const coverageNotes =
+    entryA && entryB ? crossCoverageNotes(entryA, entryB, cross.from, cross.to) : []
 
   const rankingsLoading = rankingsA.loading || rankingsB.loading
   // Refreshing only when every pending side still has its previous result.
@@ -221,6 +227,20 @@ export function CampaignsCompareMode({ catalog }: CampaignsCompareModeProps) {
             </p>
             <PrintButton />
           </div>
+
+          {coverageNotes.length > 0 && (
+            <div
+              data-testid="cross-coverage-warning"
+              className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+            >
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden />
+              <div>
+                {coverageNotes.map((note) => (
+                  <p key={note}>{note}</p>
+                ))}
+              </div>
+            </div>
+          )}
 
           <ExecutiveSummary
             items={crossSummaryItems({
