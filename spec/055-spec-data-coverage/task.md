@@ -16,4 +16,4 @@
 - [x] Tests (al día, atrasada, hueco, fines de semana, vacío, componentes)
 - [x] Catálogo real: «Datos al día: 4 campañas del 01/09 al 30/09 (22 días hábiles).»
 - [x] `/cerrar-spec 055` en verde (pytest 214 · 98,02% · vitest 365 · líneas 96,8% / ramas 83,05% · tsc · lint 0/0 · build · baseline); piso de ramas → 83
-- [ ] PR con CI en verde y squash merge
+- [x] PR #8 con CI en verde (Backend 32s · Frontend 54s · Título 4s) y squash merge
