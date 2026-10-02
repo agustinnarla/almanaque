@@ -12,4 +12,4 @@
 - [x] Tests de contrato (incluido que el test falla sin modelos)
 - [x] Foto de referencia idéntica: 194/194
 - [x] `/cerrar-spec 061` en verde (pytest 228 · 99,02% · vitest 407 · tsc · lint 0/0 · build · baseline); piso del backend → 99
-- [ ] PR con CI en verde y squash merge
+- [x] PR #14 con CI en verde (Backend 28s · Frontend 57s · Título 5s) y squash merge
