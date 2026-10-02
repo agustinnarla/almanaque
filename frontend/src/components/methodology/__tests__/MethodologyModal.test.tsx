@@ -126,6 +126,9 @@ describe('MethodologyModal', () => {
 
     panel = await showTab('Datos')
     expect(within(panel).getByText('--full')).toBeInTheDocument()
+    expect(within(panel).getByText('Cobertura de días')).toBeInTheDocument()
+    expect(panel).toHaveTextContent('días hábiles (lunes a viernes)')
+    expect(panel).toHaveTextContent('un día hábil sin datos puede ser uno')
   })
 
   it('si el endpoint falla, avisa en las secciones que lo necesitan', async () => {
