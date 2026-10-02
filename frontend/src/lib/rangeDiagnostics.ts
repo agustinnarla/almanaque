@@ -7,6 +7,7 @@ import type {
   RangeDiagnosticsResponse,
 } from '../types/api'
 import { composeCrossNegatives } from './crossDiagnostics'
+import { lowVolumeDays } from './lowVolume'
 import {
   AMD_RATIO,
   BEST_DAY_MIN_CALLS,
@@ -149,9 +150,13 @@ export function buildReliableTrunk(
 }
 
 export function buildBestDay(daily: DailyTrendPoint[]): DiagnosticEvent | null {
+  // Spec 050: a low-volume day's AA is noise, never the period's best day.
+  const lowVolume = lowVolumeDays(daily).days
   const candidates = daily.filter(
     (day) =>
-      day.agent_answer_rate != null && day.total_calls >= BEST_DAY_MIN_CALLS,
+      day.agent_answer_rate != null &&
+      day.total_calls >= BEST_DAY_MIN_CALLS &&
+      !lowVolume.has(day.fecha),
   )
   if (candidates.length === 0) {
     return null

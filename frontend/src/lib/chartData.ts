@@ -1,18 +1,25 @@
 import type { DailyTrendPoint, HourlyTrendPoint } from '../types/api'
+import { lowVolumeDays } from './lowVolume'
 
 export interface DailyChartPoint {
   label: string
   fecha: string
   total: number
   rate: number | null
+  // Spec 050: under half the range's median volume, and that share.
+  lowVolume: boolean
+  volumeShare: number | null
 }
 
 export function mapDailyPoints(points: DailyTrendPoint[]): DailyChartPoint[] {
+  const { median, days } = lowVolumeDays(points)
   return points.map((p) => ({
     label: `${p.fecha.slice(8, 10)}/${p.fecha.slice(5, 7)}`,
     fecha: p.fecha,
     total: p.total_calls,
     rate: p.agent_answer_rate != null ? p.agent_answer_rate * 100 : null,
+    lowVolume: days.has(p.fecha),
+    volumeShare: median > 0 ? p.total_calls / median : null,
   }))
 }
 
