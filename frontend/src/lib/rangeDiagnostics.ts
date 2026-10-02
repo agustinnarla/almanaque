@@ -13,6 +13,7 @@ import {
   BEST_DAY_MIN_CALLS,
   BEST_DEVICE_MIN_CALLS,
   BEST_HOUR_MIN_CALLS,
+  HIGHLIGHT_MIN_SHARE,
   PEAK_WINDOW_MIN_RATE,
   POSITIVE_DRIVERS_MAX,
   TRUNK_MAX_BUSY,
@@ -149,6 +150,22 @@ export function buildReliableTrunk(
   }
 }
 
+// Spec 053: best/worst hour or device must carry real volume. Besides the
+// absolute minimum, at least HIGHLIGHT_MIN_SHARE of the list's calls — so a
+// 56-call trunk (0.09% of campaign 35) never wins on a lucky rate.
+function highlightCandidates<T extends { agent_answer_rate: number | null; total_calls: number }>(
+  rows: T[],
+  minCalls: number,
+): T[] {
+  const total = rows.reduce((sum, row) => sum + row.total_calls, 0)
+  return rows.filter(
+    (row) =>
+      row.agent_answer_rate != null &&
+      row.total_calls >= minCalls &&
+      row.total_calls >= HIGHLIGHT_MIN_SHARE * total,
+  )
+}
+
 export function buildBestDay(daily: DailyTrendPoint[]): DiagnosticEvent | null {
   // Spec 050: a low-volume day's AA is noise, never the period's best day.
   const lowVolume = lowVolumeDays(daily).days
@@ -187,11 +204,7 @@ export function buildBestHour(
   hourly: HourlyTrendPoint[],
   campaign?: string,
 ): DiagnosticEvent | null {
-  const candidates = hourly.filter(
-    (point) =>
-      point.agent_answer_rate != null &&
-      point.total_calls >= BEST_HOUR_MIN_CALLS,
-  )
+  const candidates = highlightCandidates(hourly, BEST_HOUR_MIN_CALLS)
   if (candidates.length === 0) {
     return null
   }
@@ -222,11 +235,7 @@ export function buildBestDevice(
   devices: DeviceRangeRow[],
   campaign?: string,
 ): DiagnosticEvent | null {
-  const candidates = devices.filter(
-    (device) =>
-      device.agent_answer_rate != null &&
-      device.total_calls >= BEST_DEVICE_MIN_CALLS,
-  )
+  const candidates = highlightCandidates(devices, BEST_DEVICE_MIN_CALLS)
   if (candidates.length === 0) {
     return null
   }
@@ -257,11 +266,7 @@ export function buildWorstHour(
   hourly: HourlyTrendPoint[],
   campaign?: string,
 ): DiagnosticEvent | null {
-  const candidates = hourly.filter(
-    (point) =>
-      point.agent_answer_rate != null &&
-      point.total_calls >= BEST_HOUR_MIN_CALLS,
-  )
+  const candidates = highlightCandidates(hourly, BEST_HOUR_MIN_CALLS)
   if (candidates.length === 0) {
     return null
   }
@@ -292,11 +297,7 @@ export function buildWorstDevice(
   devices: DeviceRangeRow[],
   campaign?: string,
 ): DiagnosticEvent | null {
-  const candidates = devices.filter(
-    (device) =>
-      device.agent_answer_rate != null &&
-      device.total_calls >= BEST_DEVICE_MIN_CALLS,
-  )
+  const candidates = highlightCandidates(devices, BEST_DEVICE_MIN_CALLS)
   if (candidates.length === 0) {
     return null
   }

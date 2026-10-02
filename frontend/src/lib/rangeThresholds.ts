@@ -12,3 +12,6 @@ export const NEGATIVE_DRIVERS_MAX = 5
 // "low volume" (its AA is noisy); with fewer days the median means little.
 export const LOW_VOLUME_DAY_SHARE = 0.5
 export const LOW_VOLUME_MIN_DAYS = 3
+// Spec 053: best/worst hour or device needs at least this share of the range's
+// calls, on top of the absolute minimum (BEST_HOUR/DEVICE_MIN_CALLS).
+export const HIGHLIGHT_MIN_SHARE = 0.01
