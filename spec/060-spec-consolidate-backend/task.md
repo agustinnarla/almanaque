@@ -14,4 +14,4 @@
 - [x] Test de inicialización única (+ casos borde de `_rate`, `_fraction`, `compute_deltas` y migración sin `device`)
 - [x] Foto de referencia idéntica: 194/194 respuestas byte por byte
 - [x] `/cerrar-spec 060` en verde (pytest 224 · 98,98% · vitest 407 · tsc · lint 0/0 · build · baseline); `campaigns_repo.py` 1.245 → 1.079 líneas
-- [ ] PR con CI en verde y squash merge
+- [x] PR #13 con CI en verde (Backend 33s · Frontend 1m2s · Título 7s) y squash merge
