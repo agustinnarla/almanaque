@@ -78,6 +78,12 @@ function Metrics({ data }: { data: Methodology | null }) {
         Agentes ÷ (intentos − contestadores). Separa la calidad de la troncal (cuántas personas que
         atienden llegan a un agente) de la calidad de la lista (cuántos contestadores hay).
       </Rule>
+      <Rule term="Variación vs período anterior">
+        En «Campaña completa» y «Por semana», cada indicador se compara con el tramo del mismo largo
+        inmediatamente anterior: la semana anterior, o por ejemplo 30/08 → 14/09 para 15/09 → 30/09.
+        Tasas y participaciones, en puntos porcentuales; el total de llamadas, en %. Si ese tramo no tiene
+        datos, no se muestra variación.
+      </Rule>
       <Rule term="Segmentos">
         {segments.size === 0 ? (
           'Cargando…'
