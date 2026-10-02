@@ -124,7 +124,11 @@ def campaign_routing(
     conn: sqlite3.Connection = Depends(get_db_connection),
 ):
     rows = get_daily_device_rows(conn, campaign_name, start_date, end_date)
-    return detect_routing(rows)
+    volume = [
+        {"fecha": row["fecha"], "device": row["device"], "total_calls": row["total_calls"]}
+        for row in sorted(rows, key=lambda row: (row["fecha"], row["device"]))
+    ]
+    return {**detect_routing(rows), "volume": volume}
 
 
 @router.get("/{campaign_name}/hourly-trend")

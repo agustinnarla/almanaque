@@ -8,6 +8,7 @@ import type {
   HourlyTrendPoint,
   Recommendation,
   SummaryKpi,
+  TrunkVolumeRow,
 } from '../types/api'
 
 import type { PatternCombo, PatternCompareCombo, PatternCompareDay, PatternDayCount } from './patterns'
@@ -124,6 +125,13 @@ export function dailyRows(points: DailyTrendPoint[]): CsvTable {
       p.machine_answers,
       pct(p.agent_answer_rate),
     ]),
+  }
+}
+
+export function trunkVolumeRows(rows: TrunkVolumeRow[]): CsvTable {
+  return {
+    headers: ['Fecha', 'Troncal', 'Llamadas'],
+    rows: rows.map((r) => [r.fecha, r.device, r.total_calls]),
   }
 }
 

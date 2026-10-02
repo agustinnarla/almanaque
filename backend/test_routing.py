@@ -76,4 +76,32 @@ def test_routing_endpoint(client, memory_conn):  # noqa: F811
         "/api/campaigns/nada/routing",
         params={"start_date": "2026-09-01", "end_date": "2026-09-04"},
     ).json()
-    assert empty == {"days": [], "changes": []}
+    assert empty == {"days": [], "changes": [], "volume": []}
+
+
+def test_routing_endpoint_returns_volume_for_every_day(client, memory_conn):  # noqa: F811
+    rows = [
+        ("2026-09-02", "B", 300),
+        ("2026-09-01", "B", 200),
+        ("2026-09-01", "A", 400),
+        ("2026-09-03", "A", 10),  # below the detector's minimum, still in volume
+    ]
+    for fecha, device, calls in rows:
+        memory_conn.execute(
+            "INSERT INTO daily_campaign_metrics VALUES (?, 9, '35', '80', ?, ?, 0, 0, 0, 0, NULL, NULL)",
+            (fecha, device, calls),
+        )
+    memory_conn.commit()
+
+    data = client.get(
+        "/api/campaigns/35/routing",
+        params={"start_date": "2026-09-01", "end_date": "2026-09-03"},
+    ).json()
+
+    assert data["volume"] == [
+        {"fecha": "2026-09-01", "device": "A", "total_calls": 400},
+        {"fecha": "2026-09-01", "device": "B", "total_calls": 200},
+        {"fecha": "2026-09-02", "device": "B", "total_calls": 300},
+        {"fecha": "2026-09-03", "device": "A", "total_calls": 10},
+    ]
+    assert [d["fecha"] for d in data["days"]] == ["2026-09-01", "2026-09-02"]

@@ -414,6 +414,7 @@ vi.mock('../hooks/useCampaigns', () => ({ useCampaigns: vi.fn() }))
 vi.mock('../hooks/useRoutingChanges', () => ({
   useRoutingChanges: () => ({
     changes: [{ type: 'ROUTING_CHANGE', severity: 'INFO', date: '2026-09-09', entity: 'IPLAN', message: 'Desde el 2026-09-09 el 100% del volumen sale por IPLAN.' }],
+    volume: [],
   }),
 }))
 vi.mock('../hooks/useSegmentPeers', () => ({

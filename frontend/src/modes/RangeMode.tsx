@@ -24,6 +24,7 @@ import { GatewaysRangeTable } from '../components/overview/GatewaysRangeTable'
 import { HourlyAggregateChart } from '../components/overview/HourlyAggregateChart'
 import { OverviewKpis } from '../components/overview/OverviewKpis'
 import { SegmentRankingTable } from '../components/overview/SegmentRankingTable'
+import { TrunkVolumeChart } from '../components/overview/TrunkVolumeChart'
 import { useCampaignOverview } from '../hooks/useCampaignOverview'
 import { usePatternAlerts } from '../hooks/usePatternAlerts'
 import { useRangeDiagnostics } from '../hooks/useRangeDiagnostics'
@@ -40,6 +41,7 @@ import {
   patternDailyRows,
   recommendationRows,
   segmentRankingRows,
+  trunkVolumeRows,
 } from '../lib/exporters'
 import { summarizePatterns } from '../lib/patterns'
 import { mapRangeDiagnostics } from '../lib/rangeDiagnostics'
@@ -460,6 +462,17 @@ export function RangeMode({ catalog, variant = 'range' }: RangeModeProps) {
                   <ExportCsvButton
                     filename={`${filePrefix}_${range.campaign}_${range.from}_${range.to}_daily.csv`}
                     {...dailyRows(overview.daily)}
+                  />
+                }
+              />
+            </div>
+            <div>
+              <TrunkVolumeChart
+                rows={routing.volume}
+                headerAction={
+                  <ExportCsvButton
+                    filename={`${filePrefix}_${range.campaign}_${range.from}_${range.to}_troncales.csv`}
+                    {...trunkVolumeRows(routing.volume)}
                   />
                 }
               />

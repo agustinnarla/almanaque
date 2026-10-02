@@ -254,6 +254,13 @@ export interface RoutingResponse {
     concentrated: boolean
   }>
   changes: RoutingChange[]
+  volume: TrunkVolumeRow[]
+}
+
+export interface TrunkVolumeRow {
+  fecha: string
+  device: string
+  total_calls: number
 }
 
 export interface PatternAlert {
