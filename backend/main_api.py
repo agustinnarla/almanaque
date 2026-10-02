@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import campaigns, metrics, patterns
+from routers import campaigns, methodology, metrics, patterns
 
 app = FastAPI(title="API Métricas Call Center")
 
@@ -19,3 +19,4 @@ app.add_middleware(
 app.include_router(metrics.router)
 app.include_router(patterns.router)
 app.include_router(campaigns.router)
+app.include_router(methodology.router)

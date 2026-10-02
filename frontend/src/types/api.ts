@@ -278,3 +278,25 @@ export interface PatternAlert {
   threshold_rate?: number
   pattern_alert: boolean
 }
+
+// Spec 054: thresholds from backend/config.py, for the methodology modal.
+export interface Methodology {
+  segments: Record<string, string>
+  health: { busy_weight: number; congestion_weight: number }
+  diagnostics: {
+    base_drop_warning: number
+    base_drop_critical: number
+    base_improvement_info: number
+    base_improvement_success: number
+    mix_share: number
+    congestion_delta: number
+    congestion_critical: number
+    congestion_recovery_info: number
+    congestion_recovery_success: number
+    root_causes_limit: number
+  }
+  range_diagnostics: { congestion: number; busy: number; peak: number }
+  recommendations: { volume_drop_pct: number; amd_ratio: number; min_volume_share: number; limit: number }
+  patterns: { relative_factor: number; min_calls: number }
+  routing: { concentration_share: number; active_share: number; min_day_calls: number; amd_note_share: number }
+}
